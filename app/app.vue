@@ -51,7 +51,7 @@ const isMobileMenuOpen = ref(false)
 
       <!-- Mobile Menu Panel -->
       <div v-if="isMobileMenuOpen"
-        class="absolute top-[85px] left-4 right-4 bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 md:hidden flex flex-col p-6 space-y-5 z-[100] rounded-3xl ring-1 ring-black/5">
+        class="absolute top-[85px] left-4 right-4 bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 md:hidden flex flex-col p-6 space-y-5 z-[100] rounded-[5px] ring-1 ring-black/5">
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Home</a>
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">About</a>
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Explore</a>
