@@ -31,8 +31,7 @@
           <span class="relative inline-block">
             <span class="relative z-10">Discover</span>
             <img src="/files/hero/Vector.svg" alt="circle highlight" class="absolute top-1/2 left-25 w-[120%] h-[135%] max-w-none -translate-x-[48%] -translate-y-[45%] object-fill pointer-events-none z-0" />
-          </span>
-          <span class="text-[#2B4DB6]">careers</span><br />
+          </span>&nbsp;<span class="text-[#2B4DB6]">careers</span><br />
           that align with<br />
           your <span class="text-[#2B4DB6]">passion</span>
         </h1>
