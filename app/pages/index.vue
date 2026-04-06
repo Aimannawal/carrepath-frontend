@@ -107,7 +107,7 @@ onMounted(() => {
           <span class="relative inline-block">
             <span class="relative z-10">Discover</span>
             <img src="/files/hero/circle.svg" alt="circle highlight"
-              class="absolute top-7 left-17 lg:top-10 lg:left-21  w-[120%] h-[135%] max-w-none -translate-x-[52%] -translate-y-[50%] md:-translate-x-[48%] md:-translate-y-[45%] object-fill pointer-events-none z-0" />
+              class="absolute top-6 left-15 lg:top-10 lg:left-21  w-[120%] h-[135%] max-w-none -translate-x-[52%] -translate-y-[50%] md:-translate-x-[48%] md:-translate-y-[45%] object-fill pointer-events-none z-0" />
           </span>&nbsp;<span class="text-[#2B4DB6]">careers</span><br />
           that align with<br />
           your <span class="text-[#2B4DB6]">passion</span>
