@@ -51,7 +51,7 @@ const isMobileMenuOpen = ref(false)
 
       <!-- Mobile Menu Panel -->
       <div v-if="isMobileMenuOpen"
-        class="absolute top-[85px] left-4 right-4 bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 md:hidden flex flex-col p-6 space-y-5 z-[100] rounded-[5px] ring-1 ring-black/5">
+        class="absolute top-[85px] left-4 right-4 bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 md:hidden flex flex-col p-6 space-y-5 z-[100] rounded-3xl ring-1 ring-black/5">
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Home</a>
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">About</a>
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Explore</a>
@@ -76,11 +76,11 @@ const isMobileMenuOpen = ref(false)
       <!-- Left Content -->
       <div class="z-10 relative">
         <h1
-          class="text-5xl lg:text-[64px] font-extrabold leading-[1.2] lg:leading-[1.1] tracking-normal lg:tracking-tight text-gray-900 mb-[16px] lg:mb-[30px]">
+          class="text-[42px] lg:text-[64px] font-semibold leading-[1.2] lg:leading-[1.1] tracking-normal lg:tracking-tight text-gray-900 mb-[16px] lg:mb-[30px]">
           <span class="relative inline-block">
             <span class="relative z-10">Discover</span>
             <img src="/files/hero/circle.svg" alt="circle highlight"
-              class="absolute top-7 left-19 lg:top-10 lg:left-21  w-[120%] h-[135%] max-w-none -translate-x-[52%] -translate-y-[50%] md:-translate-x-[48%] md:-translate-y-[45%] object-fill pointer-events-none z-0" />
+              class="absolute top-7 left-17 lg:top-10 lg:left-21  w-[120%] h-[135%] max-w-none -translate-x-[52%] -translate-y-[50%] md:-translate-x-[48%] md:-translate-y-[45%] object-fill pointer-events-none z-0" />
           </span>&nbsp;<span class="text-[#2B4DB6]">careers</span><br />
           that align with<br />
           your <span class="text-[#2B4DB6]">passion</span>
