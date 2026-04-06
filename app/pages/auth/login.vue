@@ -11,6 +11,7 @@ const config = useRuntimeConfig()
 
 const handleLogin = async (e) => {
   e.preventDefault()
+  console.log("BASE URL:", config.public.siteUrl) // ← tambah ini
   isLoading.value = true
   errorMessage.value = ''
 
