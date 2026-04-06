@@ -90,7 +90,7 @@ const isMobileMenuOpen = ref(false)
           From where you are to where you want to be
         </p>
 
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8 pt-2 sm:pt-4 relative">
+        <div class="flex flex-wrap items-center gap-5 sm:gap-8 pt-2 sm:pt-4 relative">
           <div class="relative">
             <button
               class="bg-[#2B4DB6] text-white px-[30px] py-[15px] rounded-[5px] text-[14px] font-normal hover:bg-blue-800 transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-4">
