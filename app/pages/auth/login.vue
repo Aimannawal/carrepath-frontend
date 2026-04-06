@@ -7,21 +7,18 @@ const showPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-const config = useRuntimeConfig()
+const { get, post, baseUrl } = useApi()
 
 const handleLogin = async (e) => {
   e.preventDefault()
-  console.log("BASE URL:", config.public.siteUrl) // ← tambah ini
+  console.log("BASE URL:", baseUrl) // ← tambah ini
   isLoading.value = true
   errorMessage.value = ''
 
   try {
-    const response = await $fetch(`${config.public.siteUrl}/auth/login`, {
-      method: 'POST',
-      body: {
-        email: email.value,
-        password: password.value
-      }
+    const response = await post('/auth/login', {
+      email: email.value,
+      password: password.value
     })
 
     console.log("Response Backend (Login):", response)
@@ -43,7 +40,7 @@ const handleLogin = async (e) => {
 
       try {
         // Cek profile user ke Backend Go
-        const profile = await $fetch(`${config.public.siteUrl}/users/profile/${userId}`)
+        const profile = await get(`/users/profile/${userId}`)
         
         // Kalau ketemu datanya dan ada rolenya
         if (profile?.data?.role) {
@@ -77,7 +74,7 @@ const handleLogin = async (e) => {
 
 const handleGoogleLogin = () => {
   // Redirect browser langsung ke backend
-  window.location.href = `${config.public.siteUrl}/auth/google`
+  window.location.href = `${baseUrl}/auth/google`
 }
 </script>
 

@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 
 const selectedRole = ref('')
 const isLoading = ref(false)
-const config = useRuntimeConfig()
+const { post } = useApi()
 const tokenCookie = useCookie('access_token')
 const userRoleCookie = useCookie('user_role')
 
@@ -28,16 +28,14 @@ const handleSetRole = async () => {
 
   isLoading.value = true
   try {
-    const response = await $fetch(`${config.public.siteUrl}/users/set-role`, {
-      method: 'POST',
+    const response = await post('/users/set-role', {
+      id: userData.value.id,
+      role: selectedRole.value,
+      full_name: userData.value.fullName,
+      email: userData.value.email
+    }, {
       headers: { 
         'Content-Type': 'application/json'
-      },
-      body: {
-        id: userData.value.id,
-        role: selectedRole.value,
-        full_name: userData.value.fullName,
-        email: userData.value.email
       }
     })
 

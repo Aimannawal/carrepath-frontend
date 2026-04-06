@@ -10,7 +10,7 @@ const showConfirmPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-const config = useRuntimeConfig()
+const { post, baseUrl } = useApi()
 
 const handleRegister = async (e) => {
   e.preventDefault()
@@ -23,14 +23,11 @@ const handleRegister = async (e) => {
   errorMessage.value = ''
 
   try {
-    const response = await $fetch(`${config.public.siteUrl}/auth/signup`, {
-      method: 'POST',
-      body: {
-        full_name: fullName.value,
-        email: email.value,
-        password: password.value,
-        confirm_password: confirmPassword.value
-      }
+    const response = await post('/auth/signup', {
+      full_name: fullName.value,
+      email: email.value,
+      password: password.value,
+      confirm_password: confirmPassword.value
     })
 
     console.log("Response Backend (Register):", response)
@@ -64,7 +61,7 @@ const handleRegister = async (e) => {
 
 const handleGoogleLogin = () => {
   // Redirect browser langsung ke backend
-  window.location.href = `${config.public.siteUrl}/auth/google`
+  window.location.href = `${baseUrl}/auth/google`
 }
 </script>
 

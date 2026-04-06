@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 
-const config = useRuntimeConfig()
+const { get } = useApi()
 
 onMounted(async () => {
   // 1. Ambil seluruh URL Hash pakai window.location
@@ -35,7 +35,7 @@ onMounted(async () => {
         const userId = decodedPayload.sub
         
         // Panggil endpoint baru GET profile/id buat ngecek
-        const profile = await $fetch(`${config.public.siteUrl}/users/profile/${userId}`)
+        const profile = await get(`/users/profile/${userId}`)
         
         if (profile?.data?.role) {
           // Yes! Dia Google Auth orang lama (udah ada rolenya di DB kita)
