@@ -73,9 +73,8 @@ const handleLogin = async (e) => {
 }
 
 const handleGoogleLogin = () => {
-  const config = useRuntimeConfig()
-  const redirectTo = encodeURIComponent(`${config.public.siteUrl}/auth/callback`)
-  window.location.href = `${config.public.supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`
+  // Redirect browser langsung ke backend
+  window.location.href = `${baseUrl}/auth/google`
 }
 </script>
 
