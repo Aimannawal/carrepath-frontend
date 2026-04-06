@@ -56,7 +56,7 @@ const isMobileMenuOpen = ref(false)
         <div class="flex flex-col gap-3 pt-2">
           <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors text-center py-2">Login</a>
           <button
-            class="bg-[#2B4DB6] text-white text-[15px] font-medium flex items-center justify-center gap-2 px-[30px] py-[15px] rounded-xl hover:bg-blue-800 transition w-full shadow-md shadow-blue-500/20">
+            class="bg-[#2B4DB6] text-white text-[15px] font-medium flex items-center justify-center gap-2 px-[30px] py-[15px] rounded-[5px] hover:bg-blue-800 transition w-full shadow-md shadow-blue-500/20">
             <img src="/files/hero/sign-button.svg" alt="upload icon" class="w-4 h-4" />
             Upload your CV
           </button>
