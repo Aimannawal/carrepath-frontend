@@ -65,7 +65,8 @@ export default defineNuxtConfig({
 
   /* 🚀 Nitro */
   nitro: {
-    preset: "node-server",
+    // Agar bisa di-deploy ke Vercel tanpa error "No Output Directory named dist found"
+    // preset: "node-server",
 
     compressPublicAssets: {
       gzip: true,
