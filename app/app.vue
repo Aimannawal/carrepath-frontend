@@ -7,7 +7,8 @@ const isMobileMenuOpen = ref(false)
 <template>
   <div class="min-h-screen bg-white text-gray-900 overflow-x-hidden">
     <!-- Navbar -->
-    <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between relative z-50 bg-white">
+    <header
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between relative z-50 bg-white">
       <div class="text-[20px] font-semibold tracking-tight">
         <span>Carre</span><span class="text-[#2B4DB6]">path.</span>
       </div>
@@ -33,20 +34,24 @@ const isMobileMenuOpen = ref(false)
       </div>
 
       <!-- Mobile Menu Hamburger Button -->
-      <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="md:hidden bg-gray-50 hover:bg-gray-100 p-2.5 rounded-full text-[#1E1E1E] focus:outline-none transition-colors">
-        <svg v-if="!isMobileMenuOpen" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button @click="isMobileMenuOpen = !isMobileMenuOpen"
+        class="md:hidden bg-gray-50 hover:bg-gray-100 p-2.5 rounded-full text-[#1E1E1E] focus:outline-none transition-colors">
+        <svg v-if="!isMobileMenuOpen" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
           <line x1="4" y1="12" x2="20" y2="12"></line>
           <line x1="4" y1="6" x2="20" y2="6"></line>
           <line x1="4" y1="18" x2="20" y2="18"></line>
         </svg>
-        <svg v-else width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg v-else width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
 
       <!-- Mobile Menu Panel -->
-      <div v-if="isMobileMenuOpen" class="absolute top-[85px] left-4 right-4 bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 md:hidden flex flex-col p-6 space-y-5 z-[100] rounded-3xl ring-1 ring-black/5">
+      <div v-if="isMobileMenuOpen"
+        class="absolute top-[85px] left-4 right-4 bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 md:hidden flex flex-col p-6 space-y-5 z-[100] rounded-3xl ring-1 ring-black/5">
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Home</a>
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">About</a>
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Explore</a>
@@ -54,7 +59,8 @@ const isMobileMenuOpen = ref(false)
         <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Contact</a>
         <hr class="border-gray-100 my-2" />
         <div class="flex flex-col gap-3 pt-2">
-          <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors text-center py-2">Login</a>
+          <a href="#"
+            class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors text-center py-2">Login</a>
           <button
             class="bg-[#2B4DB6] text-white text-[15px] font-medium flex items-center justify-center gap-2 px-[30px] py-[15px] rounded-[5px] hover:bg-blue-800 transition w-full shadow-md shadow-blue-500/20">
             <img src="/files/hero/sign-button.svg" alt="upload icon" class="w-4 h-4" />
@@ -69,7 +75,8 @@ const isMobileMenuOpen = ref(false)
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <!-- Left Content -->
       <div class="z-10 relative">
-        <h1 class="text-5xl lg:text-[64px] font-extrabold leading-[1.2] lg:leading-[1.1] tracking-normal lg:tracking-tight text-gray-900 mb-[16px] lg:mb-[30px]">
+        <h1
+          class="text-5xl lg:text-[64px] font-extrabold leading-[1.2] lg:leading-[1.1] tracking-normal lg:tracking-tight text-gray-900 mb-[16px] lg:mb-[30px]">
           <span class="relative inline-block">
             <span class="relative z-10">Discover</span>
             <img src="/files/hero/circle.svg" alt="circle highlight"
@@ -109,8 +116,11 @@ const isMobileMenuOpen = ref(false)
 
       <!-- Right Image/Illustration Area -->
       <div class="relative w-full flex items-center justify-center lg:justify-end">
-        <img src="/files/hero/right-hero.webp" alt="Hero Illustration"
-          class="w-full max-w-[600px] lg:max-w-none lg:w-[100%] xl:w-[100%] lg:scale-110 h-auto object-contain drop-shadow-sm lg:translate-x-16 xl:translate-x-28" />
+        <img src="/files/hero/right-hero.webp" alt="Hero Illustration" class="w-full max-w-[500px] 
+           lg:max-w-none lg:w-[120%] 
+           xl:w-[130%] 
+           h-auto object-contain 
+           lg:translate-x-24 xl:translate-x-40 rounded-[5px]" />
       </div>
     </main>
   </div>
