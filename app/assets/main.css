@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root {
+  /* Base */
+  --color-dark: #1E1E1E;
+  --color-white: #FFFFFF;
+  --color-main: #2B4DB6;
+
+  /* Primary Scale (dari gelap → terang) */
+  --color-primary-900: #2B4DB6;
+  --color-primary-800: #405EBD;
+  --color-primary-700: #5570C4;
+  --color-primary-600: #6A82CB;
+  --color-primary-500: #7F94D3;
+  --color-primary-400: #95A6DA;
+  --color-primary-300: #AAB7E1;
+  --color-primary-200: #BFC9E9;
+  --color-primary-100: #D4DBF0;
+  --color-primary-50:  #E9EDF7;
+}
