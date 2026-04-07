@@ -1,11 +1,83 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 const isMobileMenuOpen = ref(false)
 const router = useRouter()
+const section2 = ref(null)
+const heroSection = ref(null)
+const headerRef = ref(null)
 
 onMounted(() => {
+  if (process.client) {
+    gsap.registerPlugin(ScrollTrigger)
+
+    // Navbar Animation
+    const navElems = headerRef.value?.querySelectorAll('.nav-elem')
+    if (navElems && navElems.length) {
+      gsap.fromTo(navElems, 
+        { y: -20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power3.out' }
+      )
+    }
+
+    // Hero Section Animation (Plays instantly on load)
+    const heroElements = heroSection.value?.querySelectorAll('.hero-elem')
+    const heroImg = heroSection.value?.querySelector('.hero-img')
+    const heroArrow = heroSection.value?.querySelector('.hero-arrow')
+    
+    if (heroElements && heroImg) {
+      const heroTl = gsap.timeline({ delay: 0.3 }) // delay agar navbar main lebih dulu
+      heroTl.fromTo(heroElements,
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: 'power3.out' }
+      ).fromTo(heroImg,
+        { x: 40, opacity: 0 },
+        { x: 0, opacity: 1, duration: 1, ease: 'power3.out' },
+        "-=0.6"
+      )
+
+      if (heroArrow) {
+        // Arrow di hero muncul paling akhir setelah gambar/text dengan delay
+        heroTl.fromTo(heroArrow,
+          { opacity: 0, x: -10, y: -10 },
+          { opacity: 1, x: 0, y: 0, duration: 0.6, ease: 'back.out(2)' },
+          "-=0.1" 
+        )
+      }
+    }
+
+    const steps = section2.value?.querySelectorAll('.step-item')
+    const arrows = section2.value?.querySelectorAll('.step-arrow')
+    
+    if (steps) {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section2.value,
+          start: 'top 80%',
+          toggleActions: 'play none none none' // Play once
+        }
+      })
+
+      // Animasi smooth masuk ke atas untuk masing-masing step
+      tl.fromTo(steps, 
+        { y: 40, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: 'power3.out' }
+      )
+      
+      // Animasi muncul untuk arrow dengan sedikit overlap (agar terkesan mengalir)
+      if (arrows && arrows.length > 0) {
+        tl.fromTo(arrows,
+          { opacity: 0, scale: 0.8, x: -10 },
+          { opacity: 1, scale: 1, x: 0, duration: 0.6, stagger: 0.2, ease: 'power2.out' },
+          "-=0.6" 
+        )
+      }
+    }
+  }
+
   // Tangkap Token dari URL Hash (Google OAuth Redirect)
   if (process.client) {
     const hash = window.location.hash
@@ -32,13 +104,13 @@ onMounted(() => {
 <template>
   <div class="min-h-screen bg-white text-gray-900 overflow-x-hidden">
     <!-- Navbar -->
-    <header
+    <header ref="headerRef"
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between relative z-50 bg-white">
-      <div class="text-[20px] font-semibold tracking-tight">
+      <div class="nav-elem opacity-0 text-[20px] font-semibold tracking-tight">
         <span>Carre</span><span class="text-[#2B4DB6]">path.</span>
       </div>
 
-      <nav class="hidden md:flex space-x-[45px] text-sm font-normal text-[#1E1E1E]">
+      <nav class="nav-elem opacity-0 hidden md:flex space-x-[45px] text-sm font-normal text-[#1E1E1E]">
         <a href="#" class="hover:text-[#2B4DB6]">Home</a>
         <a href="#" class="hover:text-[#2B4DB6]">About</a>
         <a href="#" class="hover:text-[#2B4DB6]">Explore</a>
@@ -46,7 +118,7 @@ onMounted(() => {
         <a href="#" class="hover:text-[#2B4DB6]">Contact</a>
       </nav>
 
-      <div class="hidden md:flex items-center space-x-[50px]">
+      <div class="nav-elem opacity-0 hidden md:flex items-center space-x-[50px]">
         <NuxtLink to="/auth/login" class="text-sm font-normal text-[#1E1E1E] hover:text-[#2B4DB6] transition">
           Login
         </NuxtLink>
@@ -60,7 +132,7 @@ onMounted(() => {
 
       <!-- Mobile Menu Hamburger Button -->
       <button @click="isMobileMenuOpen = !isMobileMenuOpen"
-        class="md:hidden bg-gray-50 hover:bg-gray-100 p-2.5 rounded-full text-[#1E1E1E] focus:outline-none transition-colors">
+        class="nav-elem opacity-0 md:hidden bg-gray-50 hover:bg-gray-100 p-2.5 rounded-full text-[#1E1E1E] focus:outline-none transition-colors">
         <svg v-if="!isMobileMenuOpen" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <line x1="4" y1="12" x2="20" y2="12"></line>
@@ -97,12 +169,12 @@ onMounted(() => {
     </header>
 
     <!-- Hero Section -->
-    <main
+    <main ref="heroSection"
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <!-- Left Content -->
       <div class="z-10 relative">
         <h1
-          class="text-[42px] lg:text-[64px] font-semibold leading-[1.2] lg:leading-[1.1] tracking-normal lg:tracking-tight text-gray-900 mb-[16px] lg:mb-[30px] text-center sm:text-left">
+          class="hero-elem opacity-0 text-[42px] lg:text-[64px] font-semibold leading-[1.2] lg:leading-[1.1] tracking-normal lg:tracking-tight text-gray-900 mb-[16px] lg:mb-[30px] text-center sm:text-left">
           <span class="relative inline-block">
             <span class="relative z-10">Discover</span>
             <img src="/files/hero/circle.svg" alt="circle highlight"
@@ -113,11 +185,11 @@ onMounted(() => {
         </h1>
 
         <p
-          class="mt-[16px] mb-[24px] lg:mt-[30px] lg:mb-[30px] text-base text-[#8F8F8F] font-medium max-w-md text-center sm:text-left mx-auto sm:mx-0">
+          class="hero-elem opacity-0 mt-[16px] mb-[24px] lg:mt-[30px] lg:mb-[30px] text-base text-[#8F8F8F] font-medium max-w-md text-center sm:text-left mx-auto sm:mx-0">
           From where you are to where you want to be
         </p>
 
-        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-5 sm:gap-8 pt-2 sm:pt-4 relative">
+        <div class="hero-elem opacity-0 flex flex-wrap items-center justify-center sm:justify-start gap-5 sm:gap-8 pt-2 sm:pt-4 relative">
           <div class="relative">
             <NuxtLink to="/auth/login"
               class="bg-[#2B4DB6] text-white px-[30px] py-[15px] rounded-[5px] text-[14px] font-normal hover:bg-blue-800 transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-4">
@@ -128,7 +200,7 @@ onMounted(() => {
               </svg>
             </NuxtLink>
             <img src="/files/hero/arrow.svg" alt="Arrow pointing"
-              class="absolute -bottom-17 left-85 w-[4.5rem] h-auto pointer-events-none hidden sm:block" />
+              class="hero-arrow opacity-0 absolute -bottom-17 left-85 w-[4.5rem] h-auto pointer-events-none hidden sm:block" />
           </div>
 
           <div class="flex items-center gap-3">
@@ -144,16 +216,16 @@ onMounted(() => {
       <!-- Right Image/Illustration Area -->
       <div class="relative w-full flex items-center justify-center lg:justify-end">
         <img src="/files/hero/right-hero.webp" alt="Hero Illustration"
-          class="w-full max-w-[500px] lg:max-w-none h-auto object-contain lg:translate-x-24 xl:translate-x-40 rounded-[5px]" />
+          class="hero-img opacity-0 w-full max-w-[500px] lg:max-w-none h-auto object-contain lg:translate-x-24 xl:translate-x-40 rounded-[5px]" />
       </div>
     </main>
 
     <!-- How it Works / Steps Section -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-[100px] font-['Outfit']">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
+    <section ref="section2" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-[100px] font-['Outfit']">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 overflow-hidden md:overflow-visible">
         
         <!-- Step 1 -->
-        <div class="relative mt-0 flex md:block items-start gap-4 md:gap-0">
+        <div class="relative mt-0 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
           <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
             <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">1</span>
           </div>
@@ -167,13 +239,13 @@ onMounted(() => {
           </div>
           
           <!-- Next Arrow Desktop -->
-          <div class="hidden md:block absolute -right-[125px] top-[140px] z-10">
+          <div class="hidden md:block absolute -right-[125px] top-[140px] z-10 step-arrow opacity-0">
             <img src="/files/hero/arrow1.svg" alt="Arrow to next step" class="w-full h-auto object-contain" />
           </div>
         </div>
 
         <!-- Step 2 -->
-        <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0">
+        <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
           <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
             <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">2</span>
           </div>
@@ -187,13 +259,13 @@ onMounted(() => {
           </div>
 
           <!-- Next Arrow Desktop -->
-          <div class="hidden md:block absolute -right-[90px] -top-[50px] z-10">
+          <div class="hidden md:block absolute -right-[90px] -top-[50px] z-10 step-arrow opacity-0">
             <img src="/files/hero/arrow2.svg" alt="Arrow to next step" class="w-full h-auto object-contain" />
           </div>
         </div>
 
         <!-- Step 3 -->
-        <div class="relative mt-0 md:mt-0 flex md:block items-start gap-4 md:gap-0">
+        <div class="relative mt-0 md:mt-0 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
           <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[25px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
             <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">3</span>
           </div>
@@ -207,13 +279,13 @@ onMounted(() => {
           </div>
 
           <!-- Next Arrow Desktop -->
-          <div class="hidden md:block absolute -right-[100px] top-[120px] z-10">
+          <div class="hidden md:block absolute -right-[100px] top-[120px] z-10 step-arrow opacity-0">
             <img src="/files/hero/arrow3.svg" alt="Arrow to next step" class="w-full h-auto object-contain" />
           </div>
         </div>
 
         <!-- Step 4 -->
-        <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0">
+        <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
           <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[30px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
             <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">4</span>
           </div>
