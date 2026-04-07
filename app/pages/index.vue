@@ -361,16 +361,18 @@ onMounted(() => {
 
     <!-- Section 3: Explore by Categories -->
     <section ref="section3Ref" class="w-full bg-[#F4F6FB] mb-[120px] font-['Outfit'] relative overflow-hidden">
-      <!-- Background Decorations (Ellipses & Scribble applied globally to section) -->
+      <!-- Background Decorations -->
       <img src="/files/hero/Ellipse2.svg" alt="Decoration Left"
         class="absolute -left-55 top-70 -translate-y-1/2 hidden lg:block z-0 pointer-events-none select-none" />
       <img src="/files/hero/Ellipse3.svg" alt="Decoration Right"
         class="absolute -right-25 top-90 hidden lg:block z-0 pointer-events-none select-none" />
-      <img src="/files/hero/scribbleline06.svg" alt="Scribble Top Right"
-        class="absolute right-25 top-32 hidden xl:block z-0 pointer-events-none select-none" />
 
       <div
         class="relative max-w-[1280px] w-full mx-auto lg:h-[700px] flex flex-col lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-8 py-12 lg:py-0 gap-[40px] lg:gap-[120px]">
+        
+        <!-- Scribble Decoration pinned to the container -->
+        <img src="/files/hero/scribbleline06.svg" alt="Scribble Top Right"
+          class="absolute right-4 lg:-right-4 top-30 hidden lg:block z-0 pointer-events-none select-none" />
 
         <!-- Left Content -->
         <div class="relative z-10 w-full lg:flex-1">
