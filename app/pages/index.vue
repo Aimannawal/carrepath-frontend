@@ -12,15 +12,15 @@ onMounted(() => {
     if (hash && hash.includes('access_token=')) {
       const params = new URLSearchParams(hash.substring(1))
       const accessToken = params.get('access_token')
-      
+
       if (accessToken) {
         // Simpan token ke Cookie
         const tokenCookie = useCookie('access_token')
         tokenCookie.value = accessToken
-        
+
         // Hapus hash dari URL supaya rapi (security/ux)
         window.location.hash = ''
-        
+
         // Langsung lemparkan user ke Dashboard
         router.push('/dashboard')
       }
@@ -51,8 +51,7 @@ onMounted(() => {
           Login
         </NuxtLink>
 
-        <NuxtLink
-          to="/auth/login"
+        <NuxtLink to="/auth/login"
           class="bg-[#2B4DB6] text-white text-sm font-normal flex items-center gap-2 px-[30px] py-[15px] rounded-lg hover:bg-blue-800 transition">
           <img src="/files/hero/sign-button.svg" alt="upload icon" class="w-4 h-4" />
           Upload your CV
@@ -86,9 +85,9 @@ onMounted(() => {
         <hr class="border-gray-100 my-2" />
         <div class="flex flex-col gap-3 pt-2">
           <NuxtLink to="/auth/login"
-            class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors text-center py-2">Login</NuxtLink>
-          <NuxtLink
-            to="/auth/login"
+            class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors text-center py-2">Login
+          </NuxtLink>
+          <NuxtLink to="/auth/login"
             class="bg-[#2B4DB6] text-white text-[15px] font-medium flex items-center justify-center gap-2 px-[30px] py-[15px] rounded-[5px] hover:bg-blue-800 transition w-full shadow-md shadow-blue-500/20">
             <img src="/files/hero/sign-button.svg" alt="upload icon" class="w-4 h-4" />
             Upload your CV
@@ -113,14 +112,14 @@ onMounted(() => {
           your <span class="text-[#2B4DB6]">passion</span>
         </h1>
 
-        <p class="mt-[16px] mb-[24px] lg:mt-[30px] lg:mb-[30px] text-base text-[#8F8F8F] font-medium max-w-md text-center sm:text-left mx-auto sm:mx-0">
+        <p
+          class="mt-[16px] mb-[24px] lg:mt-[30px] lg:mb-[30px] text-base text-[#8F8F8F] font-medium max-w-md text-center sm:text-left mx-auto sm:mx-0">
           From where you are to where you want to be
         </p>
 
         <div class="flex flex-wrap items-center justify-center sm:justify-start gap-5 sm:gap-8 pt-2 sm:pt-4 relative">
           <div class="relative">
-            <NuxtLink
-              to="/auth/login"
+            <NuxtLink to="/auth/login"
               class="bg-[#2B4DB6] text-white px-[30px] py-[15px] rounded-[5px] text-[14px] font-normal hover:bg-blue-800 transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-4">
               Start now
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -144,12 +143,91 @@ onMounted(() => {
 
       <!-- Right Image/Illustration Area -->
       <div class="relative w-full flex items-center justify-center lg:justify-end">
-        <img src="/files/hero/right-hero.webp" alt="Hero Illustration" class="w-full max-w-[500px] 
-           lg:max-w-none lg:w-[120%] 
-           xl:w-[130%] 
-           h-auto object-contain 
-           lg:translate-x-24 xl:translate-x-40 rounded-[5px]" />
+        <img src="/files/hero/right-hero.webp" alt="Hero Illustration"
+          class="w-full max-w-[500px] lg:max-w-none h-auto object-contain lg:translate-x-24 xl:translate-x-40 rounded-[5px]" />
       </div>
     </main>
+
+    <!-- How it Works / Steps Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-[100px] font-['Outfit']">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
+        
+        <!-- Step 1 -->
+        <div class="relative mt-0 flex md:block items-start gap-4 md:gap-0">
+          <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
+            <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">1</span>
+          </div>
+          <div>
+            <h3 class="text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[10px]">
+              Drop your CV and let us do the heavy lifting
+            </h3>
+            <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
+              We analyze your experience, skills, and background using AI to understand where you stand today.
+            </p>
+          </div>
+          
+          <!-- Next Arrow Desktop -->
+          <div class="hidden md:block absolute -right-[125px] top-[140px] z-10">
+            <img src="/files/hero/arrow1.svg" alt="Arrow to next step" class="w-full h-auto object-contain" />
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0">
+          <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
+            <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">2</span>
+          </div>
+          <div>
+            <h3 class="text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[10px]">
+              See your strengths and skill gaps instantly
+            </h3>
+            <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
+              Understand what you already have and what you're missing to reach your desired career.
+            </p>
+          </div>
+
+          <!-- Next Arrow Desktop -->
+          <div class="hidden md:block absolute -right-[90px] -top-[50px] z-10">
+            <img src="/files/hero/arrow2.svg" alt="Arrow to next step" class="w-full h-auto object-contain" />
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="relative mt-0 md:mt-0 flex md:block items-start gap-4 md:gap-0">
+          <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[25px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
+            <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">3</span>
+          </div>
+          <div>
+            <h3 class="text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[10px]">
+              Receive a personalized roadmap
+            </h3>
+            <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
+              Get curated learning paths, courses, and certifications tailored to your goals.
+            </p>
+          </div>
+
+          <!-- Next Arrow Desktop -->
+          <div class="hidden md:block absolute -right-[100px] top-[120px] z-10">
+            <img src="/files/hero/arrow3.svg" alt="Arrow to next step" class="w-full h-auto object-contain" />
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0">
+          <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[30px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
+            <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">4</span>
+          </div>
+          <div>
+            <h3 class="text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[10px]">
+              Find jobs that actually match you
+            </h3>
+            <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
+              Explore job recommendations based on your skills, interests, and growth path.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
   </div>
 </template>

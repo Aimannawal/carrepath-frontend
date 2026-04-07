@@ -13,7 +13,7 @@ onMounted(async () => {
     const params = new URLSearchParams(hash.substring(1))
     const accessToken = params.get('access_token')
     const refreshToken = params.get('refresh_token')
-
+   
     if (accessToken) {
       // 3. Token ketangkep! Save ke cookie lu.
       const tokenCookie = useCookie('access_token')
