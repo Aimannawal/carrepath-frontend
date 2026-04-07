@@ -11,6 +11,7 @@ const heroSection = ref(null)
 const headerRef = ref(null)
 const section3Ref = ref(null)
 const section4Ref = ref(null)
+const section5Ref = ref(null)
 
 const jobs = [
   { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
@@ -169,6 +170,22 @@ onMounted(() => {
         )
       }
     }
+
+    // Section 5 Animation
+    const s5Elems = section5Ref.value?.querySelectorAll('.s5-elem')
+    if (section5Ref.value && s5Elems && s5Elems.length) {
+      gsap.fromTo(s5Elems,
+        { y: 40, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power3.out',
+          scrollTrigger: {
+            trigger: section5Ref.value,
+            start: 'top 80%',
+            toggleActions: 'play none none none'
+          }
+        }
+      )
+    }
   }
 
   // Tangkap Token dari URL Hash (Google OAuth Redirect)
@@ -315,7 +332,8 @@ onMounted(() => {
     </main>
 
     <!-- How it Works / Steps Section -->
-    <section ref="section2" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mb-[40px] md:mb-[100px] font-['Outfit']">
+    <section ref="section2"
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mb-[40px] md:mb-[100px] font-['Outfit']">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 overflow-hidden md:overflow-visible">
 
         <!-- Step 1 -->
@@ -410,7 +428,7 @@ onMounted(() => {
 
       <div
         class="relative max-w-[1280px] w-full mx-auto lg:h-[700px] flex flex-col lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-8 py-12 lg:py-0 gap-[40px] lg:gap-[120px]">
-        
+
         <!-- Scribble Decoration pinned to the container -->
         <img src="/files/hero/scribbleline06.svg" alt="Scribble Top Right"
           class="absolute right-4 lg:-right-4 top-30 hidden lg:block z-0 pointer-events-none select-none" />
@@ -434,9 +452,11 @@ onMounted(() => {
               class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
                 class="bg-[#2B4DB6] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
-                <img src="/files/hero/business.svg" alt="Business Development" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
+                <img src="/files/hero/business.svg" alt="Business Development"
+                  class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <span class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Business<br />Development</span>
+              <span
+                class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Business<br />Development</span>
             </div>
             <!-- Box 2 -->
             <div
@@ -445,7 +465,8 @@ onMounted(() => {
                 class="bg-[#2B4DB6] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
                 <img src="/files/hero/web.svg" alt="Web Developer" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <span class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Web<br />Developer</span>
+              <span
+                class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Web<br />Developer</span>
             </div>
             <!-- Box 3 -->
             <div
@@ -454,7 +475,8 @@ onMounted(() => {
                 class="bg-[#2B4DB6] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
                 <img src="/files/hero/human.svg" alt="Human Resource" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <span class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Human<br />Resource</span>
+              <span
+                class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Human<br />Resource</span>
             </div>
             <!-- Box 4 -->
             <div
@@ -525,8 +547,9 @@ onMounted(() => {
     </section>
 
     <!-- Section 4: Newest Jobs -->
-    <section ref="section4Ref" class="max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16 mb-[40px] md:mb-[120px] font-['Outfit'] relative overflow-hidden flex flex-col items-center">
-      
+    <section ref="section4Ref"
+      class="max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16 mb-[40px] md:mb-[120px] font-['Outfit'] relative overflow-hidden flex flex-col items-center">
+
       <!-- Text & Arrow header -->
       <div class="relative flex flex-col items-center text-center max-w-[600px] w-full">
         <h2 class="s4-title-dec opacity-0 text-[32px] md:text-[42px] font-semibold text-[#1E1E1E] leading-tight">
@@ -536,23 +559,26 @@ onMounted(() => {
           <p class="s4-title-dec opacity-0 text-[14px] font-normal text-[#1E1E1E] opacity-50 max-w-[450px]">
             Get the fastest applications so that your name is above other applicants.
           </p>
-          <img src="/files/hero/arrow4.svg" alt="Arrow pointing" class="s4-title-dec opacity-0 absolute -right-6 -top-8 hidden lg:block w-[78px] h-[78px] pointer-events-none" />
+          <img src="/files/hero/arrow4.svg" alt="Arrow pointing"
+            class="s4-title-dec opacity-0 absolute -right-6 -top-8 hidden lg:block w-[78px] h-[78px] pointer-events-none" />
         </div>
       </div>
 
       <!-- Grid Cards -->
-      <div class="mt-[60px] md:mt-[100px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-[40px] md:gap-y-[87px] gap-x-[87px] place-items-center w-full">
-        <div 
-          v-for="(job, index) in jobs" :key="index"
+      <div
+        class="mt-[60px] md:mt-[100px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-[40px] md:gap-y-[87px] gap-x-[87px] place-items-center w-full">
+        <div v-for="(job, index) in jobs" :key="index"
           :class="['s4-card opacity-0 bg-white w-full max-w-[280px] flex flex-col items-start transition duration-300 hover:-translate-y-2', index > 3 ? 'hidden lg:flex' : 'flex']">
-          
+
           <!-- Top row -->
           <div class="flex items-center justify-between w-full">
             <img :src="job.logo" alt="Company Logo" class="w-[30px] h-[30px] object-contain" />
-            <button class="w-[94px] h-[35px] border border-[#2B4DB6] bg-white hover:bg-[#EEF1FA] text-[#2B4DB6] text-[14px] font-medium rounded-[5px] flex items-center justify-center gap-[6px] transition-colors duration-300 cursor-pointer">
+            <button
+              class="w-[94px] h-[35px] border border-[#2B4DB6] bg-white hover:bg-[#EEF1FA] text-[#2B4DB6] text-[14px] font-normal rounded-[5px] flex items-center justify-center gap-[6px] transition-colors duration-300 cursor-pointer">
               Apply
-              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3.5 10.5L10.5 3.5M10.5 3.5H4.5M10.5 3.5V9.5" />
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2.625 11.375L11.375 2.625M11.375 2.625H4.8125M11.375 2.625V9.1875" stroke="currentColor"
+                  stroke-width="0.875" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
           </div>
@@ -580,6 +606,48 @@ onMounted(() => {
             <span class="text-[#1E1E1E] opacity-60">{{ job.time }}</span>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Get Latest Job Updates -->
+    <section ref="section5Ref" class="w-full mt-10 md:mt-32 mb-20 font-['Outfit'] relative bg-[#3154C4]">
+      
+      <!-- Background Decorations (overflow hidden to prevent ellipses from expanding page) -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <img src="/files/hero/Ellipse6.svg" alt="ellipse" class="s5-elem absolute top-0 left-[10%] w-[200px] md:w-[315px] opacity-60" />
+        <img src="/files/hero/Ellipse7.svg" alt="ellipse" class="s5-elem absolute -bottom-[0%] right-[40%] w-[200px] md:w-[315px] opacity-60 hidden md:block" />
+        
+        <!-- Scribbles Swapped -->
+        <img src="/files/hero/scribbleline08.svg" alt="scribble" class="s5-elem absolute top-[58%] right-[15%] 2xl:right-[27%] w-[30px] md:w-[47px] hidden md:block" />
+        <img src="/files/hero/scribbleline07.svg" alt="scribble" class="s5-elem absolute bottom-[22%] left-[14%] w-[40px] md:w-[57px] hidden md:block" />
+        
+        <img src="/files/hero/arrow22.svg" alt="arrow" class="s5-elem absolute top-[40%] left-[38%] w-[35px] md:w-[54px] hidden md:block" />
+        <img src="/files/hero/arrow23.svg" alt="arrow" class="s5-elem absolute bottom-[70%] right-[10%] 2xl:right-[20%] w-[35px] md:w-[58px] hidden md:block" />
+      </div>
+
+      <!-- Container -->
+      <div class="max-w-[1280px] w-full h-[350px] mx-auto px-4 sm:px-6 lg:px-8 relative flex md:items-center py-10 md:py-0">
+        
+        <!-- Content -->
+        <div class="relative z-20 w-full md:w-[500px] flex flex-col justify-center mt-6 md:mt-0">
+          <h2 class="s5-elem text-white font-semibold text-[32px] md:text-[42px] leading-[1.2] mb-[37px]">
+            Get Latest Job<br />Updates
+          </h2>
+          
+          <div class="s5-elem w-full max-w-[469px] h-[53px] bg-white rounded-lg pl-[20px] pr-[10px] py-[10px] flex items-center justify-between shadow-lg">
+            <input type="email" placeholder="Enter your email" class="flex-1 bg-transparent outline-none text-[#1E1E1E] text-[12px] font-light placeholder:text-gray-400 h-full" />
+            <button class="w-[104px] h-[33px] bg-[#3154C4] text-white text-[12px] font-light rounded-md flex items-center justify-center gap-[6px] hover:bg-[#2545A8] transition-colors whitespace-nowrap">
+              Send Email
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 13L13 1M13 1H3M13 1V11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Human image pointing up -->
+        <img src="/files/hero/mascot.png" alt="Person Pointing" class="s5-elem absolute bottom-0 right-[5%] md:right-[15%] h-[85%] md:h-[450px] object-cover object-bottom pointer-events-none z-30 hidden md:block" />
+
       </div>
     </section>
 
