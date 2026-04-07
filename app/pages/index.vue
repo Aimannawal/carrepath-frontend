@@ -10,6 +10,18 @@ const section2 = ref(null)
 const heroSection = ref(null)
 const headerRef = ref(null)
 const section3Ref = ref(null)
+const section4Ref = ref(null)
+
+const jobs = [
+  { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
+  { logo: '/logos/microsoft.svg', title: 'Electrical Engineering', location: 'Indonesia', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
+  { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
+  { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
+  { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
+  { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
+  { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
+  { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' }
+]
 
 onMounted(() => {
   if (process.client) {
@@ -125,6 +137,35 @@ onMounted(() => {
           { x: 30, opacity: 0 },
           { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
           "-=0.6"
+        )
+      }
+    }
+
+    // Section 4 Animation
+    const s4Titles = section4Ref.value?.querySelectorAll('.s4-title-dec')
+    const s4Cards = section4Ref.value?.querySelectorAll('.s4-card')
+
+    if (section4Ref.value) {
+      const tl4 = gsap.timeline({
+        scrollTrigger: {
+          trigger: section4Ref.value,
+          start: 'top 75%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      if (s4Titles && s4Titles.length) {
+        tl4.fromTo(s4Titles,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: 'power3.out' }
+        )
+      }
+
+      if (s4Cards && s4Cards.length) {
+        tl4.fromTo(s4Cards,
+          { y: 40, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out' },
+          "-=0.3"
         )
       }
     }
@@ -360,7 +401,7 @@ onMounted(() => {
     </section>
 
     <!-- Section 3: Explore by Categories -->
-    <section ref="section3Ref" class="w-full bg-[#F4F6FB] mb-[120px] font-['Outfit'] relative overflow-hidden">
+    <section ref="section3Ref" class="w-full bg-[#F4F6FB] mb-0 md:mb-10 font-['Outfit'] relative overflow-hidden">
       <!-- Background Decorations -->
       <img src="/files/hero/Ellipse2.svg" alt="Decoration Left"
         class="absolute -left-55 top-70 -translate-y-1/2 hidden lg:block z-0 pointer-events-none select-none" />
@@ -480,6 +521,65 @@ onMounted(() => {
           </div>
         </div>
 
+      </div>
+    </section>
+
+    <!-- Section 4: Newest Jobs -->
+    <section ref="section4Ref" class="max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16 mb-[40px] md:mb-[120px] font-['Outfit'] relative overflow-hidden flex flex-col items-center">
+      
+      <!-- Text & Arrow header -->
+      <div class="relative flex flex-col items-center text-center max-w-[600px] w-full">
+        <h2 class="s4-title-dec opacity-0 text-[32px] md:text-[42px] font-semibold text-[#1E1E1E] leading-tight">
+          Newest jobs for you
+        </h2>
+        <div class="relative mt-[10px] md:mt-[20px] w-full flex justify-center">
+          <p class="s4-title-dec opacity-0 text-[14px] font-normal text-[#1E1E1E] opacity-50 max-w-[450px]">
+            Get the fastest applications so that your name is above other applicants.
+          </p>
+          <img src="/files/hero/arrow4.svg" alt="Arrow pointing" class="s4-title-dec opacity-0 absolute -right-6 -top-8 hidden lg:block w-[78px] h-[78px] pointer-events-none" />
+        </div>
+      </div>
+
+      <!-- Grid Cards -->
+      <div class="mt-[60px] md:mt-[100px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-[40px] md:gap-y-[87px] gap-x-[87px] place-items-center w-full">
+        <div 
+          v-for="(job, index) in jobs" :key="index"
+          :class="['s4-card opacity-0 bg-white w-full max-w-[280px] flex flex-col items-start transition duration-300 hover:-translate-y-2', index > 3 ? 'hidden lg:flex' : 'flex']">
+          
+          <!-- Top row -->
+          <div class="flex items-center justify-between w-full">
+            <img :src="job.logo" alt="Company Logo" class="w-[30px] h-[30px] object-contain" />
+            <button class="w-[94px] h-[35px] border border-[#2B4DB6] bg-white hover:bg-[#EEF1FA] text-[#2B4DB6] text-[14px] font-medium rounded-[5px] flex items-center justify-center gap-[6px] transition-colors duration-300 cursor-pointer">
+              Apply
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3.5 10.5L10.5 3.5M10.5 3.5H4.5M10.5 3.5V9.5" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Job Title -->
+          <h4 class="mt-[15px] font-normal text-[16px] text-[#1E1E1E]">
+            {{ job.title }}
+          </h4>
+
+          <!-- Tags -->
+          <div class="mt-[14px] flex items-center text-[12px] font-light text-[#1E1E1E] opacity-60">
+            <span>{{ job.location }}</span>
+            <span class="mx-[10px]">-</span>
+            <span>{{ job.type }}</span>
+            <span class="mx-[10px]">-</span>
+            <span>{{ job.type2 }}</span>
+          </div>
+
+          <!-- Divider -->
+          <hr class="mt-[60px] w-full border-[#1E1E1E] opacity-10" />
+
+          <!-- Bottom row -->
+          <div class="mt-[10px] flex items-center justify-between w-full text-[12px] font-light">
+            <span class="text-[#1E1E1E]">{{ job.company }}</span>
+            <span class="text-[#1E1E1E] opacity-60">{{ job.time }}</span>
+          </div>
+        </div>
       </div>
     </section>
 
