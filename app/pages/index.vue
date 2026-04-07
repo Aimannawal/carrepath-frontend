@@ -720,7 +720,7 @@ onMounted(() => {
     <!-- Footer -->
     <footer ref="footerRef"
       class="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12 font-['Outfit'] relative">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
 
         <!-- Logo -->
         <div class="md:col-span-3 footer-elem">
@@ -732,17 +732,17 @@ onMounted(() => {
         <!-- Contact Info -->
         <div
           class="md:col-span-4 footer-elem flex flex-col md:pl-4 items-center md:items-start text-center md:text-left">
-          <div class="text-[18px] font-normal leading-relaxed text-[#1E1E1E] mb-[100px] md:mb-[120px]">
+          <div class="text-[18px] font-normal leading-relaxed text-[#1E1E1E] mb-[32px] md:mb-[120px]">
             5123 Market St. #22B<br />
             Jakarta, Indonesia 44635
           </div>
-          <div class="mb-[27px] w-full flex justify-center md:justify-start">
+          <div class="mb-[16px] w-full flex justify-center md:justify-start">
             <a href="tel:4345464356"
               class="text-[14px] font-normal text-[#1E1E1E] border-b border-[#2B4DB6] pb-1 w-fit inline-block hover:text-[#2B4DB6] transition-colors">
               (434) 546-4356
             </a>
           </div>
-          <div class="mb-[40px] md:mb-0 w-full flex justify-center md:justify-start">
+          <div class="mb-[24px] md:mb-0 w-full flex justify-center md:justify-start">
             <a href="mailto:contact@carrepath.com"
               class="text-[14px] font-normal text-[#1E1E1E] border-b border-[#2B4DB6] pb-1 w-fit inline-block hover:text-[#2B4DB6] transition-colors">
               contact@carrepath.com
@@ -751,7 +751,7 @@ onMounted(() => {
         </div>
 
         <!-- Links -->
-        <div class="md:col-span-2 footer-elem flex flex-col gap-6 md:items-start items-center">
+        <div class="md:col-span-2 footer-elem flex flex-col gap-4 md:gap-6 md:items-start items-center">
           <a href="#home" @click.prevent="scrollToSection('home')"
             class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Home</a>
           <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')"
@@ -768,7 +768,7 @@ onMounted(() => {
         </div>
 
         <!-- Socials -->
-        <div class="md:col-span-2 footer-elem flex flex-col gap-6 md:items-start items-center mt-4 md:mt-0">
+        <div class="md:col-span-2 footer-elem flex flex-col gap-4 md:gap-6 md:items-start items-center">
           <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
             target="_blank"
             class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Facebook</a>
@@ -784,7 +784,7 @@ onMounted(() => {
         </div>
 
         <!-- Back to Top -->
-        <div class="md:col-span-1 footer-elem flex justify-center md:justify-end items-start mt-8 md:mt-0">
+        <div class="md:col-span-1 footer-elem flex justify-center md:justify-end items-start mt-4 md:mt-0">
           <button @click="scrollToTop"
             class="bg-[#2B4DB6] hover:bg-[#2545A8] rounded-full p-[14px] transition-colors shadow-lg shadow-blue-500/20 group">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -799,7 +799,7 @@ onMounted(() => {
       </div>
 
       <!-- Copyright Bottom -->
-      <div class="mt-16 md:-mt-5 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 items-end footer-elem">
+      <div class="mt-8 md:-mt-5 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-end footer-elem">
         <div class="md:col-span-3 hidden md:block"></div>
         <div class="md:col-span-4 hidden md:block"></div>
         <div class="md:col-span-5 flex justify-center md:justify-start md:pl-0">
