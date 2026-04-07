@@ -257,7 +257,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white text-gray-900 overflow-x-hidden">
+  <div class="min-h-screen bg-white text-[#292929] overflow-x-hidden">
     <!-- Navbar -->
     <header ref="headerRef"
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between relative z-50 bg-white">
@@ -265,7 +265,7 @@ onMounted(() => {
         <span>Carre</span><span class="text-[#2B4DB6]">path.</span>
       </div>
 
-      <nav class="nav-elem opacity-0 hidden md:flex space-x-[45px] text-sm font-normal text-[#1E1E1E]">
+      <nav class="nav-elem opacity-0 hidden md:flex space-x-[45px] text-sm font-normal text-[#292929]">
         <a href="#home" @click.prevent="scrollToSection('home')" class="hover:text-[#2B4DB6]">Home</a>
         <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')" class="hover:text-[#2B4DB6]">How it
           Works</a>
@@ -277,7 +277,7 @@ onMounted(() => {
       </nav>
 
       <div class="nav-elem opacity-0 hidden md:flex items-center space-x-[50px]">
-        <NuxtLink to="/auth/login" class="text-sm font-normal text-[#1E1E1E] hover:text-[#2B4DB6] transition">
+        <NuxtLink to="/auth/login" class="text-sm font-normal text-[#292929] hover:text-[#2B4DB6] transition">
           Login
         </NuxtLink>
 
@@ -290,7 +290,7 @@ onMounted(() => {
 
       <!-- Mobile Menu Hamburger Button -->
       <button @click="isMobileMenuOpen = !isMobileMenuOpen"
-        class="nav-elem opacity-0 md:hidden text-[#1E1E1E] hover:text-[#2B4DB6] focus:outline-none transition-colors p-2 -mr-2">
+        class="nav-elem opacity-0 md:hidden text-[#292929] hover:text-[#2B4DB6] focus:outline-none transition-colors p-2 -mr-2">
         <svg v-if="!isMobileMenuOpen" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <line x1="4" y1="12" x2="20" y2="12"></line>
@@ -337,7 +337,7 @@ onMounted(() => {
       <!-- Left Content -->
       <div class="z-10 relative">
         <h1
-          class="hero-elem opacity-0 text-[42px] lg:text-[64px] font-semibold leading-[1.2] lg:leading-[1.1] tracking-normal lg:tracking-tight text-gray-900 mb-[16px] lg:mb-[30px] text-center sm:text-left">
+          class="hero-elem opacity-0 text-[42px] lg:text-[64px] font-semibold leading-[1.2] lg:leading-[1.1] tracking-normal lg:tracking-tight text-[#292929] mb-[16px] lg:mb-[30px] text-center sm:text-left">
           <span class="relative inline-block">
             <span class="relative z-10">Discover</span>
             <img src="/files/hero/circle.svg" alt="circle highlight"
@@ -369,7 +369,7 @@ onMounted(() => {
 
           <div class="flex items-center gap-3">
             <img src="/files/hero/talents.webp" alt="Talents" class="h-9 w-auto object-contain" />
-            <div class="text-xs font-normal leading-tight text-[#1E1E1E]">
+            <div class="text-xs font-normal leading-tight text-[#292929]">
               <span class="text-[#2B4DB6]">100K+</span> Talents Found<br />
               Their Dream Job!
             </div>
@@ -396,10 +396,10 @@ onMounted(() => {
             <span class="text-[32px] md:text-[40px] text-[#FFFFFF] font-normal leading-none block">1</span>
           </div>
           <div>
-            <h3 class="text-[20px] md:text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[6px] md:mb-[10px]">
+            <h3 class="text-[20px] md:text-[24px] text-[#292929] font-normal leading-tight mb-[6px] md:mb-[10px]">
               Drop your CV and let us do the heavy lifting
             </h3>
-            <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
+            <p class="text-[14px] text-[#292929] opacity-60 leading-relaxed font-normal">
               We analyze your experience, skills, and background using AI to understand where you stand today.
             </p>
           </div>
@@ -417,10 +417,10 @@ onMounted(() => {
             <span class="text-[32px] md:text-[40px] text-[#FFFFFF] font-normal leading-none block">2</span>
           </div>
           <div>
-            <h3 class="text-[20px] md:text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[6px] md:mb-[10px]">
+            <h3 class="text-[20px] md:text-[24px] text-[#292929] font-normal leading-tight mb-[6px] md:mb-[10px]">
               See your strengths and skill gaps instantly
             </h3>
-            <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
+            <p class="text-[14px] text-[#292929] opacity-60 leading-relaxed font-normal">
               Understand what you already have and what you're missing to reach your desired career.
             </p>
           </div>
@@ -438,10 +438,10 @@ onMounted(() => {
             <span class="text-[32px] md:text-[40px] text-[#FFFFFF] font-normal leading-none block">3</span>
           </div>
           <div>
-            <h3 class="text-[20px] md:text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[6px] md:mb-[10px]">
+            <h3 class="text-[20px] md:text-[24px] text-[#292929] font-normal leading-tight mb-[6px] md:mb-[10px]">
               Receive a personalized roadmap
             </h3>
-            <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
+            <p class="text-[14px] text-[#292929] opacity-60 leading-relaxed font-normal">
               Get curated learning paths, courses, and certifications tailored to your goals.
             </p>
           </div>
@@ -459,10 +459,10 @@ onMounted(() => {
             <span class="text-[32px] md:text-[40px] text-[#FFFFFF] font-normal leading-none block">4</span>
           </div>
           <div>
-            <h3 class="text-[20px] md:text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[6px] md:mb-[10px]">
+            <h3 class="text-[20px] md:text-[24px] text-[#292929] font-normal leading-tight mb-[6px] md:mb-[10px]">
               Find jobs that actually match you
             </h3>
-            <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
+            <p class="text-[14px] text-[#292929] opacity-60 leading-relaxed font-normal">
               Explore job recommendations based on your skills, interests, and growth path.
             </p>
           </div>
@@ -491,11 +491,11 @@ onMounted(() => {
         <div class="relative z-10 w-full lg:flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
           <img src="/files/hero/arrow.svg" alt="Arrow pointing"
             class="s3-main-arrow opacity-0 absolute -right-8 top-18 hidden lg:block z-0 pointer-events-none w-20" />
-          <h2 class="s3-title-dec opacity-0 text-[32px] md:text-[42px] font-semibold text-[#1E1E1E] leading-tight">
+          <h2 class="s3-title-dec opacity-0 text-[32px] md:text-[42px] font-semibold text-[#292929] leading-tight">
             Explore by Categories
           </h2>
           <p
-            class="s3-title-dec opacity-0 mt-[15px] md:mt-[20px] text-[14px] font-normal text-[#1E1E1E] opacity-50 max-w-[450px] leading-relaxed">
+            class="s3-title-dec opacity-0 mt-[15px] md:mt-[20px] text-[14px] font-normal text-[#292929] opacity-50 max-w-[450px] leading-relaxed">
             We provide many categories, choose a category according to your expertise to make it easier to find a job.
           </p>
 
@@ -510,7 +510,7 @@ onMounted(() => {
                   class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
               <span
-                class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Business<br />Development</span>
+                class="text-[12px] sm:text-[14px] font-medium text-[#292929] leading-tight">Business<br />Development</span>
             </div>
             <!-- Box 2 -->
             <div
@@ -520,7 +520,7 @@ onMounted(() => {
                 <img src="/files/hero/web.svg" alt="Web Developer" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
               <span
-                class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Web<br />Developer</span>
+                class="text-[12px] sm:text-[14px] font-medium text-[#292929] leading-tight">Web<br />Developer</span>
             </div>
             <!-- Box 3 -->
             <div
@@ -530,7 +530,7 @@ onMounted(() => {
                 <img src="/files/hero/human.svg" alt="Human Resource" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
               <span
-                class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Human<br />Resource</span>
+                class="text-[12px] sm:text-[14px] font-medium text-[#292929] leading-tight">Human<br />Resource</span>
             </div>
             <!-- Box 4 -->
             <div
@@ -539,7 +539,7 @@ onMounted(() => {
                 class="bg-[#2B4DB6] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
                 <img src="/files/hero/data.svg" alt="Data Analyst" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <span class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Data Analyst</span>
+              <span class="text-[12px] sm:text-[14px] font-medium text-[#292929] leading-tight">Data Analyst</span>
             </div>
           </div>
         </div>
@@ -549,12 +549,12 @@ onMounted(() => {
           <div
             class="bg-white rounded-[10px] w-full min-h-[355px] p-6 lg:p-[30px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] text-left">
             <div class="flex items-center justify-between mb-[30px]">
-              <h3 class="text-[20px] font-medium text-[#1E1E1E]">Popular Categories</h3>
+              <h3 class="text-[20px] font-medium text-[#292929]">Popular Categories</h3>
               <button
-                class="flex items-center gap-2 text-[#1E1E1E] opacity-50 text-[14px] font-medium hover:opacity-100 transition cursor-pointer">
+                class="flex items-center gap-2 text-[#292929] opacity-50 text-[14px] font-medium hover:opacity-100 transition cursor-pointer">
                 See all categories
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.625 11.375L11.375 2.625M11.375 2.625H4.8125M11.375 2.625V9.1875" stroke="#1E1E1E"
+                  <path d="M2.625 11.375L11.375 2.625M11.375 2.625H4.8125M11.375 2.625V9.1875" stroke="#292929"
                     stroke-opacity="1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </button>
@@ -562,24 +562,24 @@ onMounted(() => {
 
             <div class="flex flex-col">
               <!-- Item 1 -->
-              <div class="flex flex-wrap items-center justify-between border-b border-[#1E1E1E]/10 pb-[15px] mb-[15px]">
-                <span class="text-[14px] font-medium text-[#1E1E1E] flex-1 min-w-[150px]">Fullstack Developer</span>
+              <div class="flex flex-wrap items-center justify-between border-b border-[#292929]/10 pb-[15px] mb-[15px]">
+                <span class="text-[14px] font-medium text-[#292929] flex-1 min-w-[150px]">Fullstack Developer</span>
                 <div
                   class="bg-[#2B4DB6]/[0.08] text-[#2B4DB6] p-[8px] rounded-[5px] text-[12px] font-semibold leading-none ml-4">
                   23
                 </div>
               </div>
               <!-- Item 2 -->
-              <div class="flex flex-wrap items-center justify-between border-b border-[#1E1E1E]/10 pb-[15px] mb-[15px]">
-                <span class="text-[14px] font-medium text-[#1E1E1E] flex-1 min-w-[150px]">Quality Assurance</span>
+              <div class="flex flex-wrap items-center justify-between border-b border-[#292929]/10 pb-[15px] mb-[15px]">
+                <span class="text-[14px] font-medium text-[#292929] flex-1 min-w-[150px]">Quality Assurance</span>
                 <div
                   class="bg-[#2B4DB6]/[0.08] text-[#2B4DB6] p-[8px] rounded-[5px] text-[12px] font-semibold leading-none ml-4">
                   43
                 </div>
               </div>
               <!-- Item 3 -->
-              <div class="flex flex-wrap items-center justify-between border-b border-[#1E1E1E]/10 pb-[15px] mb-[15px]">
-                <span class="text-[14px] font-medium text-[#1E1E1E] flex-1 min-w-[150px]">Financial Accounting</span>
+              <div class="flex flex-wrap items-center justify-between border-b border-[#292929]/10 pb-[15px] mb-[15px]">
+                <span class="text-[14px] font-medium text-[#292929] flex-1 min-w-[150px]">Financial Accounting</span>
                 <div
                   class="bg-[#2B4DB6]/[0.08] text-[#2B4DB6] p-[8px] rounded-[5px] text-[12px] font-semibold leading-none ml-4">
                   81
@@ -587,7 +587,7 @@ onMounted(() => {
               </div>
               <!-- Item 4 -->
               <div class="flex flex-wrap items-center justify-between border-b-0 pb-[15px]">
-                <span class="text-[14px] font-medium text-[#1E1E1E] flex-1 min-w-[150px]">DevOps Developer</span>
+                <span class="text-[14px] font-medium text-[#292929] flex-1 min-w-[150px]">DevOps Developer</span>
                 <div
                   class="bg-[#2B4DB6]/[0.08] text-[#2B4DB6] p-[8px] rounded-[5px] text-[12px] font-semibold leading-none ml-4">
                   91
@@ -606,11 +606,11 @@ onMounted(() => {
 
       <!-- Text & Arrow header -->
       <div class="relative flex flex-col items-center text-center max-w-[600px] w-full">
-        <h2 class="s4-title-dec opacity-0 text-[32px] md:text-[42px] font-semibold text-[#1E1E1E] leading-tight">
+        <h2 class="s4-title-dec opacity-0 text-[32px] md:text-[42px] font-semibold text-[#292929] leading-tight">
           Newest jobs for you
         </h2>
         <div class="relative mt-[10px] md:mt-[20px] w-full flex justify-center">
-          <p class="s4-title-dec opacity-0 text-[14px] font-normal text-[#1E1E1E] opacity-50 max-w-[450px]">
+          <p class="s4-title-dec opacity-0 text-[14px] font-normal text-[#292929] opacity-50 max-w-[450px]">
             Get the fastest applications so that your name is above other applicants.
           </p>
           <img src="/files/hero/arrow4.svg" alt="Arrow pointing"
@@ -638,12 +638,12 @@ onMounted(() => {
           </div>
 
           <!-- Job Title -->
-          <h4 class="mt-[15px] font-normal text-[16px] text-[#1E1E1E]">
+          <h4 class="mt-[15px] font-normal text-[16px] text-[#292929]">
             {{ job.title }}
           </h4>
 
           <!-- Tags -->
-          <div class="mt-[14px] flex items-center text-[12px] font-light text-[#1E1E1E] opacity-60">
+          <div class="mt-[14px] flex items-center text-[12px] font-light text-[#292929] opacity-60">
             <span>{{ job.location }}</span>
             <span class="mx-[10px]">-</span>
             <span>{{ job.type }}</span>
@@ -652,12 +652,12 @@ onMounted(() => {
           </div>
 
           <!-- Divider -->
-          <hr class="mt-[60px] w-full border-[#1E1E1E] opacity-10" />
+          <hr class="mt-[60px] w-full border-[#292929] opacity-10" />
 
           <!-- Bottom row -->
           <div class="mt-[10px] flex items-center justify-between w-full text-[12px] font-light">
-            <span class="text-[#1E1E1E]">{{ job.company }}</span>
-            <span class="text-[#1E1E1E] opacity-60">{{ job.time }}</span>
+            <span class="text-[#292929]">{{ job.company }}</span>
+            <span class="text-[#292929] opacity-60">{{ job.time }}</span>
           </div>
         </div>
       </div>
@@ -698,7 +698,7 @@ onMounted(() => {
           <div
             class="s5-elem w-full max-w-[469px] h-[53px] bg-white rounded-lg pl-[20px] pr-[10px] py-[10px] flex items-center justify-between shadow-lg">
             <input v-model="emailInput" @keyup.enter="handleSubscribe" type="email" placeholder="Enter your email"
-              class="flex-1 bg-transparent outline-none text-[#1E1E1E] text-[12px] font-light placeholder:text-gray-400 h-full" />
+              class="flex-1 bg-transparent outline-none text-[#292929] text-[12px] font-light placeholder:text-gray-400 h-full" />
             <button @click="handleSubscribe"
               class="w-[104px] h-[33px] bg-[#3154C4] text-white text-[12px] font-light rounded-md flex items-center justify-center gap-[6px] hover:bg-[#2545A8] transition-colors whitespace-nowrap">
               Send Email
@@ -725,26 +725,26 @@ onMounted(() => {
         <!-- Logo -->
         <div class="md:col-span-3 footer-elem">
           <div class="text-[24px] font-semibold tracking-tight text-center md:text-left">
-            <span class="text-[#1E1E1E]">Carre</span><span class="text-[#2B4DB6]">path.</span>
+            <span class="text-[#292929]">Carre</span><span class="text-[#2B4DB6]">path.</span>
           </div>
         </div>
 
         <!-- Contact Info -->
         <div
           class="md:col-span-4 footer-elem flex flex-col md:pl-4 items-center md:items-start text-center md:text-left">
-          <div class="text-[18px] font-normal leading-relaxed text-[#1E1E1E] mb-[32px] md:mb-[120px]">
+          <div class="text-[18px] font-normal leading-relaxed text-[#292929] mb-[32px] md:mb-[120px]">
             5123 Market St. #22B<br />
             Jakarta, Indonesia 44635
           </div>
           <div class="mb-[16px] w-full flex justify-center md:justify-start">
             <a href="tel:4345464356"
-              class="text-[14px] font-normal text-[#1E1E1E] border-b border-[#2B4DB6] pb-1 w-fit inline-block hover:text-[#2B4DB6] transition-colors">
+              class="text-[14px] font-normal text-[#292929] border-b border-[#2B4DB6] pb-1 w-fit inline-block hover:text-[#2B4DB6] transition-colors">
               (434) 546-4356
             </a>
           </div>
           <div class="mb-[24px] md:mb-0 w-full flex justify-center md:justify-start">
             <a href="mailto:contact@carrepath.com"
-              class="text-[14px] font-normal text-[#1E1E1E] border-b border-[#2B4DB6] pb-1 w-fit inline-block hover:text-[#2B4DB6] transition-colors">
+              class="text-[14px] font-normal text-[#292929] border-b border-[#2B4DB6] pb-1 w-fit inline-block hover:text-[#2B4DB6] transition-colors">
               contact@carrepath.com
             </a>
           </div>
@@ -753,34 +753,34 @@ onMounted(() => {
         <!-- Links -->
         <div class="md:col-span-2 footer-elem flex flex-col gap-4 md:gap-6 md:items-start items-center">
           <a href="#home" @click.prevent="scrollToSection('home')"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Home</a>
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Home</a>
           <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">How
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">How
             it Works</a>
           <a href="#job-categories" @click.prevent="scrollToSection('job-categories')"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Job
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Job
             by Categories</a>
           <a href="#latest-jobs" @click.prevent="scrollToSection('latest-jobs')"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Latest
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Latest
             Jobs</a>
           <a href="#contact" @click.prevent="scrollToSection('contact')"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Contact</a>
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Contact</a>
         </div>
 
         <!-- Socials -->
         <div class="md:col-span-2 footer-elem flex flex-col gap-4 md:gap-6 md:items-start items-center">
           <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
             target="_blank"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Facebook</a>
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Facebook</a>
           <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
             target="_blank"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Twitter</a>
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Twitter</a>
           <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
             target="_blank"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Linkedin</a>
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Linkedin</a>
           <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
             target="_blank"
-            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Instagram</a>
+            class="text-[12px] font-normal text-[#292929] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Instagram</a>
         </div>
 
         <!-- Back to Top -->
@@ -803,7 +803,7 @@ onMounted(() => {
         <div class="md:col-span-3 hidden md:block"></div>
         <div class="md:col-span-4 hidden md:block"></div>
         <div class="md:col-span-5 flex justify-center md:justify-start md:pl-0">
-          <p class="text-[12px] leading-[20px] font-normal text-[#1E1E1E] opacity-60">
+          <p class="text-[12px] leading-[20px] font-normal text-[#292929] opacity-60">
             © 2026 Carrepath. All rights reserved.
           </p>
         </div>
