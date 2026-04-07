@@ -13,6 +13,28 @@ const section3Ref = ref(null)
 const section4Ref = ref(null)
 const section5Ref = ref(null)
 
+const emailInput = ref('')
+const showToast = ref(false)
+
+const handleSubscribe = () => {
+  if (emailInput.value.trim() !== '') {
+    showToast.value = true
+    emailInput.value = ''
+    // Auto close toast after 3.5 seconds
+    setTimeout(() => {
+      showToast.value = false
+    }, 3500)
+  }
+}
+
+const scrollToSection = (id) => {
+  isMobileMenuOpen.value = false // Tutup popup menu di mobile saat diklik
+  const el = document.getElementById(id)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
 const jobs = [
   { logo: '/logos/google.svg', title: 'Junior Software Developer', location: 'Singapore', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
   { logo: '/logos/microsoft.svg', title: 'Electrical Engineering', location: 'Indonesia', type: 'On Site', type2: 'Internship', company: 'Google. inc', time: '1 Days ago' },
@@ -221,11 +243,11 @@ onMounted(() => {
       </div>
 
       <nav class="nav-elem opacity-0 hidden md:flex space-x-[45px] text-sm font-normal text-[#1E1E1E]">
-        <a href="#" class="hover:text-[#2B4DB6]">Home</a>
-        <a href="#" class="hover:text-[#2B4DB6]">About</a>
-        <a href="#" class="hover:text-[#2B4DB6]">Explore</a>
-        <a href="#" class="hover:text-[#2B4DB6]">Blog</a>
-        <a href="#" class="hover:text-[#2B4DB6]">Contact</a>
+        <a href="#home" @click.prevent="scrollToSection('home')" class="hover:text-[#2B4DB6]">Home</a>
+        <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')" class="hover:text-[#2B4DB6]">How it Works</a>
+        <a href="#job-categories" @click.prevent="scrollToSection('job-categories')" class="hover:text-[#2B4DB6]">Job by Categories</a>
+        <a href="#latest-jobs" @click.prevent="scrollToSection('latest-jobs')" class="hover:text-[#2B4DB6]">Latest Jobs</a>
+        <a href="#contact" @click.prevent="scrollToSection('contact')" class="hover:text-[#2B4DB6]">Contact</a>
       </nav>
 
       <div class="nav-elem opacity-0 hidden md:flex items-center space-x-[50px]">
@@ -242,14 +264,14 @@ onMounted(() => {
 
       <!-- Mobile Menu Hamburger Button -->
       <button @click="isMobileMenuOpen = !isMobileMenuOpen"
-        class="nav-elem opacity-0 md:hidden bg-gray-50 hover:bg-gray-100 p-2.5 rounded-full text-[#1E1E1E] focus:outline-none transition-colors">
-        <svg v-if="!isMobileMenuOpen" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        class="nav-elem opacity-0 md:hidden text-[#1E1E1E] hover:text-[#2B4DB6] focus:outline-none transition-colors p-2 -mr-2">
+        <svg v-if="!isMobileMenuOpen" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <line x1="4" y1="12" x2="20" y2="12"></line>
           <line x1="4" y1="6" x2="20" y2="6"></line>
           <line x1="4" y1="18" x2="20" y2="18"></line>
         </svg>
-        <svg v-else width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        <svg v-else width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
           stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -259,11 +281,11 @@ onMounted(() => {
       <!-- Mobile Menu Panel -->
       <div v-if="isMobileMenuOpen"
         class="absolute top-[85px] left-4 right-4 bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 md:hidden flex flex-col p-6 space-y-5 z-[100] rounded-3xl ring-1 ring-black/5">
-        <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Home</a>
-        <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">About</a>
-        <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Explore</a>
-        <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Blog</a>
-        <a href="#" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Contact</a>
+        <a href="#home" @click.prevent="scrollToSection('home')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Home</a>
+        <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">How it Works</a>
+        <a href="#job-categories" @click.prevent="scrollToSection('job-categories')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Job by Categories</a>
+        <a href="#latest-jobs" @click.prevent="scrollToSection('latest-jobs')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Latest Jobs</a>
+        <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Contact</a>
         <hr class="border-gray-100 my-2" />
         <div class="flex flex-col gap-3 pt-2">
           <NuxtLink to="/auth/login"
@@ -279,7 +301,7 @@ onMounted(() => {
     </header>
 
     <!-- Hero Section -->
-    <main ref="heroSection"
+    <main ref="heroSection" id="home"
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <!-- Left Content -->
       <div class="z-10 relative">
@@ -332,7 +354,7 @@ onMounted(() => {
     </main>
 
     <!-- How it Works / Steps Section -->
-    <section ref="section2"
+    <section ref="section2" id="how-it-works"
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mb-[40px] md:mb-[100px] font-['Outfit']">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 overflow-hidden md:overflow-visible">
 
@@ -419,7 +441,7 @@ onMounted(() => {
     </section>
 
     <!-- Section 3: Explore by Categories -->
-    <section ref="section3Ref" class="w-full bg-[#F4F6FB] mb-0 md:mb-10 font-['Outfit'] relative overflow-hidden">
+    <section ref="section3Ref" id="job-categories" class="w-full bg-[#F4F6FB] mb-0 md:mb-10 font-['Outfit'] relative overflow-hidden">
       <!-- Background Decorations -->
       <img src="/files/hero/Ellipse2.svg" alt="Decoration Left"
         class="absolute -left-55 top-70 -translate-y-1/2 hidden lg:block z-0 pointer-events-none select-none" />
@@ -547,7 +569,7 @@ onMounted(() => {
     </section>
 
     <!-- Section 4: Newest Jobs -->
-    <section ref="section4Ref"
+    <section ref="section4Ref" id="latest-jobs"
       class="max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16 mb-[40px] md:mb-[120px] font-['Outfit'] relative overflow-hidden flex flex-col items-center">
 
       <!-- Text & Arrow header -->
@@ -610,7 +632,7 @@ onMounted(() => {
     </section>
 
     <!-- Section 5: Get Latest Job Updates -->
-    <section ref="section5Ref" class="w-full mt-10 md:mt-32 mb-20 font-['Outfit'] relative bg-[#3154C4]">
+    <section ref="section5Ref" id="contact" class="w-full mt-10 md:mt-32 mb-20 font-['Outfit'] relative bg-[#3154C4]">
       
       <!-- Background Decorations (overflow hidden to prevent ellipses from expanding page) -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
@@ -635,8 +657,8 @@ onMounted(() => {
           </h2>
           
           <div class="s5-elem w-full max-w-[469px] h-[53px] bg-white rounded-lg pl-[20px] pr-[10px] py-[10px] flex items-center justify-between shadow-lg">
-            <input type="email" placeholder="Enter your email" class="flex-1 bg-transparent outline-none text-[#1E1E1E] text-[12px] font-light placeholder:text-gray-400 h-full" />
-            <button class="w-[104px] h-[33px] bg-[#3154C4] text-white text-[12px] font-light rounded-md flex items-center justify-center gap-[6px] hover:bg-[#2545A8] transition-colors whitespace-nowrap">
+            <input v-model="emailInput" @keyup.enter="handleSubscribe" type="email" placeholder="Enter your email" class="flex-1 bg-transparent outline-none text-[#1E1E1E] text-[12px] font-light placeholder:text-gray-400 h-full" />
+            <button @click="handleSubscribe" class="w-[104px] h-[33px] bg-[#3154C4] text-white text-[12px] font-light rounded-md flex items-center justify-center gap-[6px] hover:bg-[#2545A8] transition-colors whitespace-nowrap">
               Send Email
               <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 13L13 1M13 1H3M13 1V11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -650,6 +672,19 @@ onMounted(() => {
 
       </div>
     </section>
+
+    <!-- Custom Toast Notification -->
+    <div :class="['fixed bottom-8 right-4 sm:right-8 bg-[#2B4DB6] text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 transition-all duration-500 z-[9999]', showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none']">
+      <div class="bg-white/20 p-2 rounded-full hidden sm:block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <h4 class="font-semibold text-[15px] leading-tight">Subscribed Successfully!</h4>
+        <p class="text-[12px] opacity-90 mt-0.5 font-light">Get ready for the latest job updates straight to your inbox.</p>
+      </div>
+    </div>
 
   </div>
 </template>
