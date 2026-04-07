@@ -274,17 +274,17 @@ onMounted(() => {
     </main>
 
     <!-- How it Works / Steps Section -->
-    <section ref="section2" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-[100px] font-['Outfit']">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 overflow-hidden md:overflow-visible">
+    <section ref="section2" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mb-[40px] md:mb-[100px] font-['Outfit']">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 overflow-hidden md:overflow-visible">
 
         <!-- Step 1 -->
         <div class="relative mt-0 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
           <div
-            class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
-            <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">1</span>
+            class="inline-block bg-[#2B4DB6] rounded-[5px] py-[10px] px-[15px] md:px-[20px] mb-0 md:mb-[10px] shrink-0 text-center w-auto">
+            <span class="text-[32px] md:text-[40px] text-[#FFFFFF] font-normal leading-none block">1</span>
           </div>
           <div>
-            <h3 class="text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[10px]">
+            <h3 class="text-[20px] md:text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[6px] md:mb-[10px]">
               Drop your CV and let us do the heavy lifting
             </h3>
             <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
@@ -301,11 +301,11 @@ onMounted(() => {
         <!-- Step 2 -->
         <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
           <div
-            class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
-            <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">2</span>
+            class="inline-block bg-[#2B4DB6] rounded-[5px] py-[10px] px-[15px] md:px-[20px] mb-0 md:mb-[10px] shrink-0 text-center w-auto">
+            <span class="text-[32px] md:text-[40px] text-[#FFFFFF] font-normal leading-none block">2</span>
           </div>
           <div>
-            <h3 class="text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[10px]">
+            <h3 class="text-[20px] md:text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[6px] md:mb-[10px]">
               See your strengths and skill gaps instantly
             </h3>
             <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
@@ -322,11 +322,11 @@ onMounted(() => {
         <!-- Step 3 -->
         <div class="relative mt-0 md:mt-0 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
           <div
-            class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[25px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
-            <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">3</span>
+            class="inline-block bg-[#2B4DB6] rounded-[5px] py-[10px] px-[15px] md:px-[25px] mb-0 md:mb-[10px] shrink-0 text-center w-auto">
+            <span class="text-[32px] md:text-[40px] text-[#FFFFFF] font-normal leading-none block">3</span>
           </div>
           <div>
-            <h3 class="text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[10px]">
+            <h3 class="text-[20px] md:text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[6px] md:mb-[10px]">
               Receive a personalized roadmap
             </h3>
             <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
@@ -343,11 +343,11 @@ onMounted(() => {
         <!-- Step 4 -->
         <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
           <div
-            class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[30px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
-            <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">4</span>
+            class="inline-block bg-[#2B4DB6] rounded-[5px] py-[10px] px-[15px] md:px-[30px] mb-0 md:mb-[10px] shrink-0 text-center w-auto">
+            <span class="text-[32px] md:text-[40px] text-[#FFFFFF] font-normal leading-none block">4</span>
           </div>
           <div>
-            <h3 class="text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[10px]">
+            <h3 class="text-[20px] md:text-[24px] text-[#1E1E1E] font-normal leading-tight mb-[6px] md:mb-[10px]">
               Find jobs that actually match you
             </h3>
             <p class="text-[14px] text-[#1E1E1E] opacity-60 leading-relaxed font-normal">
@@ -375,54 +375,54 @@ onMounted(() => {
           class="absolute right-4 lg:-right-4 top-30 hidden lg:block z-0 pointer-events-none select-none" />
 
         <!-- Left Content -->
-        <div class="relative z-10 w-full lg:flex-1">
+        <div class="relative z-10 w-full lg:flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
           <img src="/files/hero/arrow.svg" alt="Arrow pointing"
             class="s3-main-arrow opacity-0 absolute -right-8 top-18 hidden lg:block z-0 pointer-events-none w-20" />
-          <h2 class="s3-title-dec opacity-0 text-[42px] font-semibold text-[#1E1E1E] leading-tight">
+          <h2 class="s3-title-dec opacity-0 text-[32px] md:text-[42px] font-semibold text-[#1E1E1E] leading-tight">
             Explore by Categories
           </h2>
           <p
-            class="s3-title-dec opacity-0 mt-[20px] text-[14px] font-normal text-[#1E1E1E] opacity-50 max-w-[450px] leading-relaxed">
+            class="s3-title-dec opacity-0 mt-[15px] md:mt-[20px] text-[14px] font-normal text-[#1E1E1E] opacity-50 max-w-[450px] leading-relaxed">
             We provide many categories, choose a category according to your expertise to make it easier to find a job.
           </p>
 
           <div
-            class="mt-[80px] grid grid-cols-1 sm:grid-cols-2 gap-x-[20px] gap-y-[15px] max-w-[550px]">
+            class="mt-[40px] md:mt-[80px] grid grid-cols-2 gap-x-[10px] sm:gap-x-[20px] gap-y-[15px] w-full max-w-[550px] place-items-center lg:place-items-start">
             <!-- Box 1 -->
             <div
-              class="s3-box opacity-0 bg-white rounded-[10px] p-[10px] pr-4 flex items-center gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300">
+              class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
-                class="bg-[#2B4DB6] p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-12 h-12">
-                <img src="/files/hero/business.svg" alt="Business Development" class="w-6 h-6 object-contain" />
+                class="bg-[#2B4DB6] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
+                <img src="/files/hero/business.svg" alt="Business Development" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <span class="text-[14px] font-medium text-[#1E1E1E]">Business<br />Development</span>
+              <span class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Business<br />Development</span>
             </div>
             <!-- Box 2 -->
             <div
-              class="s3-box opacity-0 bg-white rounded-[10px] p-[10px] pr-4 flex items-center gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300">
+              class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
-                class="bg-[#2B4DB6] p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-12 h-12">
-                <img src="/files/hero/web.svg" alt="Web Developer" class="w-6 h-6 object-contain" />
+                class="bg-[#2B4DB6] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
+                <img src="/files/hero/web.svg" alt="Web Developer" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <span class="text-[14px] font-medium text-[#1E1E1E]">Web<br />Developer</span>
+              <span class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Web<br />Developer</span>
             </div>
             <!-- Box 3 -->
             <div
-              class="s3-box opacity-0 bg-white rounded-[10px] p-[10px] pr-4 flex items-center gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300">
+              class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
-                class="bg-[#2B4DB6] p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-12 h-12">
-                <img src="/files/hero/human.svg" alt="Human Resource" class="w-6 h-6 object-contain" />
+                class="bg-[#2B4DB6] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
+                <img src="/files/hero/human.svg" alt="Human Resource" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <span class="text-[14px] font-medium text-[#1E1E1E]">Human<br />Resource</span>
+              <span class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Human<br />Resource</span>
             </div>
             <!-- Box 4 -->
             <div
-              class="s3-box opacity-0 bg-white rounded-[10px] p-[10px] pr-4 flex items-center gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300">
+              class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
-                class="bg-[#2B4DB6] p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-12 h-12">
-                <img src="/files/hero/data.svg" alt="Data Analyst" class="w-6 h-6 object-contain" />
+                class="bg-[#2B4DB6] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
+                <img src="/files/hero/data.svg" alt="Data Analyst" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <span class="text-[14px] font-medium text-[#1E1E1E]">Data Analyst</span>
+              <span class="text-[12px] sm:text-[14px] font-medium text-[#1E1E1E] leading-tight">Data Analyst</span>
             </div>
           </div>
         </div>
