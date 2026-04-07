@@ -9,6 +9,7 @@ const router = useRouter()
 const section2 = ref(null)
 const heroSection = ref(null)
 const headerRef = ref(null)
+const section3Ref = ref(null)
 
 onMounted(() => {
   if (process.client) {
@@ -17,9 +18,9 @@ onMounted(() => {
     // Navbar Animation
     const navElems = headerRef.value?.querySelectorAll('.nav-elem')
     if (navElems && navElems.length) {
-      gsap.fromTo(navElems, 
+      gsap.fromTo(navElems,
         { y: -20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power3.out' }
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
       )
     }
 
@@ -27,31 +28,31 @@ onMounted(() => {
     const heroElements = heroSection.value?.querySelectorAll('.hero-elem')
     const heroImg = heroSection.value?.querySelector('.hero-img')
     const heroArrow = heroSection.value?.querySelector('.hero-arrow')
-    
+
     if (heroElements && heroImg) {
-      const heroTl = gsap.timeline({ delay: 0.3 }) // delay agar navbar main lebih dulu
+      const heroTl = gsap.timeline({ delay: 0.1 }) // Delay dikurangi
       heroTl.fromTo(heroElements,
         { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: 'power3.out' }
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
       ).fromTo(heroImg,
         { x: 40, opacity: 0 },
-        { x: 0, opacity: 1, duration: 1, ease: 'power3.out' },
-        "-=0.6"
+        { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
+        "-=0.4"
       )
 
       if (heroArrow) {
-        // Arrow di hero muncul paling akhir setelah gambar/text dengan delay
+        // Arrow di hero muncul dari kanan bawah (x: positif, y: positif) ke posisi asal
         heroTl.fromTo(heroArrow,
-          { opacity: 0, x: -10, y: -10 },
+          { opacity: 0, x: 15, y: 15 },
           { opacity: 1, x: 0, y: 0, duration: 0.6, ease: 'back.out(2)' },
-          "-=0.1" 
+          "-=0.3"
         )
       }
     }
 
     const steps = section2.value?.querySelectorAll('.step-item')
     const arrows = section2.value?.querySelectorAll('.step-arrow')
-    
+
     if (steps) {
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -62,17 +63,68 @@ onMounted(() => {
       })
 
       // Animasi smooth masuk ke atas untuk masing-masing step
-      tl.fromTo(steps, 
+      tl.fromTo(steps,
         { y: 40, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: 'power3.out' }
       )
-      
+
       // Animasi muncul untuk arrow dengan sedikit overlap (agar terkesan mengalir)
       if (arrows && arrows.length > 0) {
         tl.fromTo(arrows,
           { opacity: 0, scale: 0.8, x: -10 },
           { opacity: 1, scale: 1, x: 0, duration: 0.6, stagger: 0.2, ease: 'power2.out' },
-          "-=0.6" 
+          "-=0.6"
+        )
+      }
+    }
+
+    // Section 3 Animation
+    const s3TitleDec = section3Ref.value?.querySelectorAll('.s3-title-dec')
+    const s3Arrow = section3Ref.value?.querySelector('.s3-main-arrow')
+    const s3Boxes = section3Ref.value?.querySelectorAll('.s3-box')
+    const s3Card = section3Ref.value?.querySelector('.s3-card')
+
+    if (section3Ref.value) {
+      const tl3 = gsap.timeline({
+        scrollTrigger: {
+          trigger: section3Ref.value,
+          start: 'top 75%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Animate Main Text
+      if (s3TitleDec && s3TitleDec.length) {
+        tl3.fromTo(s3TitleDec,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: 'power3.out' }
+        )
+      }
+
+      // Animate Left Arrow
+      if (s3Arrow) {
+        tl3.fromTo(s3Arrow,
+          { opacity: 0, x: 30, y: 30, scale: 0.8 },
+          { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.6, ease: 'back.out(2)' },
+          "-=0.4"
+        )
+      }
+
+      // Animate Boxes using stagger
+      if (s3Boxes && s3Boxes.length) {
+        tl3.fromTo(s3Boxes,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power3.out' },
+          "-=0.3"
+        )
+      }
+
+      // Animate Right Card
+      if (s3Card) {
+        tl3.fromTo(s3Card,
+          { x: 30, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
+          "-=0.6"
         )
       }
     }
@@ -189,7 +241,8 @@ onMounted(() => {
           From where you are to where you want to be
         </p>
 
-        <div class="hero-elem opacity-0 flex flex-wrap items-center justify-center sm:justify-start gap-5 sm:gap-8 pt-2 sm:pt-4 relative">
+        <div
+          class="hero-elem opacity-0 flex flex-wrap items-center justify-center sm:justify-start gap-5 sm:gap-8 pt-2 sm:pt-4 relative">
           <div class="relative">
             <NuxtLink to="/auth/login"
               class="bg-[#2B4DB6] text-white px-[30px] py-[15px] rounded-[5px] text-[14px] font-normal hover:bg-blue-800 transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-4">
@@ -223,10 +276,11 @@ onMounted(() => {
     <!-- How it Works / Steps Section -->
     <section ref="section2" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-[100px] font-['Outfit']">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 overflow-hidden md:overflow-visible">
-        
+
         <!-- Step 1 -->
         <div class="relative mt-0 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
-          <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
+          <div
+            class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
             <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">1</span>
           </div>
           <div>
@@ -237,16 +291,17 @@ onMounted(() => {
               We analyze your experience, skills, and background using AI to understand where you stand today.
             </p>
           </div>
-          
+
           <!-- Next Arrow Desktop -->
           <div class="hidden md:block absolute -right-[125px] top-[140px] z-10 step-arrow opacity-0">
-            <img src="/files/hero/arrow1.svg" alt="Arrow to next step" class="w-full h-auto object-contain" />
+            <img src="/files/hero/arrow3.svg" alt="Arrow to next step" class="w-full h-auto object-contain" />
           </div>
         </div>
 
         <!-- Step 2 -->
         <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
-          <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
+          <div
+            class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[20px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
             <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">2</span>
           </div>
           <div>
@@ -266,7 +321,8 @@ onMounted(() => {
 
         <!-- Step 3 -->
         <div class="relative mt-0 md:mt-0 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
-          <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[25px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
+          <div
+            class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[25px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
             <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">3</span>
           </div>
           <div>
@@ -286,7 +342,8 @@ onMounted(() => {
 
         <!-- Step 4 -->
         <div class="relative mt-0 md:mt-75 flex md:block items-start gap-4 md:gap-0 step-item opacity-0">
-          <div class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[30px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
+          <div
+            class="inline-block bg-[#2B4DB6] rounded-[5px] p-[10px] md:py-[10px] md:px-[30px] mb-[10px] shrink-0 text-center w-[60px] md:w-auto">
             <span class="text-[40px] text-[#FFFFFF] font-normal leading-none block">4</span>
           </div>
           <div>
@@ -301,5 +358,128 @@ onMounted(() => {
 
       </div>
     </section>
+
+    <!-- Section 3: Explore by Categories -->
+    <section ref="section3Ref" class="w-full bg-[#F4F6FB] mb-[120px] font-['Outfit'] relative overflow-hidden">
+      <!-- Background Decorations (Ellipses & Scribble applied globally to section) -->
+      <img src="/files/hero/Ellipse2.svg" alt="Decoration Left"
+        class="absolute -left-55 top-70 -translate-y-1/2 hidden lg:block z-0 pointer-events-none select-none" />
+      <img src="/files/hero/Ellipse3.svg" alt="Decoration Right"
+        class="absolute -right-25 top-90 hidden lg:block z-0 pointer-events-none select-none" />
+      <img src="/files/hero/scribbleline06.svg" alt="Scribble Top Right"
+        class="absolute right-25 top-32 hidden xl:block z-0 pointer-events-none select-none" />
+
+      <div
+        class="relative max-w-[1280px] w-full mx-auto lg:h-[700px] flex flex-col lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-8 py-12 lg:py-0 gap-[40px] lg:gap-[120px]">
+
+        <!-- Left Content -->
+        <div class="relative z-10 w-full lg:flex-1">
+          <img src="/files/hero/arrow.svg" alt="Arrow pointing"
+            class="s3-main-arrow opacity-0 absolute -right-8 top-18 hidden lg:block z-0 pointer-events-none w-20" />
+          <h2 class="s3-title-dec opacity-0 text-[42px] font-semibold text-[#1E1E1E] leading-tight">
+            Explore by Categories
+          </h2>
+          <p
+            class="s3-title-dec opacity-0 mt-[20px] text-[14px] font-normal text-[#1E1E1E] opacity-50 max-w-[450px] leading-relaxed">
+            We provide many categories, choose a category according to your expertise to make it easier to find a job.
+          </p>
+
+          <div
+            class="mt-[80px] grid grid-cols-1 sm:grid-cols-2 gap-x-[20px] gap-y-[15px] max-w-[550px]">
+            <!-- Box 1 -->
+            <div
+              class="s3-box opacity-0 bg-white rounded-[10px] p-[10px] pr-4 flex items-center gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300">
+              <div
+                class="bg-[#2B4DB6] p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-12 h-12">
+                <img src="/files/hero/business.svg" alt="Business Development" class="w-6 h-6 object-contain" />
+              </div>
+              <span class="text-[14px] font-medium text-[#1E1E1E]">Business<br />Development</span>
+            </div>
+            <!-- Box 2 -->
+            <div
+              class="s3-box opacity-0 bg-white rounded-[10px] p-[10px] pr-4 flex items-center gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300">
+              <div
+                class="bg-[#2B4DB6] p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-12 h-12">
+                <img src="/files/hero/web.svg" alt="Web Developer" class="w-6 h-6 object-contain" />
+              </div>
+              <span class="text-[14px] font-medium text-[#1E1E1E]">Web<br />Developer</span>
+            </div>
+            <!-- Box 3 -->
+            <div
+              class="s3-box opacity-0 bg-white rounded-[10px] p-[10px] pr-4 flex items-center gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300">
+              <div
+                class="bg-[#2B4DB6] p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-12 h-12">
+                <img src="/files/hero/human.svg" alt="Human Resource" class="w-6 h-6 object-contain" />
+              </div>
+              <span class="text-[14px] font-medium text-[#1E1E1E]">Human<br />Resource</span>
+            </div>
+            <!-- Box 4 -->
+            <div
+              class="s3-box opacity-0 bg-white rounded-[10px] p-[10px] pr-4 flex items-center gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300">
+              <div
+                class="bg-[#2B4DB6] p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-12 h-12">
+                <img src="/files/hero/data.svg" alt="Data Analyst" class="w-6 h-6 object-contain" />
+              </div>
+              <span class="text-[14px] font-medium text-[#1E1E1E]">Data Analyst</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Content (Card) -->
+        <div class="s3-card opacity-0 relative z-10 w-full lg:w-[530px] shrink-0">
+          <div
+            class="bg-white rounded-[10px] w-full min-h-[355px] p-6 lg:p-[30px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] text-left">
+            <div class="flex items-center justify-between mb-[30px]">
+              <h3 class="text-[20px] font-medium text-[#1E1E1E]">Popular Categories</h3>
+              <button
+                class="flex items-center gap-2 text-[#1E1E1E] opacity-50 text-[14px] font-medium hover:opacity-100 transition cursor-pointer">
+                See all categories
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.625 11.375L11.375 2.625M11.375 2.625H4.8125M11.375 2.625V9.1875" stroke="#1E1E1E"
+                    stroke-opacity="1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="flex flex-col">
+              <!-- Item 1 -->
+              <div class="flex flex-wrap items-center justify-between border-b border-[#1E1E1E]/10 pb-[15px] mb-[15px]">
+                <span class="text-[14px] font-medium text-[#1E1E1E] flex-1 min-w-[150px]">Fullstack Developer</span>
+                <div
+                  class="bg-[#2B4DB6]/[0.08] text-[#2B4DB6] p-[8px] rounded-[5px] text-[12px] font-semibold leading-none ml-4">
+                  23
+                </div>
+              </div>
+              <!-- Item 2 -->
+              <div class="flex flex-wrap items-center justify-between border-b border-[#1E1E1E]/10 pb-[15px] mb-[15px]">
+                <span class="text-[14px] font-medium text-[#1E1E1E] flex-1 min-w-[150px]">Quality Assurance</span>
+                <div
+                  class="bg-[#2B4DB6]/[0.08] text-[#2B4DB6] p-[8px] rounded-[5px] text-[12px] font-semibold leading-none ml-4">
+                  43
+                </div>
+              </div>
+              <!-- Item 3 -->
+              <div class="flex flex-wrap items-center justify-between border-b border-[#1E1E1E]/10 pb-[15px] mb-[15px]">
+                <span class="text-[14px] font-medium text-[#1E1E1E] flex-1 min-w-[150px]">Financial Accounting</span>
+                <div
+                  class="bg-[#2B4DB6]/[0.08] text-[#2B4DB6] p-[8px] rounded-[5px] text-[12px] font-semibold leading-none ml-4">
+                  81
+                </div>
+              </div>
+              <!-- Item 4 -->
+              <div class="flex flex-wrap items-center justify-between border-b-0 pb-[15px]">
+                <span class="text-[14px] font-medium text-[#1E1E1E] flex-1 min-w-[150px]">DevOps Developer</span>
+                <div
+                  class="bg-[#2B4DB6]/[0.08] text-[#2B4DB6] p-[8px] rounded-[5px] text-[12px] font-semibold leading-none ml-4">
+                  91
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
   </div>
 </template>
