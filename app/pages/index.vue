@@ -12,9 +12,16 @@ const headerRef = ref(null)
 const section3Ref = ref(null)
 const section4Ref = ref(null)
 const section5Ref = ref(null)
+const footerRef = ref(null)
 
 const emailInput = ref('')
 const showToast = ref(false)
+
+const scrollToTop = () => {
+  if (process.client) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
 
 const handleSubscribe = () => {
   if (emailInput.value.trim() !== '') {
@@ -208,6 +215,22 @@ onMounted(() => {
         }
       )
     }
+
+    // Footer Animation
+    const footerElems = footerRef.value?.querySelectorAll('.footer-elem')
+    if (footerRef.value && footerElems && footerElems.length) {
+      gsap.fromTo(footerElems,
+        { y: 40, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power3.out',
+          scrollTrigger: {
+            trigger: footerRef.value,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        }
+      )
+    }
   }
 
   // Tangkap Token dari URL Hash (Google OAuth Redirect)
@@ -244,9 +267,12 @@ onMounted(() => {
 
       <nav class="nav-elem opacity-0 hidden md:flex space-x-[45px] text-sm font-normal text-[#1E1E1E]">
         <a href="#home" @click.prevent="scrollToSection('home')" class="hover:text-[#2B4DB6]">Home</a>
-        <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')" class="hover:text-[#2B4DB6]">How it Works</a>
-        <a href="#job-categories" @click.prevent="scrollToSection('job-categories')" class="hover:text-[#2B4DB6]">Job by Categories</a>
-        <a href="#latest-jobs" @click.prevent="scrollToSection('latest-jobs')" class="hover:text-[#2B4DB6]">Latest Jobs</a>
+        <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')" class="hover:text-[#2B4DB6]">How it
+          Works</a>
+        <a href="#job-categories" @click.prevent="scrollToSection('job-categories')" class="hover:text-[#2B4DB6]">Job by
+          Categories</a>
+        <a href="#latest-jobs" @click.prevent="scrollToSection('latest-jobs')" class="hover:text-[#2B4DB6]">Latest
+          Jobs</a>
         <a href="#contact" @click.prevent="scrollToSection('contact')" class="hover:text-[#2B4DB6]">Contact</a>
       </nav>
 
@@ -281,11 +307,16 @@ onMounted(() => {
       <!-- Mobile Menu Panel -->
       <div v-if="isMobileMenuOpen"
         class="absolute top-[85px] left-4 right-4 bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 md:hidden flex flex-col p-6 space-y-5 z-[100] rounded-3xl ring-1 ring-black/5">
-        <a href="#home" @click.prevent="scrollToSection('home')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Home</a>
-        <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">How it Works</a>
-        <a href="#job-categories" @click.prevent="scrollToSection('job-categories')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Job by Categories</a>
-        <a href="#latest-jobs" @click.prevent="scrollToSection('latest-jobs')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Latest Jobs</a>
-        <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Contact</a>
+        <a href="#home" @click.prevent="scrollToSection('home')"
+          class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Home</a>
+        <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')"
+          class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">How it Works</a>
+        <a href="#job-categories" @click.prevent="scrollToSection('job-categories')"
+          class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Job by Categories</a>
+        <a href="#latest-jobs" @click.prevent="scrollToSection('latest-jobs')"
+          class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Latest Jobs</a>
+        <a href="#contact" @click.prevent="scrollToSection('contact')"
+          class="text-[15px] font-medium text-gray-800 hover:text-[#2B4DB6] transition-colors">Contact</a>
         <hr class="border-gray-100 my-2" />
         <div class="flex flex-col gap-3 pt-2">
           <NuxtLink to="/auth/login"
@@ -441,7 +472,8 @@ onMounted(() => {
     </section>
 
     <!-- Section 3: Explore by Categories -->
-    <section ref="section3Ref" id="job-categories" class="w-full bg-[#F4F6FB] mb-0 md:mb-10 font-['Outfit'] relative overflow-hidden">
+    <section ref="section3Ref" id="job-categories"
+      class="w-full bg-[#F4F6FB] mb-0 md:mb-10 font-['Outfit'] relative overflow-hidden">
       <!-- Background Decorations -->
       <img src="/files/hero/Ellipse2.svg" alt="Decoration Left"
         class="absolute -left-55 top-70 -translate-y-1/2 hidden lg:block z-0 pointer-events-none select-none" />
@@ -633,56 +665,165 @@ onMounted(() => {
 
     <!-- Section 5: Get Latest Job Updates -->
     <section ref="section5Ref" id="contact" class="w-full mt-10 md:mt-32 mb-20 font-['Outfit'] relative bg-[#3154C4]">
-      
+
       <!-- Background Decorations (overflow hidden to prevent ellipses from expanding page) -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <img src="/files/hero/Ellipse6.svg" alt="ellipse" class="s5-elem absolute top-0 left-[10%] w-[200px] md:w-[315px] opacity-60" />
-        <img src="/files/hero/Ellipse7.svg" alt="ellipse" class="s5-elem absolute -bottom-[0%] right-[40%] w-[200px] md:w-[315px] opacity-60 hidden md:block" />
-        
+        <img src="/files/hero/Ellipse6.svg" alt="ellipse"
+          class="s5-elem absolute top-0 left-[10%] w-[200px] md:w-[315px] opacity-60" />
+        <img src="/files/hero/Ellipse7.svg" alt="ellipse"
+          class="s5-elem absolute -bottom-[0%] right-[40%] w-[200px] md:w-[315px] opacity-60 hidden md:block" />
+
         <!-- Scribbles Swapped -->
-        <img src="/files/hero/scribbleline08.svg" alt="scribble" class="s5-elem absolute top-[58%] right-[15%] 2xl:right-[27%] w-[30px] md:w-[47px] hidden md:block" />
-        <img src="/files/hero/scribbleline07.svg" alt="scribble" class="s5-elem absolute bottom-[22%] left-[14%] w-[40px] md:w-[57px] hidden md:block" />
-        
-        <img src="/files/hero/arrow22.svg" alt="arrow" class="s5-elem absolute top-[40%] left-[38%] w-[35px] md:w-[54px] hidden md:block" />
-        <img src="/files/hero/arrow23.svg" alt="arrow" class="s5-elem absolute bottom-[70%] right-[10%] 2xl:right-[20%] w-[35px] md:w-[58px] hidden md:block" />
+        <img src="/files/hero/scribbleline08.svg" alt="scribble"
+          class="s5-elem absolute top-[58%] right-[15%] 2xl:right-[27%] w-[30px] md:w-[47px] hidden md:block" />
+        <img src="/files/hero/scribbleline07.svg" alt="scribble"
+          class="s5-elem absolute bottom-[22%] left-[14%] w-[40px] md:w-[57px] hidden md:block" />
+
+        <img src="/files/hero/arrow22.svg" alt="arrow"
+          class="s5-elem absolute top-[40%] left-[38%] w-[35px] md:w-[54px] hidden md:block" />
+        <img src="/files/hero/arrow23.svg" alt="arrow"
+          class="s5-elem absolute bottom-[70%] right-[10%] 2xl:right-[20%] w-[35px] md:w-[58px] hidden md:block" />
       </div>
 
       <!-- Container -->
-      <div class="max-w-[1280px] w-full h-[350px] mx-auto px-4 sm:px-6 lg:px-8 relative flex md:items-center py-10 md:py-0">
-        
+      <div
+        class="max-w-[1280px] w-full h-[350px] mx-auto px-4 sm:px-6 lg:px-8 relative flex md:items-center py-10 md:py-0">
+
         <!-- Content -->
         <div class="relative z-20 w-full md:w-[500px] flex flex-col justify-center mt-6 md:mt-0">
           <h2 class="s5-elem text-white font-semibold text-[32px] md:text-[42px] leading-[1.2] mb-[37px]">
             Get Latest Job<br />Updates
           </h2>
-          
-          <div class="s5-elem w-full max-w-[469px] h-[53px] bg-white rounded-lg pl-[20px] pr-[10px] py-[10px] flex items-center justify-between shadow-lg">
-            <input v-model="emailInput" @keyup.enter="handleSubscribe" type="email" placeholder="Enter your email" class="flex-1 bg-transparent outline-none text-[#1E1E1E] text-[12px] font-light placeholder:text-gray-400 h-full" />
-            <button @click="handleSubscribe" class="w-[104px] h-[33px] bg-[#3154C4] text-white text-[12px] font-light rounded-md flex items-center justify-center gap-[6px] hover:bg-[#2545A8] transition-colors whitespace-nowrap">
+
+          <div
+            class="s5-elem w-full max-w-[469px] h-[53px] bg-white rounded-lg pl-[20px] pr-[10px] py-[10px] flex items-center justify-between shadow-lg">
+            <input v-model="emailInput" @keyup.enter="handleSubscribe" type="email" placeholder="Enter your email"
+              class="flex-1 bg-transparent outline-none text-[#1E1E1E] text-[12px] font-light placeholder:text-gray-400 h-full" />
+            <button @click="handleSubscribe"
+              class="w-[104px] h-[33px] bg-[#3154C4] text-white text-[12px] font-light rounded-md flex items-center justify-center gap-[6px] hover:bg-[#2545A8] transition-colors whitespace-nowrap">
               Send Email
               <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 13L13 1M13 1H3M13 1V11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M1 13L13 1M13 1H3M13 1V11" stroke="white" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
               </svg>
             </button>
           </div>
         </div>
 
         <!-- Human image pointing up -->
-        <img src="/files/hero/mascot.png" alt="Person Pointing" class="s5-elem absolute bottom-0 right-[5%] md:right-[15%] h-[85%] md:h-[450px] object-cover object-bottom pointer-events-none z-30 hidden md:block" />
+        <img src="/files/hero/mascot.png" alt="Person Pointing"
+          class="s5-elem absolute bottom-0 right-[5%] md:right-[15%] h-[85%] md:h-[450px] object-cover object-bottom pointer-events-none z-30 hidden md:block" />
 
       </div>
     </section>
 
+    <!-- Footer -->
+    <footer ref="footerRef"
+      class="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12 font-['Outfit'] relative">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8">
+
+        <!-- Logo -->
+        <div class="md:col-span-3 footer-elem">
+          <div class="text-[24px] font-semibold tracking-tight text-center md:text-left">
+            <span class="text-[#1E1E1E]">Carre</span><span class="text-[#2B4DB6]">path.</span>
+          </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div
+          class="md:col-span-4 footer-elem flex flex-col md:pl-4 items-center md:items-start text-center md:text-left">
+          <div class="text-[18px] font-normal leading-relaxed text-[#1E1E1E] mb-[100px] md:mb-[120px]">
+            5123 Market St. #22B<br />
+            Jakarta, Indonesia 44635
+          </div>
+          <div class="mb-[27px] w-full flex justify-center md:justify-start">
+            <a href="tel:4345464356"
+              class="text-[14px] font-normal text-[#1E1E1E] border-b border-[#2B4DB6] pb-1 w-fit inline-block hover:text-[#2B4DB6] transition-colors">
+              (434) 546-4356
+            </a>
+          </div>
+          <div class="mb-[40px] md:mb-0 w-full flex justify-center md:justify-start">
+            <a href="mailto:contact@carrepath.com"
+              class="text-[14px] font-normal text-[#1E1E1E] border-b border-[#2B4DB6] pb-1 w-fit inline-block hover:text-[#2B4DB6] transition-colors">
+              contact@carrepath.com
+            </a>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div class="md:col-span-2 footer-elem flex flex-col gap-6 md:items-start items-center">
+          <a href="#home" @click.prevent="scrollToSection('home')"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Home</a>
+          <a href="#how-it-works" @click.prevent="scrollToSection('how-it-works')"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">How
+            it Works</a>
+          <a href="#job-categories" @click.prevent="scrollToSection('job-categories')"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Job
+            by Categories</a>
+          <a href="#latest-jobs" @click.prevent="scrollToSection('latest-jobs')"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Latest
+            Jobs</a>
+          <a href="#contact" @click.prevent="scrollToSection('contact')"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Contact</a>
+        </div>
+
+        <!-- Socials -->
+        <div class="md:col-span-2 footer-elem flex flex-col gap-6 md:items-start items-center mt-4 md:mt-0">
+          <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+            target="_blank"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Facebook</a>
+          <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+            target="_blank"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Twitter</a>
+          <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+            target="_blank"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Linkedin</a>
+          <a href="https://www.instagram.com/rzlrmziiiii?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+            target="_blank"
+            class="text-[12px] font-normal text-[#1E1E1E] opacity-70 hover:opacity-100 transition-opacity w-fit inline-block">Instagram</a>
+        </div>
+
+        <!-- Back to Top -->
+        <div class="md:col-span-1 footer-elem flex justify-center md:justify-end items-start mt-8 md:mt-0">
+          <button @click="scrollToTop"
+            class="bg-[#2B4DB6] hover:bg-[#2545A8] rounded-full p-[14px] transition-colors shadow-lg shadow-blue-500/20 group">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+              class="group-hover:-translate-y-1 transition duration-300">
+              <path d="M12 5L12 21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M18 11L12.4096 4.1978C12.3585 4.13563 12.2955 4.08584 12.225 4.05174C12.1544 4.01764 12.0779 4 12.0005 4C11.9232 4 11.8467 4.01764 11.7761 4.05174C11.7056 4.08584 11.6426 4.13563 11.5915 4.1978L6 11"
+                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Copyright Bottom -->
+      <div class="mt-16 md:-mt-5 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 items-end footer-elem">
+        <div class="md:col-span-3 hidden md:block"></div>
+        <div class="md:col-span-4 hidden md:block"></div>
+        <div class="md:col-span-5 flex justify-center md:justify-start md:pl-0">
+          <p class="text-[12px] leading-[20px] font-normal text-[#1E1E1E] opacity-60">
+            © 2026 Carrepath. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
     <!-- Custom Toast Notification -->
-    <div :class="['fixed bottom-8 right-4 sm:right-8 bg-[#2B4DB6] text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 transition-all duration-500 z-[9999]', showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none']">
+    <div
+      :class="['fixed bottom-8 right-4 sm:right-8 bg-[#2B4DB6] text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 transition-all duration-500 z-[9999]', showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none']">
       <div class="bg-white/20 p-2 rounded-full hidden sm:block">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+          class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
       <div>
         <h4 class="font-semibold text-[15px] leading-tight">Subscribed Successfully!</h4>
-        <p class="text-[12px] opacity-90 mt-0.5 font-light">Get ready for the latest job updates straight to your inbox.</p>
+        <p class="text-[12px] opacity-90 mt-0.5 font-light">Get ready for the latest job updates straight to your inbox.
+        </p>
       </div>
     </div>
 
