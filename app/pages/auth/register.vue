@@ -70,7 +70,7 @@ const handleGoogleLogin = () => {
     <!-- Register Centered Card -->
     <main class="flex-1 flex flex-col items-center justify-center p-4">
       <div class="w-full max-w-md mb-4">
-        <NuxtLink to="/" class="inline-flex items-center gap-2 text-[15px] font-medium text-[#1e1e1e] hover:text-[#2B4DB6] transition-colors">
+        <NuxtLink to="/" class="inline-flex items-center gap-2 text-[15px] font-medium text-[color:var(--color-dark)] hover:text-[color:var(--color-main)] transition-colors">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -118,7 +118,7 @@ const handleGoogleLogin = () => {
               type="text" 
               v-model="fullName"
               placeholder="Enter your full name" 
-              class="w-full px-4 py-3 rounded-[8px] bg-gray-50 border border-gray-200 focus:border-[#2B4DB6] focus:ring-2 focus:ring-blue-500/20 outline-none transition text-[15px] font-normal"
+              class="w-full px-4 py-3 rounded-[8px] bg-gray-50 border border-gray-200 focus:border-[color:var(--color-main)] focus:ring-2 focus:ring-blue-500/20 outline-none transition text-[15px] font-normal"
               required 
             />
           </div>
@@ -131,7 +131,7 @@ const handleGoogleLogin = () => {
               type="email" 
               v-model="email"
               placeholder="Enter your email" 
-              class="w-full px-4 py-3 rounded-[8px] bg-gray-50 border border-gray-200 focus:border-[#2B4DB6] focus:ring-2 focus:ring-blue-500/20 outline-none transition text-[15px] font-normal"
+              class="w-full px-4 py-3 rounded-[8px] bg-gray-50 border border-gray-200 focus:border-[color:var(--color-main)] focus:ring-2 focus:ring-blue-500/20 outline-none transition text-[15px] font-normal"
               required 
             />
           </div>
@@ -145,7 +145,7 @@ const handleGoogleLogin = () => {
                 :type="showPassword ? 'text' : 'password'" 
                 v-model="password"
                 placeholder="Create a password" 
-                class="w-full px-4 py-3 rounded-[8px] bg-gray-50 border border-gray-200 focus:border-[#2B4DB6] focus:ring-2 focus:ring-blue-500/20 outline-none transition text-[15px] font-normal"
+                class="w-full px-4 py-3 rounded-[8px] bg-gray-50 border border-gray-200 focus:border-[color:var(--color-main)] focus:ring-2 focus:ring-blue-500/20 outline-none transition text-[15px] font-normal"
                 required 
               />
               <button 
@@ -169,7 +169,7 @@ const handleGoogleLogin = () => {
                 :type="showConfirmPassword ? 'text' : 'password'" 
                 v-model="confirmPassword"
                 placeholder="Confirm your password" 
-                class="w-full px-4 py-3 rounded-[8px] bg-gray-50 border border-gray-200 focus:border-[#2B4DB6] focus:ring-2 focus:ring-blue-500/20 outline-none transition text-[15px] font-normal"
+                class="w-full px-4 py-3 rounded-[8px] bg-gray-50 border border-gray-200 focus:border-[color:var(--color-main)] focus:ring-2 focus:ring-blue-500/20 outline-none transition text-[15px] font-normal"
                 required 
               />
               <button 
@@ -188,7 +188,7 @@ const handleGoogleLogin = () => {
           <button 
             type="submit" 
             :disabled="isLoading"
-            class="w-full bg-[#2B4DB6] text-white text-[15px] font-medium flex items-center justify-center gap-2 px-[30px] py-[15px] rounded-[8px] hover:bg-blue-800 transition shadow-md shadow-blue-500/20 mt-4 disabled:opacity-70 disabled:cursor-not-allowed">
+            class="w-full bg-[color:var(--color-main)] text-white text-[15px] font-medium flex items-center justify-center gap-2 px-[30px] py-[15px] rounded-[8px] hover:bg-blue-800 transition shadow-md shadow-blue-500/20 mt-4 disabled:opacity-70 disabled:cursor-not-allowed">
             {{ isLoading ? 'Signing Up...' : 'Sign Up' }}
           </button>
         </form>
@@ -196,10 +196,12 @@ const handleGoogleLogin = () => {
         <div class="mt-8 text-center">
           <p class="text-[14px] text-gray-600 font-normal">
             Already have an account? 
-            <NuxtLink to="/auth/login" class="text-[#2B4DB6] font-medium hover:text-blue-800 transition">Log in here</NuxtLink>
+            <NuxtLink to="/auth/login" class="text-[color:var(--color-main)] font-medium hover:text-blue-800 transition">Log in here</NuxtLink>
           </p>
         </div>
       </div>
     </main>
   </div>
 </template>
+
+
