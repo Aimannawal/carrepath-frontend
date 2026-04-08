@@ -1,5 +1,5 @@
 {
   "buildCommand": "bun run build",
-  "installCommand": "bun install",
+  "installCommand": "bun install --ignore-scripts && npx npm install @rollup/rollup-linux-x64-gnu --no-save",
   "framework": "nuxtjs"
 }
