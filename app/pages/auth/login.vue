@@ -9,6 +9,10 @@ const errorMessage = ref('')
 
 const { get, post, baseUrl } = useApi()
 
+useHead({
+  title: 'CarrePath | Login',
+})
+
 const handleLogin = async (e) => {
   e.preventDefault()
   console.log('BASE URL:', baseUrl)
