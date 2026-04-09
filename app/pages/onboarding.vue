@@ -2,6 +2,10 @@
 import { ref, onMounted, nextTick } from 'vue'
 import gsap from 'gsap'
 
+useHead({
+  title: 'CarrePath | Choose your Role',
+})
+
 const selectedRole = ref('')
 const isLoading = ref(false)
 const { post } = useApi()

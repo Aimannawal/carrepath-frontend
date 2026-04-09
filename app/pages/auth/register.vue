@@ -10,6 +10,10 @@ const showConfirmPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 
+useHead({
+  title: 'CarrePath | Register',
+})
+
 const { post, baseUrl } = useApi()
 
 const handleRegister = async (e) => {

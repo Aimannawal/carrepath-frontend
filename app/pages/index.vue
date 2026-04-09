@@ -4,6 +4,10 @@ import { useRouter } from 'vue-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
+useHead({
+  title: 'CarrePath | Discover Your Path, Shape Your Future',
+})
+
 const isMobileMenuOpen = ref(false)
 const router = useRouter()
 const section2 = ref(null)
