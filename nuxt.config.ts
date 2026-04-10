@@ -2,6 +2,8 @@ import tailwindcss from "@tailwindcss/vite";
 import viteCompression from "vite-plugin-compression";
 
 const isDev = import.meta.dev
+const fallbackPublicApiUrl = "https://htaperrac.azhel.my.id"
+const defaultPublicApiUrl = isDev ? "http://localhost:8080" : fallbackPublicApiUrl
 
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -71,7 +73,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiUrl: import.meta.env.NUXT_PUBLIC_API_URL || 'http://localhost:8080',
+      apiUrl: import.meta.env.NUXT_PUBLIC_API_URL || defaultPublicApiUrl,
       siteUrl: import.meta.env.NUXT_PUBLIC_SITE_URL,
     },
   },
