@@ -3,6 +3,12 @@ import { onMounted } from 'vue'
 
 const { get } = useApi()
 
+const normalizeRole = (rawRole) => {
+  if (rawRole === 'user') return 'worker'
+  if (rawRole === 'superadmin') return 'admin'
+  return rawRole
+}
+
 onMounted(async () => {
   // 1. Ambil seluruh URL Hash pakai window.location
   const hash = window.location.hash
@@ -37,12 +43,15 @@ onMounted(async () => {
         // Panggil endpoint baru GET profile/id buat ngecek
         const profile = await get(`/users/profile/${userId}`)
         
-        if (profile?.data?.role) {
+        const rawRole = profile?.data?.user?.role || profile?.data?.role
+
+        if (rawRole) {
           // Yes! Dia Google Auth orang lama (udah ada rolenya di DB kita)
           const roleCookie = useCookie('user_role')
-          roleCookie.value = profile.data.role
-          
-          const dest = profile.data.role === 'superadmin' ? '/admin/dashboard' : `/${profile.data.role}/dashboard`
+          const role = normalizeRole(rawRole)
+          roleCookie.value = role
+
+          const dest = role ? `/${role}/dashboard` : '/onboarding'
           navigateTo(dest)
         } else {
           navigateTo('/onboarding')

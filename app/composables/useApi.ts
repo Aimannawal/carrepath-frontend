@@ -1,9 +1,127 @@
 export const useApi = () => {
   const config = useRuntimeConfig()
-  const baseUrl = config.public.siteUrl
+  const baseUrl = (config.public.apiUrl || 'http://localhost:8080').replace(/\/$/, '')
 
-  const get = (path, options = {}) => $fetch(`${baseUrl}${path}`, options)
-  const post = (path, body, options = {}) => $fetch(`${baseUrl}${path}`, { method: 'POST', body, ...options })
+  /**
+   * Get bearer token from cookie
+   */
+  const getToken = () => {
+    try {
+      const token = useCookie('access_token').value
+      return token || ''
+    } catch {
+      return ''
+    }
+  }
 
-  return { get, post, baseUrl }
+  /**
+   * Build headers with auto-injected Bearer token if available
+   */
+  const getHeaders = (customHeaders: Record<string, string> = {}) => {
+    const headers: Record<string, string> = {
+      ...customHeaders
+    }
+
+    const token = getToken()
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+
+    return headers
+  }
+
+  const withBase = (path: string) => `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`
+
+  /**
+   * Handle 401 responses - redirect to login on token expiry
+   */
+  const handleUnauthenticated = async () => {
+    if (process.client) {
+      const token = useCookie('access_token')
+      token.value = null
+      const roleCookie = useCookie('user_role')
+      roleCookie.value = null
+
+      // Only redirect if not already on auth pages
+      const route = useRoute()
+      if (!route.path.startsWith('/auth/')) {
+        await navigateTo('/auth/login')
+      }
+    }
+  }
+
+  /**
+   * GET request with auto-injected token
+   */
+  const get = async (path: string, options = {}) => {
+    try {
+      return await $fetch(withBase(path), {
+        headers: getHeaders(options.headers),
+        ...options
+      })
+    } catch (error) {
+      if (error.status === 401) {
+        await handleUnauthenticated()
+      }
+      throw error
+    }
+  }
+
+  /**
+   * POST request with auto-injected token
+   */
+  const post = async (path: string, body: any, options = {}) => {
+    try {
+      return await $fetch(withBase(path), {
+        method: 'POST',
+        body,
+        headers: getHeaders(options.headers),
+        ...options
+      })
+    } catch (error) {
+      if (error.status === 401) {
+        await handleUnauthenticated()
+      }
+      throw error
+    }
+  }
+
+  /**
+   * PUT request with auto-injected token
+   */
+  const put = async (path: string, body: any, options = {}) => {
+    try {
+      return await $fetch(withBase(path), {
+        method: 'PUT',
+        body,
+        headers: getHeaders(options.headers),
+        ...options
+      })
+    } catch (error) {
+      if (error.status === 401) {
+        await handleUnauthenticated()
+      }
+      throw error
+    }
+  }
+
+  /**
+   * DELETE request with auto-injected token
+   */
+  const del = async (path: string, options = {}) => {
+    try {
+      return await $fetch(withBase(path), {
+        method: 'DELETE',
+        headers: getHeaders(options.headers),
+        ...options
+      })
+    } catch (error) {
+      if (error.status === 401) {
+        await handleUnauthenticated()
+      }
+      throw error
+    }
+  }
+
+  return { get, post, put, del, baseUrl, getHeaders, getToken }
 }

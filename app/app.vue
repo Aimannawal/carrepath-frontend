@@ -1,8 +1,10 @@
 <template>
-  <NuxtPage :transition="{
-    name: 'page',
-    mode: 'out-in'
-  }" />
+  <NuxtLayout>
+    <NuxtPage :transition="{
+      name: 'page',
+      mode: 'out-in'
+    }" />
+  </NuxtLayout>
 </template>
 
 <style>
