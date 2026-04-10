@@ -1,6 +1,14 @@
 export const useApi = () => {
   const config = useRuntimeConfig()
-  const baseUrl = (config.public.apiUrl || 'http://localhost:8080').replace(/\/$/, '')
+  const fallbackUrl = 'https://htaperrac.azhel.my.id'
+  const runtimeApiUrl = (config.public.apiUrl || '').replace(/\/$/, '')
+  const isLocalRuntimeTarget = /https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(runtimeApiUrl)
+
+  const baseUrl = (
+    runtimeApiUrl && !(import.meta.env.PROD && isLocalRuntimeTarget)
+      ? runtimeApiUrl
+      : fallbackUrl
+  ).replace(/\/$/, '')
 
   /**
    * Get bearer token from cookie
