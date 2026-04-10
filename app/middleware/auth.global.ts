@@ -1,11 +1,35 @@
 export default defineNuxtRouteMiddleware((to, from) => {
+  const normalizeRole = (rawRole?: string | null) => {
+    if (!rawRole) return ''
+    if (rawRole === 'user') return 'worker'
+    if (rawRole === 'superadmin') return 'admin'
+    return rawRole
+  }
+
+  const getDashboardPath = (role: string) => {
+    if (role === 'worker' || role === 'company' || role === 'admin') {
+      return `/${role}/dashboard`
+    }
+    return '/onboarding'
+  }
+
   // Hanya berlaku di sisi client untuk akses cookie
   if (process.client) {
     const token = useCookie('access_token').value
-    const role = useCookie('user_role').value
-    
+    const roleCookie = useCookie('user_role')
+    const role = normalizeRole(roleCookie.value)
+
+    if (role && role !== roleCookie.value) {
+      roleCookie.value = role
+    }
+
     // Rute yang dilindungi
-    const isProtectedRoute = to.path.startsWith('/dashboard') || to.path === '/onboarding'
+    const isProtectedRoute =
+      to.path === '/dashboard' ||
+      to.path === '/onboarding' ||
+      to.path.startsWith('/worker') ||
+      to.path.startsWith('/company') ||
+      to.path.startsWith('/admin')
 
     // 1. Cek Login
     if (isProtectedRoute && !token) {
@@ -18,22 +42,22 @@ export default defineNuxtRouteMiddleware((to, from) => {
       if (!role) {
         return navigateTo('/onboarding')
       } else {
-        const dest = role === 'superadmin' ? '/admin/dashboard' : `/${role}/dashboard`
+        const dest = getDashboardPath(role)
         return navigateTo(dest)
       }
     }
 
-    // 3. Pengecekan Khusus Role Dashboard
-    if (to.path.endsWith('/dashboard') && to.path !== '/dashboard') {
+    // 3. Pengecekan Khusus Role workspace (worker/company/admin)
+    if (to.path.startsWith('/worker') || to.path.startsWith('/company') || to.path.startsWith('/admin')) {
       // Jika nyasar padahal belum milih role
       if (!role) {
         return navigateTo('/onboarding')
       }
 
-      const correctPath = role === 'superadmin' ? '/admin/dashboard' : `/${role}/dashboard`
+      const correctPath = getDashboardPath(role)
 
       // Hard block untuk role yang nyebrang
-      if (to.path.startsWith('/admin') && role !== 'superadmin') {
+      if (to.path.startsWith('/admin') && role !== 'admin') {
         return navigateTo(correctPath)
       }
       if (to.path.startsWith('/worker') && role !== 'worker') {
@@ -46,7 +70,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
 
     // 4. Edge Case: Kalau udh login + udh pilih role, jangan bisa balik ke Onboarding / Login / Auth Pages
     if ((to.path.startsWith('/auth/') || to.path === '/onboarding') && token && role) {
-      const dest = role === 'superadmin' ? '/admin/dashboard' : `/${role}/dashboard`
+      const dest = getDashboardPath(role)
       return navigateTo(dest)
     }
   }

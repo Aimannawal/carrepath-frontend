@@ -9,6 +9,12 @@ const errorMessage = ref('')
 
 const { get, post, baseUrl } = useApi()
 
+const normalizeRole = (rawRole) => {
+  if (rawRole === 'user') return 'worker'
+  if (rawRole === 'superadmin') return 'admin'
+  return rawRole
+}
+
 useHead({
   title: 'CarrePath | Login',
 })
@@ -44,11 +50,14 @@ const handleLogin = async (e) => {
 
         const profile = await get(`/users/profile/${userId}`)
 
-        if (profile?.data?.role) {
-          const roleCookie = useCookie('user_role')
-          roleCookie.value = profile.data.role
+        const rawRole = profile?.data?.user?.role || profile?.data?.role
 
-          const dest = profile.data.role === 'superadmin' ? '/admin/dashboard' : `/${profile.data.role}/dashboard`
+        if (rawRole) {
+          const roleCookie = useCookie('user_role')
+          const role = normalizeRole(rawRole)
+          roleCookie.value = role
+
+          const dest = role ? `/${role}/dashboard` : '/onboarding'
           navigateTo(dest)
         } else {
           navigateTo('/onboarding')

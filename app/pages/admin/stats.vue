@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-useHead({ title: 'CarrePath | Admin Dashboard' })
+useHead({ title: 'CarrePath | Admin Stats' })
 definePageMeta({ layout: 'admin' })
 
 const { get } = useApi()
@@ -9,20 +9,18 @@ const loading = ref(true)
 const error = ref('')
 const revenue = ref(0)
 const stats = ref({ total_users: 0, total_companies: 0, total_jobs: 0, total_transactions: 0 })
-const transactions = ref([])
 
 onMounted(async () => {
   try {
-    const [revRes, statsRes, txRes] = await Promise.all([
+    const [revRes, statsRes] = await Promise.all([
       get('/admin/revenue'),
-      get('/admin/stats'),
-      get('/admin/transactions')
+      get('/admin/stats')
     ])
+
     revenue.value = revRes.data?.total_revenue || 0
     stats.value = statsRes.data || stats.value
-    transactions.value = txRes.data || []
   } catch (e) {
-    error.value = e?.data?.error || 'Failed to load admin dashboard'
+    error.value = e?.data?.error || 'Failed to load admin stats'
   } finally {
     loading.value = false
   }
@@ -31,10 +29,14 @@ onMounted(async () => {
 
 <template>
   <section class="p-6 md:p-8">
-    <h1 class="text-[30px] font-semibold mb-5">Admin Dashboard</h1>
-    <p v-if="error" class="text-[14px] text-red-400 mb-4">{{ error }}</p>
+    <h1 class="text-[30px] font-semibold mb-5">Platform Stats</h1>
+    <p v-if="error" class="text-[14px] text-red-500 mb-4">{{ error }}</p>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+      <div v-for="i in 5" :key="i" class="h-[90px] bg-[#111827] rounded-[10px] animate-pulse"></div>
+    </div>
+
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
       <div class="bg-[#111827] border border-[#1F2937] rounded-[10px] p-5">
         <p class="text-[13px] text-[#9CA3AF]">Total Revenue</p>
         <p class="text-[24px] font-semibold mt-1 text-white">Rp {{ Number(revenue).toLocaleString('id-ID') }}</p>
@@ -55,20 +57,6 @@ onMounted(async () => {
         <p class="text-[13px] text-[#9CA3AF]">Total Transactions</p>
         <p class="text-[24px] font-semibold mt-1 text-white">{{ stats.total_transactions || 0 }}</p>
       </div>
-    </div>
-
-    <div class="bg-[#0F172A] border border-[#1E293B] rounded-[10px] p-5">
-      <h2 class="text-[20px] font-semibold mb-4 text-white">Latest Transactions</h2>
-      <div v-if="loading" class="space-y-3">
-        <div v-for="i in 6" :key="i" class="h-[56px] bg-[#1E293B] rounded-[10px] animate-pulse"></div>
-      </div>
-      <div v-else-if="transactions.length" class="space-y-3">
-        <div v-for="tx in transactions.slice(0, 10)" :key="tx.id" class="p-3 rounded-[10px] bg-[#111827] border border-[#1F2937] flex flex-col md:flex-row md:items-center md:justify-between">
-          <p class="text-[14px] text-white">{{ tx.type }} - Rp {{ Number(tx.amount || 0).toLocaleString('id-ID') }}</p>
-          <p class="text-[13px] text-[#9CA3AF]">{{ tx.status }} | {{ new Date(tx.created_at || Date.now()).toLocaleString() }}</p>
-        </div>
-      </div>
-      <div v-else class="text-[14px] text-[#94A3B8]">No transaction data.</div>
     </div>
   </section>
 </template>

@@ -1,7 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 import viteCompression from "vite-plugin-compression";
 
-const isDev = process.env.NODE_ENV === 'development'
+const isDev = import.meta.dev
 
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -71,7 +71,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
+      apiUrl: import.meta.env.NUXT_PUBLIC_API_URL || 'http://localhost:8080',
+      siteUrl: import.meta.env.NUXT_PUBLIC_SITE_URL,
     },
   },
 
@@ -87,10 +88,6 @@ export default defineNuxtConfig({
         { rel: "icon", type: "image/png", sizes: "32x32", href: "/logos/logo.png" },
       ],
     },
-  },
-
-  experimental: {
-    viteNode: false,  // ✅ Fix IPC: matikan vite-node mode
   },
 
   build: { analyze: false },

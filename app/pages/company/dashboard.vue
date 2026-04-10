@@ -1,98 +1,82 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
+useHead({ title: 'CarrePath | Company Dashboard' })
+definePageMeta({ layout: 'company' })
+
+const { get } = useApi()
 const tokenCookie = useCookie('access_token')
-const userRoleCookie = useCookie('user_role')
 
-const companyName = ref('Perusahaan')
-const email = ref('')
+const userId = ref('')
+const loading = ref(true)
+const error = ref('')
+const jobs = ref([])
+const recentApplications = ref([])
 
-onMounted(() => {
-  if (tokenCookie.value) {
-    try {
-      const payloadBase64 = tokenCookie.value.split('.')[1]
-      const decodedPayload = JSON.parse(atob(payloadBase64))
-      email.value = decodedPayload.email || ''
-      if (decodedPayload.user_metadata?.full_name) {
-        companyName.value = decodedPayload.user_metadata.full_name
-      }
-    } catch (e) {
-      console.error(e)
+const totalJobPosted = computed(() => jobs.value.length)
+const activeJobs = computed(() => jobs.value.filter((j) => j.status === 'open').length)
+const totalApplicants = computed(() => recentApplications.value.length)
+
+onMounted(async () => {
+  try {
+    const payload = JSON.parse(atob(tokenCookie.value.split('.')[1]))
+    userId.value = payload.sub
+
+    const jobsRes = await get(`/companies/${userId.value}/jobs`)
+    jobs.value = jobsRes.data || []
+
+    const appGroups = await Promise.allSettled(jobs.value.slice(0, 5).map((job) => get(`/applications/job/${job.id}`)))
+    recentApplications.value = appGroups
+      .filter((x) => x.status === 'fulfilled')
+      .flatMap((x) => x.value.data || [])
+      .slice(0, 5)
+
+    if (appGroups.some((x) => x.status === 'rejected')) {
+      error.value = 'Some applicant data failed to load.'
     }
+  } catch (e) {
+    error.value = e?.data?.error || 'Failed to load company dashboard'
+  } finally {
+    loading.value = false
   }
 })
-
-const handleLogout = () => {
-  tokenCookie.value = null
-  userRoleCookie.value = null
-  navigateTo('/auth/login')
-}
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col font-['Outfit']">
-    <!-- Navbar Company -->
-    <header class="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <NuxtLink to="/" class="text-[20px] font-bold tracking-tight text-gray-900">
-          Carre<span class="text-[#2B4DB6]">path</span> <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full ml-1 align-middle">Company</span>
-        </NuxtLink>
+  <section class="p-6 md:p-8">
+    <h1 class="text-[28px] font-semibold mb-5">Company Dashboard</h1>
+    <p v-if="error" class="text-[14px] text-red-600 mb-4">{{ error }}</p>
 
-        <div class="flex items-center gap-4">
-          <span class="text-sm font-medium text-gray-600 hidden sm:block">Welcome, {{ companyName }} 🏢</span>
-          <button @click="handleLogout" class="text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition">
-            Logout
-          </button>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-5">
+        <p class="text-[13px] text-[#64748B]">Total Job Posted</p>
+        <p class="text-[28px] font-semibold mt-1">{{ totalJobPosted }}</p>
+      </div>
+      <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-5">
+        <p class="text-[13px] text-[#64748B]">Total Pelamar</p>
+        <p class="text-[28px] font-semibold mt-1">{{ totalApplicants }}</p>
+      </div>
+      <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-5">
+        <p class="text-[13px] text-[#64748B]">Job Aktif</p>
+        <p class="text-[28px] font-semibold mt-1">{{ activeJobs }}</p>
+      </div>
+    </div>
+
+    <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-5">
+      <h2 class="text-[20px] font-semibold mb-4">Recent Applications</h2>
+      <div v-if="loading" class="space-y-3">
+        <div v-for="i in 5" :key="i" class="h-[62px] bg-[#F8FAFC] border border-[#E2E8F0] rounded-[10px] animate-pulse"></div>
+      </div>
+      <div v-else-if="recentApplications.length" class="space-y-3">
+        <div v-for="app in recentApplications" :key="app.id" class="p-4 border border-[#E2E8F0] rounded-[10px] flex items-center justify-between">
+          <div>
+            <p class="text-[15px] font-medium">{{ app.worker_profiles?.full_name || app.worker_name || 'Worker' }}</p>
+            <p class="text-[13px] text-[#64748B]">{{ app.jobs?.title || '-' }}</p>
+          </div>
+          <span class="text-[12px] rounded-full px-3 py-1 bg-[#F1F5F9] capitalize">{{ app.status || 'pending' }}</span>
         </div>
       </div>
-    </header>
-
-    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
-      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Dashboard Rekrutmen</h1>
-          <p class="text-sm text-gray-500 mt-1">Kelola lowongan, telusuri talenta, dan periksa pelamar.</p>
-        </div>
-        <button class="bg-[#2B4DB6] text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:bg-blue-800 transition">
-          + Pasang Lowongan
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Stats Card -->
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col">
-          <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-          </div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Lowongan Aktif</p>
-          <div class="mt-1 flex items-baseline gap-2">
-            <span class="text-3xl font-bold text-gray-900">0</span>
-          </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col">
-          <div class="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-3">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          </div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Pelamar</p>
-          <div class="mt-1 flex items-baseline gap-2">
-            <span class="text-3xl font-bold text-gray-900">0</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Recent Job Posts Empty State -->
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
-        <div class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-4 text-indigo-500">
-          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        </div>
-        <h2 class="text-xl font-bold text-gray-900">Mulai Bangun Timmu</h2>
-        <p class="text-sm text-gray-500 mt-2 max-w-sm mx-auto mb-6">Perusahaanmu belum membuat satupun lowongan. Posting lowongan pertamamu untuk menemukan talenta terbaik.</p>
-        <button class="bg-white border-2 border-gray-200 text-gray-700 px-6 py-2.5 rounded-full font-semibold text-sm hover:border-[#2B4DB6] hover:text-[#2B4DB6] transition">
-          Buat Lowongan Pekerjaan
-        </button>
-      </div>
-
-    </main>
-  </div>
+      <div v-else class="text-[14px] text-[#64748B]">No application data yet.</div>
+    </div>
+  </section>
 </template>
