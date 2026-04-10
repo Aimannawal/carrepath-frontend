@@ -1,9 +1,25 @@
 <script setup>
-defineProps({
-  company: { type: Object, required: true }
-})
+import { computed, toRefs } from 'vue'
 
 const emit = defineEmits(['view-jobs', 'unsave'])
+
+const props = defineProps({
+  company: { type: Object, required: true }
+})
+const { company } = toRefs(props)
+
+const isPremium = computed(() => {
+  return Boolean(
+    props.company?.is_premium ||
+      props.company?.premium_active ||
+      props.company?.premium_until ||
+      props.company?.premium_expires_at
+  )
+})
+
+const premiumUntil = computed(() => {
+  return props.company?.premium_until || props.company?.premium_expires_at || ''
+})
 </script>
 
 <template>
@@ -13,6 +29,10 @@ const emit = defineEmits(['view-jobs', 'unsave'])
       <div>
         <h3 class="text-[16px] font-semibold text-[color:var(--color-dark)]">{{ company.company_name || '-' }}</h3>
         <p class="text-[13px] text-[#64748B]">{{ company.category || '-' }}</p>
+        <p v-if="isPremium" class="text-[12px] mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-[#DBEAFE] text-[#1D4ED8]">
+          Premium active
+        </p>
+        <p v-if="isPremium && premiumUntil" class="text-[12px] text-[#64748B] mt-1">Premium active until {{ new Date(premiumUntil).toLocaleDateString('id-ID') }}</p>
       </div>
     </div>
 

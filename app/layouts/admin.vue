@@ -8,9 +8,9 @@ const navRef = ref(null)
 const contentRef = ref(null)
 
 const menuItems = [
-  { name: 'Dashboard', path: '/admin/dashboard', icon: 'dashboard' },
-  { name: 'Platform Stats', path: '/admin/stats', icon: 'chart' },
-  { name: 'Transactions', path: '/admin/transactions', icon: 'list' }
+  { name: 'Dashboard', path: '/admin/dashboard', icon: 'heroicons:home' },
+  { name: 'Platform Stats', path: '/admin/stats', icon: 'heroicons:chart-bar-square' },
+  { name: 'Transactions', path: '/admin/transactions', icon: 'heroicons:credit-card' }
 ]
 
 onMounted(() => {
@@ -28,40 +28,76 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F8F9FA] font-['Outfit'] text-[color:var(--color-dark)]">
-    <header ref="navRef" class="bg-[#0F172A] border-b border-[#1E293B] sticky top-0 z-40">
-      <div class="px-4 md:px-6 py-3 flex items-center justify-between gap-4">
+  <div class="min-h-screen bg-[#0B1220] font-['Outfit'] text-white lg:flex">
+    <aside ref="navRef" class="hidden lg:flex lg:w-[280px] lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 bg-[#0F172A] border-r border-[#1E293B] z-40">
+      <div class="px-6 pt-6 pb-4 border-b border-[#1E293B]">
         <NuxtLink to="/admin/dashboard" class="font-semibold text-[24px] tracking-tight whitespace-nowrap text-white">
           Carre<span class="text-[#60A5FA]">path.</span>
         </NuxtLink>
+        <p class="text-[13px] text-[#94A3B8] mt-2">Superadmin menu navigation</p>
+      </div>
 
-        <nav class="flex items-center gap-2 overflow-x-auto">
+      <nav class="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
+        <NuxtLink
+          v-for="item in menuItems"
+          :key="item.path"
+          :to="item.path"
+          :class="[
+            'flex items-center gap-3 px-4 py-3 rounded-[12px] text-[14px] font-medium transition',
+            route.path === item.path || route.path.startsWith(`${item.path}/`)
+              ? 'bg-[#1D4ED8] text-white shadow-sm'
+              : 'text-[#94A3B8] hover:bg-[#1E293B] hover:text-white'
+          ]"
+        >
+          <Icon :name="item.icon" class="h-5 w-5 shrink-0" />
+          <span>{{ item.name }}</span>
+        </NuxtLink>
+      </nav>
+
+      <div class="p-4 border-t border-[#1E293B]">
+        <button
+          @click="handleLogout"
+          class="w-full px-4 py-3 rounded-[12px] text-[14px] font-medium text-[#94A3B8] bg-[#111827] hover:bg-[#7F1D1D] hover:text-white transition"
+        >
+          Log out
+        </button>
+      </div>
+    </aside>
+
+    <div class="flex-1 lg:pl-[280px] min-w-0">
+      <header class="lg:hidden bg-[#0F172A] border-b border-[#1E293B] sticky top-0 z-40">
+        <div class="px-4 py-3 flex items-center justify-between gap-4">
+          <NuxtLink to="/admin/dashboard" class="font-semibold text-[22px] tracking-tight whitespace-nowrap text-white">
+            Carre<span class="text-[#60A5FA]">path.</span>
+          </NuxtLink>
+          <button
+            @click="handleLogout"
+            class="px-3 py-2 rounded-[8px] text-[13px] font-medium text-[#94A3B8] hover:bg-[#7F1D1D] hover:text-white whitespace-nowrap"
+          >
+            Log out
+          </button>
+        </div>
+        <div class="px-4 pb-3 flex gap-2 overflow-x-auto">
           <NuxtLink
             v-for="item in menuItems"
             :key="item.path"
             :to="item.path"
             :class="[
-              'px-3 py-2 rounded-[8px] text-[13px] font-medium whitespace-nowrap transition',
+              'inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] text-[13px] font-medium whitespace-nowrap transition',
               route.path === item.path || route.path.startsWith(`${item.path}/`)
                 ? 'bg-[#1D4ED8] text-white'
-                : 'text-[#9CA3AF] hover:bg-[#1F2937] hover:text-white'
+                : 'text-[#94A3B8] hover:bg-[#1E293B] hover:text-white'
             ]"
           >
+            <Icon :name="item.icon" class="h-4 w-4 shrink-0" />
             {{ item.name }}
           </NuxtLink>
-        </nav>
+        </div>
+      </header>
 
-        <button
-          @click="handleLogout"
-          class="px-3 py-2 rounded-[8px] text-[13px] font-medium text-[#9CA3AF] hover:bg-[#7F1D1D] hover:text-white whitespace-nowrap"
-        >
-          Log out
-        </button>
-      </div>
-    </header>
-
-    <main ref="contentRef" class="min-w-0">
-      <slot />
-    </main>
+      <main ref="contentRef" class="min-w-0">
+        <slot />
+      </main>
+    </div>
   </div>
 </template>

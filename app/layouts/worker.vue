@@ -8,14 +8,15 @@ const navRef = ref(null)
 const contentRef = ref(null)
 
 const menuItems = [
-  { name: 'Dashboard', path: '/worker/dashboard', icon: 'dashboard' },
-  { name: 'Manage Job', path: '/worker/jobs', icon: 'briefcase' },
-  { name: 'My Resume', path: '/worker/resume', icon: 'file' },
-  { name: 'Applications', path: '/worker/applications', icon: 'send' },
-  { name: 'Saved Companies', path: '/worker/saved-companies', icon: 'bookmark' },
-  { name: 'My Account', path: '/worker/account', icon: 'user' },
-  { name: 'Settings', path: '/worker/settings', icon: 'settings' },
-  { name: 'Upgrade', path: '/worker/upgrade', icon: 'sparkles' }
+  { name: 'Dashboard', path: '/worker/dashboard', icon: 'heroicons:home' },
+  { name: 'Manage Job', path: '/worker/jobs', icon: 'heroicons:briefcase' },
+  { name: 'My Resume', path: '/worker/resume', icon: 'heroicons:document-text' },
+  { name: 'Applications', path: '/worker/applications', icon: 'heroicons:paper-airplane' },
+  { name: 'Saved Companies', path: '/worker/saved-companies', icon: 'heroicons:bookmark' },
+  { name: 'My Account', path: '/worker/account', icon: 'heroicons:user' },
+  { name: 'Settings', path: '/worker/settings', icon: 'heroicons:cog-6-tooth' },
+  { name: 'Transactions', path: '/worker/transactions', icon: 'heroicons:banknotes' },
+  { name: 'Upgrade', path: '/worker/upgrade', icon: 'heroicons:sparkles' }
 ]
 
 onMounted(() => {
@@ -54,7 +55,7 @@ const handleLogout = () => {
               : 'text-[#64748B] hover:bg-[#EEF2FF] hover:text-[color:var(--color-main)]'
           ]"
         >
-          <span class="h-2.5 w-2.5 rounded-full bg-current opacity-70"></span>
+          <Icon :name="item.icon" class="h-5 w-5 shrink-0" />
           <span>{{ item.name }}</span>
         </NuxtLink>
       </nav>
@@ -94,6 +95,7 @@ const handleLogout = () => {
                 : 'text-[#64748B] hover:bg-[#EEF2FF] hover:text-[color:var(--color-main)]'
             ]"
           >
+            <Icon :name="item.icon" class="h-4 w-4 shrink-0" />
             {{ item.name }}
           </NuxtLink>
         </div>

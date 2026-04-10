@@ -8,6 +8,7 @@ const { get } = useApi()
 const tokenCookie = useCookie('access_token')
 
 const userId = ref('')
+const companyProfileId = ref('')
 const loading = ref(true)
 const error = ref('')
 const jobs = ref([])
@@ -19,10 +20,14 @@ const totalApplicants = computed(() => recentApplications.value.length)
 
 onMounted(async () => {
   try {
+    if (!tokenCookie.value) throw new Error('Missing access token')
     const payload = JSON.parse(atob(tokenCookie.value.split('.')[1]))
-    userId.value = payload.sub
+    userId.value = payload.sub || ''
 
-    const jobsRes = await get(`/companies/${userId.value}/jobs`)
+    const profileRes = await get(`/companies/profile/${userId.value}`)
+    companyProfileId.value = profileRes.data?.id || profileRes.data?.company_profile_id || userId.value
+
+    const jobsRes = await get(`/companies/${companyProfileId.value}/jobs`)
     jobs.value = jobsRes.data || []
 
     const appGroups = await Promise.allSettled(jobs.value.slice(0, 5).map((job) => get(`/applications/job/${job.id}`)))

@@ -6,6 +6,15 @@ const props = defineProps({
 
 const emit = defineEmits(['apply', 'view'])
 
+const isPremiumCompany = computed(() => {
+  const company = props.job?.company_profiles || {}
+  return Boolean(company.is_premium || company.premium_active || company.premium_until || company.premium_expires_at)
+})
+
+const companyName = computed(() => {
+  return props.job?.company_profiles?.company_name || props.job?.company_name || 'Unknown Company'
+})
+
 const salaryText = computed(() => {
   if (!props.job?.salary_min && !props.job?.salary_max) {
     return 'Negotiable'
@@ -21,7 +30,8 @@ const salaryText = computed(() => {
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0">
         <h3 class="text-[18px] font-semibold text-[color:var(--color-dark)] truncate">{{ job.title || 'Untitled Job' }}</h3>
-        <p class="text-[14px] text-[#64748B] mt-1 truncate">{{ job.company_name || job.company_profiles?.company_name || 'Unknown Company' }}</p>
+        <p class="text-[14px] text-[#64748B] mt-1 truncate">{{ companyName }}</p>
+        <p v-if="isPremiumCompany" class="mt-1 inline-flex text-[11px] px-2 py-0.5 rounded-full bg-[#DBEAFE] text-[#1D4ED8]">Premium Company</p>
       </div>
       <img v-if="job.company_profiles?.logo_url" :src="job.company_profiles.logo_url" alt="Company logo" class="w-10 h-10 rounded-[5px] object-cover" />
     </div>

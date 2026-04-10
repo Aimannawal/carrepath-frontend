@@ -5,6 +5,7 @@ useHead({ title: 'CarrePath | Worker Jobs' })
 definePageMeta({ layout: 'worker' })
 
 const { get } = useApi()
+const { getData, toArray, getErrorMessage } = useApiResponse()
 const loading = ref(true)
 const error = ref('')
 const allJobs = ref([])
@@ -23,7 +24,8 @@ const locationTypes = ['remote', 'onsite', 'hybrid']
 const filtered = computed(() => {
   const key = q.value.toLowerCase().trim()
   return allJobs.value.filter((j) => {
-    const hitQ = !key || `${j.title || ''} ${j.description || ''} ${j.company_name || ''}`.toLowerCase().includes(key)
+    const companyName = j.company_profiles?.company_name || j.company_name || ''
+    const hitQ = !key || `${j.title || ''} ${j.description || ''} ${companyName}`.toLowerCase().includes(key)
     const hitCat = !category.value || (j.category || '').toLowerCase() === category.value.toLowerCase()
     const hitType = !type.value || j.type === type.value
     const hitLoc = !locationType.value || j.location_type === locationType.value
@@ -52,9 +54,9 @@ const fetchJobs = async () => {
     if (locationType.value) query.set('location_type', locationType.value)
     const suffix = query.toString() ? `?${query.toString()}` : ''
     const res = await get(`/jobs${suffix}`)
-    allJobs.value = res.data || []
+    allJobs.value = toArray(getData(res))
   } catch (e) {
-    error.value = e?.data?.error || 'Failed to fetch jobs'
+    error.value = getErrorMessage(e, 'Failed to fetch jobs')
   } finally {
     loading.value = false
   }
