@@ -9,7 +9,6 @@ const contentRef = ref(null)
 
 const menuItems = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: 'heroicons:home' },
-  { name: 'Platform Stats', path: '/admin/stats', icon: 'heroicons:chart-bar-square' },
   { name: 'Transactions', path: '/admin/transactions', icon: 'heroicons:credit-card' }
 ]
 
@@ -28,13 +27,13 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0B1220] font-['Outfit'] text-white lg:flex">
-    <aside ref="navRef" class="hidden lg:flex lg:w-[280px] lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 bg-[#0F172A] border-r border-[#1E293B] z-40">
-      <div class="px-6 pt-6 pb-4 border-b border-[#1E293B]">
-        <NuxtLink to="/admin/dashboard" class="font-semibold text-[24px] tracking-tight whitespace-nowrap text-white">
-          Carre<span class="text-[#60A5FA]">path.</span>
+  <div class="min-h-screen bg-[#F8FAFC] font-['Outfit'] text-[#0F172A] lg:flex">
+    <aside ref="navRef" class="hidden lg:flex lg:w-[280px] lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 bg-white border-r border-[#E2E8F0] z-40 shadow-sm">
+      <div class="px-6 pt-6 pb-4 border-b border-[#E2E8F0]">
+        <NuxtLink to="/admin/dashboard" class="font-semibold text-[24px] tracking-tight whitespace-nowrap text-[#0F172A]">
+          Carre<span class="text-[color:var(--color-main)]">path.</span>
         </NuxtLink>
-        <p class="text-[13px] text-[#94A3B8] mt-2">Superadmin menu navigation</p>
+        <p class="text-[13px] text-[#64748B] mt-2">Superadmin menu navigation</p>
       </div>
 
       <nav class="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
@@ -45,8 +44,8 @@ const handleLogout = () => {
           :class="[
             'flex items-center gap-3 px-4 py-3 rounded-[12px] text-[14px] font-medium transition',
             route.path === item.path || route.path.startsWith(`${item.path}/`)
-              ? 'bg-[#1D4ED8] text-white shadow-sm'
-              : 'text-[#94A3B8] hover:bg-[#1E293B] hover:text-white'
+              ? 'bg-[#EEF2FF] text-[#1E3A8A] shadow-sm border border-[#BFDBFE]'
+              : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
           ]"
         >
           <Icon :name="item.icon" class="h-5 w-5 shrink-0" />
@@ -54,10 +53,10 @@ const handleLogout = () => {
         </NuxtLink>
       </nav>
 
-      <div class="p-4 border-t border-[#1E293B]">
+      <div class="p-4 border-t border-[#E2E8F0]">
         <button
           @click="handleLogout"
-          class="w-full px-4 py-3 rounded-[12px] text-[14px] font-medium text-[#94A3B8] bg-[#111827] hover:bg-[#7F1D1D] hover:text-white transition"
+          class="w-full px-4 py-3 rounded-[12px] text-[14px] font-medium text-[#475569] bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-[#FEE2E2] hover:text-[#991B1B] hover:border-[#FCA5A5] transition"
         >
           Log out
         </button>
@@ -65,14 +64,14 @@ const handleLogout = () => {
     </aside>
 
     <div class="flex-1 lg:pl-[280px] min-w-0">
-      <header class="lg:hidden bg-[#0F172A] border-b border-[#1E293B] sticky top-0 z-40">
+      <header class="lg:hidden bg-white border-b border-[#E2E8F0] sticky top-0 z-40">
         <div class="px-4 py-3 flex items-center justify-between gap-4">
-          <NuxtLink to="/admin/dashboard" class="font-semibold text-[22px] tracking-tight whitespace-nowrap text-white">
-            Carre<span class="text-[#60A5FA]">path.</span>
+          <NuxtLink to="/admin/dashboard" class="font-semibold text-[22px] tracking-tight whitespace-nowrap text-[#0F172A]">
+            Carre<span class="text-[color:var(--color-main)]">path.</span>
           </NuxtLink>
           <button
             @click="handleLogout"
-            class="px-3 py-2 rounded-[8px] text-[13px] font-medium text-[#94A3B8] hover:bg-[#7F1D1D] hover:text-white whitespace-nowrap"
+            class="px-3 py-2 rounded-[8px] text-[13px] font-medium text-[#475569] border border-[#E2E8F0] hover:bg-[#FEE2E2] hover:text-[#991B1B] hover:border-[#FCA5A5] whitespace-nowrap"
           >
             Log out
           </button>
@@ -85,8 +84,8 @@ const handleLogout = () => {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] text-[13px] font-medium whitespace-nowrap transition',
               route.path === item.path || route.path.startsWith(`${item.path}/`)
-                ? 'bg-[#1D4ED8] text-white'
-                : 'text-[#94A3B8] hover:bg-[#1E293B] hover:text-white'
+                ? 'bg-[#EEF2FF] text-[#1E3A8A] border border-[#BFDBFE]'
+                : 'text-[#475569] border border-[#E2E8F0] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
             ]"
           >
             <Icon :name="item.icon" class="h-4 w-4 shrink-0" />

@@ -7,6 +7,7 @@ definePageMeta({ layout: 'worker' })
 const { get } = useApi()
 const { getData, toArray, getErrorMessage } = useApiResponse()
 const { userId } = useAuth()
+const { error: showError, info } = useModal()
 
 const loading = ref(true)
 const error = ref('')
@@ -21,14 +22,21 @@ const fetchApplications = async () => {
   
   try {
     if (!userId.value) {
-      error.value = 'User not authenticated'
+      const msg = 'User not authenticated. Please log in again.'
+      error.value = msg
+      showError('Authentication Error', msg)
       return
     }
     
     const res = await get(`/applications/worker/${userId.value}`)
     items.value = toArray(getData(res))
+    if (!items.value.length) {
+      console.log('No applications found')
+    }
   } catch (e) {
-    error.value = getErrorMessage(e, 'Failed to load applications')
+    const msg = getErrorMessage(e, 'Failed to load applications')
+    error.value = msg
+    showError('Load Error', msg)
     items.value = []
   } finally {
     loading.value = false

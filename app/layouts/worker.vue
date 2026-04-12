@@ -11,10 +11,10 @@ const menuItems = [
   { name: 'Dashboard', path: '/worker/dashboard', icon: 'heroicons:home' },
   { name: 'Manage Job', path: '/worker/jobs', icon: 'heroicons:briefcase' },
   { name: 'My Resume', path: '/worker/resume', icon: 'heroicons:document-text' },
+  { name: 'Study Plan', path: '/worker/study-plan', icon: 'heroicons:academic-cap' },
   { name: 'Applications', path: '/worker/applications', icon: 'heroicons:paper-airplane' },
-  { name: 'Saved Companies', path: '/worker/saved-companies', icon: 'heroicons:bookmark' },
+  { name: 'Saved Jobs', path: '/worker/saved-companies', icon: 'heroicons:bookmark' },
   { name: 'My Account', path: '/worker/account', icon: 'heroicons:user' },
-  { name: 'Settings', path: '/worker/settings', icon: 'heroicons:cog-6-tooth' },
   { name: 'Transactions', path: '/worker/transactions', icon: 'heroicons:banknotes' },
   { name: 'Upgrade', path: '/worker/upgrade', icon: 'heroicons:sparkles' }
 ]

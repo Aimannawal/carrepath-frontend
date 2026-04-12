@@ -1,90 +1,83 @@
-# Carrepath Frontend
+# 🚀 Carrepath - Platform Karir Terdepan
 
-Frontend Carrepath dibangun dengan Nuxt 3 + Vue 3 untuk menangani flow worker, company, admin, resume AI, job application, dan pembayaran premium.
+Carrepath adalah platform karir terpadu yang menghubungkan **job seekers** dan **perusahaan** dalam satu ekosistem yang terintegrasi. Kami membantu profesional muda menemukan pekerjaan impian mereka dengan dukungan AI terdepan, sementara memberikan perusahaan akses ke talenta terbaik.
 
-## Fitur Utama
+## 💼 Untuk Job Seekers
 
-- Worker dashboard, job browsing, apply job, saved companies, transactions, dan upgrade premium.
-- Company dashboard, manage jobs, applicants, account center, dan premium package.
-- Resume AI dengan 2 mode utama:
-	- Study Plan Workspace
-	- CV ATS Preview + download PDF
-- Upload profile image dan upload PDF CV dengan handling warning backend yang non-fatal.
-- Mapping response backend dibuat defensif untuk variasi shape nested/top-level.
+Temukan peluang karir yang sesuai dengan skill dan aspirasi Anda:
 
-## Struktur Singkat
+- **Browse & Apply** - Jelajahi ribuan lowongan kerja dari perusahaan ternama, dan apply langsung dengan satu klik
+- **Resume AI Powered** - Tingkatkan CV Anda dengan bantuan AI yang mengoptimalkan tulisan Anda untuk setiap posisi
+- **Study Plan** - Dapatkan rekomendasi pembelajaran personal untuk mengembangkan skill sesuai target karir Anda
+- **Simpan Perusahaan Favorit** - Ikuti perusahaan yang Anda minati dan jangan lewatkan update lowongan terbaru
+- **Track Applications** - Pantau status aplikasi Anda secara real-time, dari submitted hingga interview
+- **Upgrade Premium** - Akses fitur eksklusif untuk meningkatkan peluang mendapatkan pekerjaan impian
 
-- `app/pages/worker/*` - halaman worker.
-- `app/pages/company/*` - halaman company.
-- `app/pages/admin/*` - halaman admin.
-- `app/composables/*` - helper untuk auth, fetch, upload, dan response mapping.
-- `app/components/*` - komponen reusable untuk job, company, dan modal.
+## 🏢 Untuk Perusahaan
 
-## Setup
+Rekrut talenta terbaik dengan mudah dan efisien:
 
-Pastikan dependency terpasang:
+- **Post & Manage Jobs** - Buat dan kelola lowongan kerja dengan sistem yang mudah digunakan
+- **Investor Dashboard** - Lihat semua aplikasi masuk, track progress perekrutan, dan kelola kandidat favorit
+- **Screening Otomatis** - Saring kandidat berdasarkan skill dan kualifikasi dengan lebih cepat
+- **Premium Packages** - Tingkatkan visibilitas lowongan Anda dan akses fitur premium untuk rekrutmen yang lebih efektif
+- **Analytics** - Dapatkan insights tentang recruitment funnel dan performa lowongan Anda
+
+## 🎯 Fitur Unggulan
+
+### AI Resume Optimizer
+- **CV Scanner** - AI akan menganalisis CV Anda dan memberikan saran perbaikan untuk meningkatkan ATS score
+- **Resume Preview** - Lihat preview final CV dalam format ATS sebelum disubmit
+- **Download PDF** - Ekspor CV yang sudah dioptimalkan dalam format PDF siap kirim
+
+### Payment & Subscription
+- **Flexible Plans** - Pilih paket yang sesuai dengan kebutuhan Anda (untuk worker maupun company)
+- **Secure Payment** - Proses pembayaran yang aman dan terpercaya
+- **Instant Activation** - Nikmati premium features segera setelah pembayaran berhasil
+
+### User Experience Optimization
+- **Responsive Design** - Platform yang bekerja sempurna di desktop, tablet, dan mobile
+- **Fast Performance** - Interface yang cepat dan responsif untuk pengalaman pengguna terbaik
+- **Intuitive Navigation** - Mudah digunakan bahkan untuk pemula
+
+## 🚀 Mulai Sekarang
+
+### Untuk Developer
 
 ```bash
+# Install dependencies
 bun install
-```
 
-Jalankan project:
-
-```bash
+# Run development server
 bun run dev
-```
 
-Build production:
-
-```bash
+# Build for production
 bun run build
 ```
 
-Preview hasil production build:
+Buka browser ke `http://localhost:3000`
 
-```bash
-bun run preview
-```
+### Environment Setup
 
-## Environment
+Buat file `.env` di root directory:
 
-Buat file `.env` di root project jika belum ada.
-
-Contoh:
-
-```bash
+```env
 NUXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-Catatan:
+## 📱 Platform
 
-- Token auth dibaca dari cookie `access_token`.
-- Role user dibaca dari cookie `user_role`.
-- Jika `NUXT_PUBLIC_API_URL` tidak diisi, default ke `http://localhost:8080`.
+Carrepath dibangun dengan teknologi modern yang menjamin:
 
-## Flow Penting Yang Sudah Dipakai FE
+- ⚡ **Performance** - Load time cepat dengan optimasi bundle
+- 🔒 **Security** - Enkripsi dan validasi data untuk keamanan maksimal
+- 📱 **Mobile First** - Dioptimalkan untuk pengalaman mobile yang sempurna
+- ♿ **Accessibility** - Dapat diakses oleh semua kalangan pengguna
 
-- Save company: `POST /saved/company`
-- Detail job: `GET /jobs/:id`
-- List jobs: `GET /jobs`
-- Apply job: `POST /applications`
-- Applicants list/status: `GET /applications/job/:job_id`, `PUT /applications/:id/status`
-- Upload profile image: `POST /storage/upload/profile/:user_id`
-- Upload PDF CV: `POST /storage/upload/pdf/:worker_id`
-- Resume AI: `POST /ai/generate-resume`, `POST /ai/optimize-resume`, `POST /ai/study-plan`
-- Resume history: `GET /ai/resumes/:worker_id`, `GET /ai/study-plans/:worker_id`
-- Payment: `GET /payment/packages`, `POST /payment/transaction`, `PUT /payment/transaction/:id/confirm`, `GET /payment/transactions/:user_id`
+## 🎓 Tentang Kami
 
-## Kontribusi / Development Notes
+Carrepath lahir dari visi untuk mempermudah transisi karir generasi muda Indonesia. Dengan menggabungkan teknologi AI terkini dan UX yang user-friendly, kami membantu puluhan ribu profesional menemukan karir impian mereka.
 
-- Gunakan composable yang sudah ada: `useApi`, `useApiResponse`, `useAuth`, `useFileUpload`, dan `usePageFetch`.
-- Prioritaskan inline error/success message, jangan pakai browser alert.
-- Untuk response backend yang bentuknya berbeda-beda, gunakan helper parsing dari `useApiResponse`.
-- Untuk resume PDF, frontend memakai PDF.js untuk ekstraksi teks sebelum mengirim ke endpoint optimize.
+---
 
-## Dokumentasi Nuxt
-
-Referensi resmi:
-
-- https://nuxt.com/docs/getting-started/introduction
-- https://nuxt.com/docs/getting-started/deployment
+**Siap memulai karir Anda? Bergabunglah dengan ribuan pengguna yang sudah merasakan manfaatnya! 🌟**

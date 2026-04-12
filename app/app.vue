@@ -5,7 +5,30 @@
       mode: 'out-in'
     }" />
   </NuxtLayout>
+
+  <!-- Global Modal for notifications -->
+  <ConfirmModal
+    :is-open="modalState.isOpen"
+    :type="modalState.type"
+    :title="modalState.title"
+    :message="modalState.message"
+    :action-text="modalState.actionText"
+    :cancel-text="modalState.cancelText"
+    :show-cancel="modalState.showCancel"
+    :loading="modalState.loading"
+    :loading-text="modalState.loadingText"
+    :on-confirm="modalState.onConfirm"
+    :on-cancel="modalState.onCancel"
+    @close="close"
+  />
 </template>
+
+<script setup lang="ts">
+import { useModal } from '~/composables/useModal'
+
+const { getModalState, close } = useModal()
+const modalState = getModalState()
+</script>
 
 <style>
 html,

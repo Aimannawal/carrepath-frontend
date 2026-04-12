@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
-import gsap from 'gsap'
+import { ref, onMounted } from 'vue'
 
 useHead({
   title: 'CarrePath | Choose your Role'
@@ -13,9 +12,6 @@ const tokenCookie = useCookie('access_token')
 const userRoleCookie = useCookie('user_role')
 
 const userData = ref({ id: '', fullName: '', email: '' })
-const headerRef = ref(null)
-const cardsRef = ref(null)
-const buttonRef = ref(null)
 
 onMounted(() => {
   if (tokenCookie.value) {
@@ -28,35 +24,6 @@ onMounted(() => {
       console.error('Failed to parse JWT for onboarding', err)
     }
   }
-
-  nextTick(() => {
-    setTimeout(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-
-      if (headerRef.value) {
-        tl.fromTo(headerRef.value.children,
-          { y: 30, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, stagger: 0.15 }
-        )
-      }
-
-      if (cardsRef.value) {
-        tl.fromTo(cardsRef.value.children,
-          { y: 40, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, stagger: 0.2 },
-          '-=0.4'
-        )
-      }
-
-      if (buttonRef.value) {
-        tl.fromTo(buttonRef.value,
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6 },
-          '-=0.4'
-        )
-      }
-    }, 50)
-  })
 })
 
 const handleSetRole = async () => {
@@ -92,18 +59,18 @@ const handleSetRole = async () => {
 <template>
   <div class="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-4 sm:p-6 font-['Outfit']">
     <div class="max-w-4xl w-full text-center flex flex-col items-center">
-      <div ref="headerRef" class="mb-[50px]">
+      <div class="mb-[50px]">
         <h1 class="text-[48px] font-semibold text-[color:var(--color-dark)] leading-tight tracking-tight">What you want
           to be ?</h1>
         <p class="text-[14px] font-normal text-[color:var(--color-dark)] opacity-60 mt-[16px]">Choose the role that best
           suits your goals at Carrepath.</p>
       </div>
 
-      <div ref="cardsRef" class="flex flex-col md:flex-row gap-6 justify-center w-full">
+      <div class="flex flex-col md:flex-row gap-6 justify-center w-full">
         <div @click="selectedRole = 'worker'" :class="[
-          'p-[40px] rounded-[10px] bg-white cursor-pointer transition-all duration-300 text-left border relative w-full max-w-[320px]',
+          'p-[40px] rounded-[10px] bg-white cursor-pointer transition-all duration-200 ease-in-out text-left border relative w-full max-w-[320px] hover:shadow-sm',
           selectedRole === 'worker'
-            ? 'border-[color:var(--color-main)] shadow-[0_10px_30px_-10px_rgba(43,77,182,0.15)]'
+            ? 'ring-2 ring-[#2B4DB6] border-[#2B4DB6]'
             : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
         ]">
           <div class="flex items-start justify-between">
@@ -126,8 +93,8 @@ const handleSetRole = async () => {
         </div>
 
         <div @click="selectedRole = 'company'" :class="[
-          'w-full max-w-[320px] p-[40px] rounded-[10px] bg-white cursor-pointer transition-all duration-300 text-left border relative',
-          selectedRole === 'company' ? 'border-[color:var(--color-main)] shadow-[0_10px_30px_-10px_rgba(43,77,182,0.15)]' : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
+          'w-full max-w-[320px] p-[40px] rounded-[10px] bg-white cursor-pointer transition-all duration-200 ease-in-out text-left border relative hover:shadow-sm',
+          selectedRole === 'company' ? 'ring-2 ring-[#2B4DB6] border-[#2B4DB6]' : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
         ]">
           <div class="flex items-start justify-between">
             <div class="w-[40px] h-[40px] bg-[#F4F6FB] rounded-[5px] flex items-center justify-center text-[color:var(--color-main)]">
@@ -158,11 +125,11 @@ const handleSetRole = async () => {
         </div>
       </div>
 
-      <div class="mt-[50px] flex justify-center" ref="buttonRef">
+      <div class="mt-[50px] flex justify-center">
         <button @click="handleSetRole" :disabled="!selectedRole || isLoading" :class="[
-          'px-[30px] py-[15px] rounded-[5px] font-normal text-[14px] transition-all flex items-center justify-center gap-[10px]',
+          'px-[30px] py-[15px] rounded-[5px] font-normal text-[14px] transition-all duration-200 ease-in-out flex items-center justify-center gap-[10px]',
           selectedRole && !isLoading
-            ? 'bg-[color:var(--color-main)] text-[#FFFFFF] hover:bg-blue-800'
+            ? 'bg-[color:var(--color-main)] text-[#FFFFFF] hover:bg-blue-800 shadow-lg shadow-blue-500/30'
             : 'bg-[#E2E8F0] text-[#94A3B8] cursor-not-allowed shadow-none'
         ]">
           <span>{{ isLoading ? 'Menyimpan...' : 'Continue to Dashboard' }}</span>

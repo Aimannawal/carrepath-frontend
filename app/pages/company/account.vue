@@ -8,6 +8,7 @@ const { get, put } = useApi()
 const { getData, asObject, getErrorMessage } = useApiResponse()
 const { userId } = useAuth()
 const { uploadProfileImage, uploadError, uploading, clearUploadState } = useFileUpload()
+const { success, error, info } = useModal()
 
 const loading = ref(false)
 const pageError = ref("")
@@ -22,6 +23,7 @@ const form = ref({
   category: "",
   owner_name: "",
   address: "",
+  description: "",
   logo_url: ""
 })
 
@@ -29,18 +31,42 @@ const password = ref("")
 const confirmPassword = ref("")
 const logoFileInput = ref(null)
 
+const safeValue = (value) => {
+  if (value === null || value === undefined) return ""
+  return String(value)
+}
+
 const fetchProfile = async () => {
-  if (!userId.value) return
+  if (!userId.value) {
+    console.warn("No userId available")
+    return
+  }
   loading.value = true
   pageError.value = ""
   
   try {
-    const res = await get(`/companies/profile/${ userId.value }`)
+    const res = await get(`/companies/profile/${userId.value}`)
     const payload = asObject(getData(res))
-    form.value = { ...form.value, ...payload }
+    const profile = asObject(payload.profile || payload)
+
+    const extractedData = {
+      company_name: safeValue(profile.company_name),
+      company_email: safeValue(profile.company_email),
+      phone: safeValue(profile.phone),
+      category: safeValue(profile.category),
+      owner_name: safeValue(profile.owner_name),
+      address: safeValue(profile.address),
+      description: safeValue(profile.description),
+      logo_url: safeValue(profile.logo_url)
+    }
+    
+    form.value = { ...form.value, ...extractedData }
+    
   } catch (e) {
     if (e?.status !== 404) {
-      pageError.value = getErrorMessage(e, "Failed to load profile")
+      const msg = getErrorMessage(e, "Failed to load profile")
+      pageError.value = msg
+      console.error("Company profile fetch error:", msg)
     }
   } finally {
     loading.value = false
@@ -63,13 +89,13 @@ const handleLogoFileChange = (event) => {
 
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"]
   if (!allowedTypes.includes(file.type)) {
-    pageError.value = "Logo must be JPG, PNG, or WebP"
+    error("Invalid File Type", "Logo must be JPG, PNG, or WebP")
     logoFileInput.value.value = ""
     return
   }
 
   if (file.size > 2 * 1024 * 1024) {
-    pageError.value = "Logo max size is 2MB"
+    error("File Too Large", "Logo max size is 2MB")
     logoFileInput.value.value = ""
     return
   }
@@ -81,7 +107,7 @@ const handleLogoFileChange = (event) => {
 const handleUploadLogo = async () => {
   const file = logoFileInput.value?.files?.[0]
   if (!file) {
-    pageError.value = "Please select a logo first"
+    info("Select Logo", "Please select a logo first")
     return
   }
 
@@ -92,27 +118,25 @@ const handleUploadLogo = async () => {
   const result = await uploadProfileImage(file, userId.value)
   
   if (!result) {
-    pageError.value = uploadError.value
+    error("Upload Failed", uploadError.value || "Failed to upload logo")
     return
   }
 
   form.value.logo_url = result.publicUrl
   if (result.warning) uploadWarning.value = result.warning
 
-  pageSuccess.value = "Company logo uploaded successfully"
+  success("Upload Complete", "Company logo uploaded successfully")
   logoFileInput.value.value = ""
   if (localPreviewUrl.value) {
     URL.revokeObjectURL(localPreviewUrl.value)
     localPreviewUrl.value = ""
   }
-
-  setTimeout(() => { pageSuccess.value = "" }, 3000)
 }
 
 const saveProfile = async () => {
   if (loading.value || uploading.value) return
   if (!userId.value) {
-    pageError.value = "User ID not available"
+    error("Error", "User ID not available")
     return
   }
 
@@ -125,7 +149,7 @@ const saveProfile = async () => {
 
   const missing = required.find((item) => !String(form.value[item.key] || "").trim())
   if (missing) {
-    pageError.value = `${ missing.label } is required`
+    error("Validation Error", `${missing.label} is required`)
     return
   }
 
@@ -140,44 +164,42 @@ const saveProfile = async () => {
       phone: form.value.phone,
       category: form.value.category,
       owner_name: form.value.owner_name || "",
-      address: form.value.address || ""
+      address: form.value.address || "",
+      description: form.value.description || ""
     }
 
     if (form.value.logo_url) payload.logo_url = form.value.logo_url
 
-    await put(`/companies/profile/${ userId.value }`, payload)
-    pageSuccess.value = "Company profile updated successfully"
-    setTimeout(() => { pageSuccess.value = "" }, 3000)
+    await put(`/companies/profile/${userId.value}`, payload)
+    await fetchProfile()
+    success("Success", "Company profile updated successfully")
   } catch (e) {
-    pageError.value = getErrorMessage(e, "Failed to save profile")
+    const msg = getErrorMessage(e, "Failed to save profile")
+    error("Error", msg)
   } finally {
     loading.value = false
   }
 }
 
 const changePassword = async () => {
-  pageError.value = ""
-  pageSuccess.value = ""
-
   if (!password.value || !confirmPassword.value) {
-    pageError.value = "Both password fields are required"
+    error("Validation Error", "Both password fields are required")
     return
   }
 
   if (password.value.length < 8) {
-    pageError.value = "Password must be at least 8 characters"
+    error("Validation Error", "Password must be at least 8 characters")
     return
   }
 
   if (password.value !== confirmPassword.value) {
-    pageError.value = "Passwords do not match"
+    error("Validation Error", "Passwords do not match")
     return
   }
 
-  pageSuccess.value = "Password change functionality coming soon"
+  success("Coming Soon", "Password change functionality coming soon")
   password.value = ""
   confirmPassword.value = ""
-  setTimeout(() => { pageSuccess.value = "" }, 3000)
 }
 </script>
 
@@ -204,7 +226,7 @@ const changePassword = async () => {
         
         <div class="flex flex-col md:flex-row gap-6 md:items-start">
           <div class="flex-shrink-0">
-            <div class="h-24 w-24 rounded-lg overflow-hidden bg-gradient-to-br from-[#EEF2FF] to-[#E0E7FF] border-2 border-[#E2E8F0] flex items-center justify-center">
+            <div class="h-24 w-24 overflow-hidden bg-white flex items-center justify-center shadow-[0_12px_26px_rgba(15,23,42,0.08)]">
               <img 
                 v-if="localPreviewUrl || form.logo_url"
                 :src="localPreviewUrl || form.logo_url"
@@ -282,6 +304,12 @@ const changePassword = async () => {
         <div>
           <label class="text-[12px] font-medium text-[#64748B] block mb-2">Company Address</label>
           <textarea v-model="form.address" rows="3" class="w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50" placeholder="Company address"></textarea>
+        </div>
+
+        <div>
+          <label class="text-[12px] font-medium text-[#64748B] block mb-2">Company Description</label>
+          <textarea v-model="form.description" rows="4" class="w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50" placeholder="Tell workers about your company, culture, mission, and what makes you special..."></textarea>
+          <p class="text-[12px] text-[#64748B] mt-1">350 characters recommended</p>
         </div>
 
         <button

@@ -8,6 +8,7 @@ const { get, put } = useApi()
 const { getData, asObject, getErrorMessage } = useApiResponse()
 const { userId } = useAuth()
 const { uploadProfileImage, uploadError, uploading, clearUploadState } = useFileUpload()
+const { success, error, info } = useModal()
 
 const loading = ref(false)
 const pageError = ref("")
@@ -28,30 +29,48 @@ const password = ref("")
 const confirmPassword = ref("")
 const photoFileInput = ref(null)
 
+const safeValue = (value) => {
+  if (value === null || value === undefined) return ""
+  return String(value)
+}
+
 const fetchProfile = async () => {
-  if (!userId.value) return
+  if (!userId.value) {
+    return
+  }
   loading.value = true
   pageError.value = ""
-  
+
   try {
-    const res = await get(`/workers/profile/${ userId.value }`)
+    const res = await get(`/workers/profile/${userId.value}`)
     const payload = asObject(getData(res))
-    form.value = {
-      ...form.value,
-      ...payload,
-      full_name: payload?.data?.user?.full_name || payload?.user?.full_name || payload?.full_name || form.value.full_name,
-      email: payload?.data?.user?.email || payload?.user?.email || payload?.email || form.value.email
+    const profile = asObject(payload.profile || payload)
+    const user = asObject(payload.user)
+
+    const extractedData = {
+      full_name: safeValue(profile.full_name || user.full_name),
+      email: safeValue(profile.email || user.email),
+      field_of_work: safeValue(profile.field_of_work),
+      phone: safeValue(profile.phone),
+      address: safeValue(profile.address),
+      photo_url: safeValue(profile.photo_url || profile.profile_url)
     }
+
+    form.value = { ...form.value, ...extractedData }
   } catch (e) {
     if (e?.status !== 404) {
-      pageError.value = getErrorMessage(e, "Failed to load profile")
+      const msg = getErrorMessage(e, "Failed to load profile")
+      pageError.value = msg
     }
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => { fetchProfile() })
+onMounted(() => {
+  fetchProfile()
+})
+
 onBeforeUnmount(() => {
   if (localPreviewUrl.value) URL.revokeObjectURL(localPreviewUrl.value)
 })
@@ -68,13 +87,15 @@ const handlePhotoFileChange = (event) => {
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"]
   if (!allowedTypes.includes(file.type)) {
     pageError.value = "Photo must be JPG, PNG, or WebP"
-    photoFileInput.value.value = ""
+    error("Invalid File Type", "Photo must be JPG, PNG, or WebP")
+    if (photoFileInput.value) photoFileInput.value.value = ""
     return
   }
 
   if (file.size > 2 * 1024 * 1024) {
     pageError.value = "Photo max size is 2MB"
-    photoFileInput.value.value = ""
+    error("File Too Large", "Photo max size is 2MB")
+    if (photoFileInput.value) photoFileInput.value.value = ""
     return
   }
 
@@ -86,6 +107,7 @@ const handleUploadProfileImage = async () => {
   const file = photoFileInput.value?.files?.[0]
   if (!file) {
     pageError.value = "Please select a photo first"
+    info("Select Photo", "Please select a photo first")
     return
   }
 
@@ -94,29 +116,27 @@ const handleUploadProfileImage = async () => {
   uploadWarning.value = ""
 
   const result = await uploadProfileImage(file, userId.value)
-  
   if (!result) {
     pageError.value = uploadError.value
+    error("Upload Failed", uploadError.value || "Failed to upload photo")
     return
   }
 
   form.value.photo_url = result.publicUrl
   if (result.warning) uploadWarning.value = result.warning
 
-  pageSuccess.value = "Profile photo uploaded successfully"
-  photoFileInput.value.value = ""
+  success("Upload Complete", "Profile photo uploaded successfully")
+  if (photoFileInput.value) photoFileInput.value.value = ""
   if (localPreviewUrl.value) {
     URL.revokeObjectURL(localPreviewUrl.value)
     localPreviewUrl.value = ""
   }
-
-  setTimeout(() => { pageSuccess.value = "" }, 3000)
 }
 
 const saveProfile = async () => {
   if (loading.value || uploading.value) return
   if (!userId.value) {
-    pageError.value = "User ID not available"
+    error("Error", "User ID not available")
     return
   }
 
@@ -129,7 +149,7 @@ const saveProfile = async () => {
 
   const missing = required.find((item) => !String(form.value[item.key] || "").trim())
   if (missing) {
-    pageError.value = `${ missing.label } is required`
+    error("Validation Error", `${missing.label} is required`)
     return
   }
 
@@ -146,41 +166,47 @@ const saveProfile = async () => {
       address: form.value.address || ""
     }
 
-    if (form.value.photo_url) payload.photo_url = form.value.photo_url
+    if (form.value.photo_url) {
+      payload.profile_url = form.value.photo_url
+    }
 
-    await put(`/workers/profile/${ userId.value }`, payload)
-    pageSuccess.value = "Profile updated successfully"
-    setTimeout(() => { pageSuccess.value = "" }, 3000)
+    await put(`/workers/profile/${userId.value}`, payload)
+
+    if (localPreviewUrl.value) {
+      URL.revokeObjectURL(localPreviewUrl.value)
+      localPreviewUrl.value = ""
+    }
+    if (photoFileInput.value) photoFileInput.value.value = ""
+
+    await fetchProfile()
+    success("Success", "Profile updated successfully")
   } catch (e) {
-    pageError.value = getErrorMessage(e, "Failed to save profile")
+    const msg = getErrorMessage(e, "Failed to save profile")
+    error("Error", msg)
   } finally {
     loading.value = false
   }
 }
 
 const changePassword = async () => {
-  pageError.value = ""
-  pageSuccess.value = ""
-
   if (!password.value || !confirmPassword.value) {
-    pageError.value = "Both password fields are required"
+    error("Validation Error", "Both password fields are required")
     return
   }
 
   if (password.value.length < 8) {
-    pageError.value = "Password must be at least 8 characters"
+    error("Validation Error", "Password must be at least 8 characters")
     return
   }
 
   if (password.value !== confirmPassword.value) {
-    pageError.value = "Passwords do not match"
+    error("Validation Error", "Passwords do not match")
     return
   }
 
-  pageSuccess.value = "Password change functionality coming soon"
+  success("Coming Soon", "Password change functionality coming soon")
   password.value = ""
   confirmPassword.value = ""
-  setTimeout(() => { pageSuccess.value = "" }, 3000)
 }
 </script>
 
@@ -204,15 +230,17 @@ const changePassword = async () => {
     <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-6">
       <div class="mb-6 pb-6 border-b border-[#E2E8F0]">
         <h2 class="text-[18px] font-semibold mb-4">Profile Photo</h2>
-        
+
         <div class="flex flex-col md:flex-row gap-6 md:items-start">
           <div class="flex-shrink-0">
-            <div class="h-24 w-24 rounded-full overflow-hidden bg-gradient-to-br from-[#EEF2FF] to-[#E0E7FF] border-2 border-[#E2E8F0] flex items-center justify-center">
-              <img 
+            <div class="h-24 w-24 rounded-full overflow-hidden bg-white flex items-center justify-center">
+              <NuxtImg
                 v-if="localPreviewUrl || form.photo_url"
                 :src="localPreviewUrl || form.photo_url"
                 alt="Photo preview"
                 class="h-full w-full object-cover"
+                :key="form.photo_url"
+                loading="lazy"
               />
               <span v-else class="text-[12px] text-[#64748B]">No photo</span>
             </div>
@@ -240,7 +268,6 @@ const changePassword = async () => {
             </button>
 
             <p v-if="uploadError" class="text-[13px] text-red-600">{{ uploadError }}</p>
-
             <div v-if="uploadWarning" class="text-[13px] bg-yellow-50 border border-yellow-200 rounded-[5px] p-2 text-yellow-800">
               ⚠️ {{ uploadWarning }}
             </div>
@@ -254,7 +281,7 @@ const changePassword = async () => {
 
       <div>
         <h2 class="text-[18px] font-semibold mb-4">Personal Information</h2>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           <div>
             <label class="text-[12px] font-medium text-[#64748B] block mb-2">Full Name *</label>
@@ -293,7 +320,7 @@ const changePassword = async () => {
 
       <div class="mt-8 pt-6 border-t border-[#E2E8F0]">
         <h2 class="text-[18px] font-semibold mb-4">Change Password</h2>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label class="text-[12px] font-medium text-[#64748B] block mb-2">New Password</label>
