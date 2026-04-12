@@ -30,6 +30,15 @@ export default defineNuxtConfig({
     inject: true,
   },
 
+  image: {
+    provider: "ipx",
+    ipx: {},
+    domains: ["byjtqgnntpnslgofibec.supabase.co"],
+    alias: {
+      supabase: "https://byjtqgnntpnslgofibec.supabase.co/storage/v1/object/public"
+    }
+  },
+
   fontMetrics: {
     fonts: ["Outfit"],
   },
@@ -73,8 +82,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiUrl: import.meta.env.NUXT_PUBLIC_API_URL || defaultPublicApiUrl,
-      siteUrl: import.meta.env.NUXT_PUBLIC_SITE_URL,
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || defaultPublicApiUrl,
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
     },
   },
 

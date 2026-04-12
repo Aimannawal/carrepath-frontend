@@ -38,7 +38,7 @@ const submit = async () => {
       <form class="w-full flex flex-col items-end gap-6" @submit.prevent="submit">
         <div class="flex flex-col gap-3 w-full">
           <label for="workerName" class="text-[14px]">Full Name</label>
-          <input id="workerName" v-model="fullName" type="text" autocomplete="off" placeholder="Muhammad Rizal Ramzi" class="w-[420px] border border-[#E2E8F0] rounded-[5px] px-[14px] py-[12px] text-[14px]" />
+          <input id="workerName" v-model="fullName" type="text" autocomplete="off" placeholder="Your Full Name" class="w-[420px] border border-[#E2E8F0] rounded-[5px] px-[14px] py-[12px] text-[14px]" />
           <p v-if="error" class="text-[12px] text-red-600">{{ error }}</p>
         </div>
 

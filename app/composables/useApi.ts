@@ -1,14 +1,23 @@
 export const useApi = () => {
   const config = useRuntimeConfig()
-  const fallbackUrl = 'https://htaperrac.azhel.my.id'
+  const fallbackUrl = 'http://localhost:8080'
   const runtimeApiUrl = (config.public.apiUrl || '').replace(/\/$/, '')
+  const useRemoteInDev = String(config.public.useRemoteApi || '').toLowerCase() === 'true'
   const isLocalRuntimeTarget = /https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(runtimeApiUrl)
+  const isRemoteRuntimeTarget = /^https?:\/\//i.test(runtimeApiUrl) && !isLocalRuntimeTarget
 
-  const baseUrl = (
-    runtimeApiUrl && !(import.meta.env.PROD && isLocalRuntimeTarget)
-      ? runtimeApiUrl
-      : fallbackUrl
-  ).replace(/\/$/, '')
+  const baseUrl = (() => {
+    // In dev, default to local backend to avoid exhausting production Gemini quota.
+    if (import.meta.env.DEV && isRemoteRuntimeTarget && !useRemoteInDev) {
+      return fallbackUrl
+    }
+
+    return (
+      runtimeApiUrl && !(import.meta.env.PROD && isLocalRuntimeTarget)
+        ? runtimeApiUrl
+        : fallbackUrl
+    )
+  })().replace(/\/$/, '')
 
   /**
    * Get bearer token from cookie
@@ -80,10 +89,22 @@ export const useApi = () => {
    */
   const post = async (path: string, body: any, options = {}) => {
     try {
+      // For FormData, don't set Content-Type header - let browser handle it
+      const isFormData = body instanceof FormData
+      const headers = isFormData ? { Authorization: '' } : getHeaders(options.headers)
+      
+      // Add token to FormData if needed
+      if (isFormData) {
+        const token = getToken()
+        if (token) {
+          headers.Authorization = `Bearer ${token}`
+        }
+      }
+
       return await $fetch(withBase(path), {
         method: 'POST',
         body,
-        headers: getHeaders(options.headers),
+        headers: isFormData ? headers : getHeaders(options.headers),
         ...options
       })
     } catch (error) {

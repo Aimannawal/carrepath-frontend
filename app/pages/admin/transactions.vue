@@ -22,23 +22,35 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="p-6 md:p-8">
-    <h1 class="text-[30px] font-semibold mb-5">Admin Transactions</h1>
+  <section class="p-6 md:p-8 bg-[#F8FAFC] min-h-screen">
+    <h1 class="text-[30px] font-semibold mb-2 text-[#1E293B]">Admin Transactions</h1>
+    <p class="text-[14px] text-[#64748B] mb-5">Monitor all payment activity and status updates</p>
     <p v-if="error" class="text-[14px] text-red-500 mb-4">{{ error }}</p>
 
-    <div class="bg-[#0F172A] border border-[#1E293B] rounded-[10px] p-5">
+    <div class="bg-white border border-[#E2E8F0] rounded-[12px] p-5 shadow-sm">
       <div v-if="loading" class="space-y-3">
-        <div v-for="i in 8" :key="i" class="h-[56px] bg-[#1E293B] rounded-[10px] animate-pulse"></div>
+        <div v-for="i in 8" :key="i" class="h-[56px] bg-[#F1F5F9] rounded-[10px] animate-pulse"></div>
       </div>
 
       <div v-else-if="transactions.length" class="space-y-3">
-        <div v-for="tx in transactions" :key="tx.id" class="p-3 rounded-[10px] bg-[#111827] border border-[#1F2937] flex flex-col md:flex-row md:items-center md:justify-between">
-          <p class="text-[14px] text-white">{{ tx.type || 'payment' }} - Rp {{ Number(tx.amount || 0).toLocaleString('id-ID') }}</p>
-          <p class="text-[13px] text-[#9CA3AF]">{{ tx.status || '-' }} | {{ new Date(tx.created_at || Date.now()).toLocaleString() }}</p>
+        <div v-for="tx in transactions" :key="tx.id" class="p-4 rounded-[10px] bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] transition flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center" :class="tx.status === 'success' ? 'bg-emerald-100' : 'bg-amber-100'">
+              <Icon :name="tx.status === 'success' ? 'mdi:check-circle' : 'mdi:clock-outline'" :class="tx.status === 'success' ? 'text-emerald-600' : 'text-amber-600'" />
+            </div>
+            <div>
+              <p class="text-[14px] font-medium text-[#1E293B]">{{ tx.type || 'payment' }}</p>
+              <p class="text-[12px] text-[#64748B]">Rp {{ Number(tx.amount || 0).toLocaleString('id-ID') }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] px-2.5 py-1 rounded-full" :class="tx.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">{{ tx.status || '-' }}</span>
+            <p class="text-[12px] text-[#64748B]">{{ new Date(tx.created_at || Date.now()).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) }}</p>
+          </div>
         </div>
       </div>
 
-      <div v-else class="text-[14px] text-[#94A3B8]">No transaction data.</div>
+      <div v-else class="text-[14px] text-[#94A3B8] text-center py-8">No transaction data.</div>
     </div>
   </section>
 </template>

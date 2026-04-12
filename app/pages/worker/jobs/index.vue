@@ -4,11 +4,15 @@ import { ref, computed, onMounted, watch } from 'vue'
 useHead({ title: 'CarrePath | Worker Jobs' })
 definePageMeta({ layout: 'worker' })
 
-const { get } = useApi()
+const { get, post, del } = useApi()
 const { getData, toArray, getErrorMessage } = useApiResponse()
+const { userId } = useAuth()
 const loading = ref(true)
 const error = ref('')
 const allJobs = ref([])
+const appliedJobIds = ref(new Set())
+const savedJobMap = ref({})
+const savingJobId = ref('')
 
 const q = ref('')
 const category = ref('')
@@ -17,13 +21,22 @@ const locationType = ref('')
 const page = ref(1)
 const pageSize = 8
 
-const categories = ['Information Technology', 'Finance', 'Healthcare', 'Marketing', 'Operations']
+const categories = computed(() => {
+  return Array.from(
+    new Set(
+      allJobs.value
+        .map((job) => String(job?.category || '').trim())
+        .filter(Boolean)
+    )
+  ).sort((a, b) => a.localeCompare(b))
+})
 const types = ['full-time', 'part-time', 'internship', 'contract']
 const locationTypes = ['remote', 'onsite', 'hybrid']
 
 const filtered = computed(() => {
   const key = q.value.toLowerCase().trim()
   return allJobs.value.filter((j) => {
+    if (appliedJobIds.value.has(j?.id)) return false
     const companyName = j.company_profiles?.company_name || j.company_name || ''
     const hitQ = !key || `${j.title || ''} ${j.description || ''} ${companyName}`.toLowerCase().includes(key)
     const hitCat = !category.value || (j.category || '').toLowerCase() === category.value.toLowerCase()
@@ -47,6 +60,24 @@ const fetchJobs = async () => {
   loading.value = true
   error.value = ''
   try {
+    const [appRes, savedRes] = await Promise.all([
+      get(`/applications/worker/${userId.value}`),
+      get(`/saved/jobs/${userId.value}`)
+    ])
+
+    const applications = toArray(getData(appRes))
+    appliedJobIds.value = new Set(
+      applications
+        .map((app) => app?.job_id || app?.job?.id)
+        .filter((id) => typeof id === 'string' && id.trim().length)
+    )
+
+    const savedJobs = toArray(getData(savedRes))
+    savedJobMap.value = savedJobs.reduce((acc, job) => {
+      if (job?.id && job?.saved_id) acc[job.id] = job.saved_id
+      return acc
+    }, {})
+
     const query = new URLSearchParams()
     if (q.value) query.set('q', q.value)
     if (category.value) query.set('category', category.value)
@@ -59,6 +90,38 @@ const fetchJobs = async () => {
     error.value = getErrorMessage(e, 'Failed to fetch jobs')
   } finally {
     loading.value = false
+  }
+}
+
+const toggleSaveJob = async (job) => {
+  if (!job?.id || savingJobId.value) return
+  savingJobId.value = job.id
+  error.value = ''
+
+  try {
+    const existingSavedId = savedJobMap.value[job.id]
+    if (existingSavedId) {
+      await del(`/saved/company/${existingSavedId}`)
+      const next = { ...savedJobMap.value }
+      delete next[job.id]
+      savedJobMap.value = next
+      return
+    }
+
+    const res = await post('/saved/company', {
+      worker_id: userId.value,
+      job_id: job.id
+    })
+
+    const first = toArray(getData(res))[0]
+    const savedId = first?.id
+    if (savedId) {
+      savedJobMap.value = { ...savedJobMap.value, [job.id]: savedId }
+    }
+  } catch (e) {
+    error.value = getErrorMessage(e, 'Failed to update saved job')
+  } finally {
+    savingJobId.value = ''
   }
 }
 
@@ -93,7 +156,17 @@ const openDetail = (job) => navigateTo(`/worker/jobs/${job.id}`)
       <div v-for="i in 6" :key="i" class="h-[170px] bg-white border border-[#E2E8F0] rounded-[10px] animate-pulse"></div>
     </div>
     <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-      <JobCard v-for="job in list" :key="job.id" :job="job" @view="openDetail" @apply="openDetail" />
+      <JobCard
+        v-for="job in list"
+        :key="job.id"
+        :job="job"
+        :show-save="true"
+        :is-saved="Boolean(savedJobMap[job.id])"
+        :save-loading="savingJobId === job.id"
+        @save="toggleSaveJob"
+        @view="openDetail"
+        @apply="openDetail"
+      />
     </div>
 
     <div class="mt-6 flex items-center gap-2">

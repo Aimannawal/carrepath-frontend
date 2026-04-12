@@ -6,6 +6,7 @@ useHead({ title: 'CarrePath | Worker Dashboard' })
 definePageMeta({ layout: 'worker' })
 
 const { get } = useApi()
+const { getData, toArray, getErrorMessage } = useApiResponse()
 const tokenCookie = useCookie('access_token')
 const userId = ref('')
 const userName = ref('Worker')
@@ -18,6 +19,7 @@ const rootRef = ref(null)
 
 const sentCount = computed(() => applications.value.length)
 const acceptedCount = computed(() => applications.value.filter((a) => a.status === 'accepted').length)
+const rejectedCount = computed(() => applications.value.filter((a) => a.status === 'rejected').length)
 const savedCvCount = computed(() => resumes.value.length)
 
 const parseToken = () => {
@@ -37,15 +39,22 @@ const fetchData = async () => {
       get(`/applications/worker/${userId.value}`),
       get(`/ai/resumes/${userId.value}`)
     ])
-    jobs.value = jobsRes.status === 'fulfilled' ? (jobsRes.value.data || []).slice(0, 6) : []
-    applications.value = appRes.status === 'fulfilled' ? (appRes.value.data || []) : []
-    resumes.value = resumeRes.status === 'fulfilled' ? (resumeRes.value.data || []) : []
+    const allJobs = jobsRes.status === 'fulfilled' ? toArray(getData(jobsRes.value)) : []
+    applications.value = appRes.status === 'fulfilled' ? toArray(getData(appRes.value)) : []
+    resumes.value = resumeRes.status === 'fulfilled' ? toArray(getData(resumeRes.value)) : []
+
+    const appliedJobIds = new Set(
+      applications.value
+        .map((app) => app?.job_id || app?.job?.id)
+        .filter((id) => typeof id === 'string' && id.trim().length)
+    )
+    jobs.value = allJobs.filter((job) => !appliedJobIds.has(job?.id)).slice(0, 6)
 
     if (jobsRes.status === 'rejected' || appRes.status === 'rejected' || resumeRes.status === 'rejected') {
       error.value = 'Some dashboard data failed to load. You can still use other menu pages.'
     }
   } catch (e) {
-    error.value = e?.data?.error || 'Failed to fetch dashboard data'
+    error.value = getErrorMessage(e, 'Failed to fetch dashboard data')
   } finally {
     loading.value = false
     if (rootRef.value) {
@@ -80,8 +89,8 @@ onMounted(fetchData)
         <p class="text-[28px] font-semibold mt-1">{{ acceptedCount }}</p>
       </div>
       <div class="enter-card bg-white border border-[#E2E8F0] rounded-[10px] p-5">
-        <p class="text-[13px] text-[#64748B]">Saved CV</p>
-        <p class="text-[28px] font-semibold mt-1">{{ savedCvCount }}</p>
+        <p class="text-[13px] text-[#64748B]">Rejected</p>
+        <p class="text-[28px] font-semibold mt-1">{{ rejectedCount }}</p>
       </div>
     </div>
 

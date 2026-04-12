@@ -164,7 +164,7 @@ const submitApply = async () => {
   }
 }
 
-const saveCompany = async () => {
+const saveJob = async () => {
   if (!userId.value || !job.value?.id) {
     formError.value = 'Worker or job information not ready'
     return
@@ -175,22 +175,17 @@ const saveCompany = async () => {
   
   try {
     const payload = {
-      worker_id: userId.value
-    }
-
-    if (resolvedCompanyId.value) {
-      payload.company_id = String(resolvedCompanyId.value)
-    } else {
-      payload.job_id = String(job.value.id)
+      worker_id: userId.value,
+      job_id: String(job.value.id)
     }
 
     const res = await post('/saved/company', payload)
     const message = String(res?.message || '').toLowerCase()
     
     if (message.includes('already saved')) {
-      formSuccess.value = 'Company already saved.'
+      formSuccess.value = 'Job already saved.'
     } else {
-      formSuccess.value = 'Company saved successfully.'
+      formSuccess.value = 'Job saved successfully.'
     }
     
     // Reset after 3 seconds
@@ -198,10 +193,10 @@ const saveCompany = async () => {
       formSuccess.value = ''
     }, 3000)
   } catch (e) {
-    const errMsg = getErrorMessage(e, 'Failed to save company')
+    const errMsg = getErrorMessage(e, 'Failed to save job')
     // Handle idempotent case - "already saved" is success
     if (errMsg.toLowerCase().includes('already saved')) {
-      formSuccess.value = 'Company already saved.'
+      formSuccess.value = 'Job already saved.'
       setTimeout(() => {
         formSuccess.value = ''
       }, 2000)
@@ -225,7 +220,8 @@ const fetchJobDetail = async () => {
     // First fetch worker profile for workerProfileId
     try {
       const profileRes = await get(`/workers/profile/${userId.value}`)
-      const profile = asObject(getData(profileRes))
+      const payloadProfile = asObject(getData(profileRes))
+      const profile = asObject(payloadProfile.profile || payloadProfile)
       workerProfileId.value = profile.id || profile.worker_profile_id || ''
     } catch (profileErr) {
       // Profile fetch failure is not critical
@@ -327,9 +323,9 @@ onMounted(() => {
           </button>
           <button
             class="border border-[#CBD5E1] rounded-[5px] px-5 py-2.5 font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors"
-            @click="saveCompany"
+            @click="saveJob"
           >
-            Save Company
+            Save Job
           </button>
         </div>
       </div>
