@@ -68,6 +68,7 @@ const parsedPlan = computed(() => {
   const raw = latestRaw.value
   const planList = normalizeList(raw.study_plan || raw.weeks || raw.plan_data?.study_plan || raw.data?.study_plan)
   const careerList = normalizeList(raw.most_relevant_careers || raw.careers)
+  const recommendedJobRows = normalizeList(raw.recommended_jobs || raw.recommendation_jobs || raw.jobs_recommendation)
 
   const weeks = planList.map((item, index) => {
     const row = toRecord(item)
@@ -86,6 +87,22 @@ const parsedPlan = computed(() => {
     strengths: normalizeList(raw.strengths),
     gaps: normalizeList(raw.gaps || raw.skill_gaps),
     finalProjectIdeas: normalizeList(raw.final_project_ideas || raw.project_ideas),
+    recommendedJobs: recommendedJobRows.map((item) => {
+      const row = toRecord(item)
+      const company = toRecord(row.company_profiles)
+      return {
+        id: row.id || row.job_id || '',
+        title: row.title || '-',
+        company_profiles: {
+          company_name: company.company_name || row.company_name || '-',
+          logo_url: company.logo_url || '',
+          is_premium: company.is_premium ?? row.is_premium ?? false
+        },
+        location_type: row.location_type || '-',
+        type: row.type || '-',
+        reason: row.reason || ''
+      }
+    }),
     careers: careerList.map((item) => {
       const row = toRecord(item)
       return {
@@ -101,6 +118,9 @@ const parsedPlan = computed(() => {
 const recommendedCareerTitles = computed(() => parsedPlan.value.careers.map((x) => String(x.title || '').toLowerCase().trim()).filter(Boolean))
 
 const recommendedJobs = computed(() => {
+  if (parsedPlan.value.recommendedJobs.length) {
+    return parsedPlan.value.recommendedJobs
+  }
   if (!recommendedCareerTitles.value.length || !allJobs.value.length) return []
 
   const scoreJob = (job) => {
@@ -360,8 +380,9 @@ const generateStudyPlan = async () => {
 }
 
 const openJobDetail = (job) => {
-  if (!job?.id) return
-  navigateTo(`/worker/jobs/${job.id}`)
+  const jobId = job?.id || job?.job_id
+  if (!jobId) return
+  navigateTo(`/worker/jobs/${jobId}`)
 }
 
 onMounted(() => {

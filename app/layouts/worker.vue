@@ -12,11 +12,12 @@ const menuItems = [
   { name: 'Manage Job', path: '/worker/jobs', icon: 'heroicons:briefcase' },
   { name: 'My Resume', path: '/worker/resume', icon: 'heroicons:document-text' },
   { name: 'Study Plan', path: '/worker/study-plan', icon: 'heroicons:academic-cap' },
+  { name: 'CarrepathAI', path: '/worker/ai', icon: 'heroicons:sparkles' },
   { name: 'Applications', path: '/worker/applications', icon: 'heroicons:paper-airplane' },
   { name: 'Saved Jobs', path: '/worker/saved-companies', icon: 'heroicons:bookmark' },
   { name: 'My Account', path: '/worker/account', icon: 'heroicons:user' },
   { name: 'Transactions', path: '/worker/transactions', icon: 'heroicons:banknotes' },
-  { name: 'Upgrade', path: '/worker/upgrade', icon: 'heroicons:sparkles' }
+  { name: 'Upgrade', path: '/worker/upgrade', icon: 'heroicons:arrow-trending-up' }
 ]
 
 onMounted(() => {
