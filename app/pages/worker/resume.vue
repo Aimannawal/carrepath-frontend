@@ -20,6 +20,9 @@ const cvFiles = ref([])
 const cvFileNames = ref([])
 const cvFileError = ref('')
 const generateResult = ref(null)
+const savingDraft = ref(false)
+const readyToAutosave = ref(false)
+let draftSaveTimer = null
 
 const createForm = ref({
   full_name: '',
@@ -47,11 +50,17 @@ const quotaDisplayText = computed(() => {
   return `${quotaState.value.remaining}x tersisa dari ${quotaState.value.quota}x kuota bulanan`
 })
 
+const getLatestResumeSource = (value) => {
+  if (!value) return null
+  if (Array.isArray(value)) return value[0] || null
+  if (Array.isArray(value?.data)) return value.data[0] || null
+  if (value?.data && typeof value.data === 'object') return value.data
+  return value
+}
+
 const parsedResume = computed(() => {
-  if (!generateResult.value) return null
-  const source = Array.isArray(generateResult.value)
-    ? (generateResult.value[0] || {})
-    : generateResult.value
+  const source = getLatestResumeSource(generateResult.value)
+  if (!source) return null
   const raw = source.raw_data || source.resume_data || source
   if (!raw) return null
 
@@ -97,6 +106,84 @@ const clearMessages = () => {
   cvFileError.value = ''
 }
 
+const normalizeDraftForm = (value) => {
+  const base = {
+    full_name: '',
+    headline: '',
+    email: '',
+    phone: '',
+    country: '',
+    province: '',
+    city: '',
+    website: '',
+    summary: '',
+    hard_skills: [],
+    certificates: [],
+    education: [{ school: '', degree: '', year: '' }],
+    experiences: [{ company: '', role: '', start_date: '', end_date: '', tasks: '', impact: '' }]
+  }
+  const raw = value && typeof value === 'object' ? value : {}
+  return {
+    ...base,
+    ...raw,
+    hard_skills: Array.isArray(raw.hard_skills) ? raw.hard_skills : [],
+    certificates: Array.isArray(raw.certificates) ? raw.certificates : [],
+    education: Array.isArray(raw.education) && raw.education.length ? raw.education : base.education,
+    experiences: Array.isArray(raw.experiences) && raw.experiences.length ? raw.experiences : base.experiences
+  }
+}
+
+const saveResumeDraft = async () => {
+  if (!userId.value || !readyToAutosave.value) return
+  savingDraft.value = true
+  try {
+    await post('/ai/resume-draft', {
+      worker_id: userId.value,
+      draft_data: createForm.value
+    })
+  } catch {
+    // Silent fail to avoid disrupting form flow.
+  } finally {
+    savingDraft.value = false
+  }
+}
+
+const fetchResumeDraft = async () => {
+  if (!userId.value) return
+  try {
+    const response = await get(`/ai/resume-draft/${userId.value}`)
+    const payload = getData(response) || {}
+    const draftData = payload.draft_data && typeof payload.draft_data === 'object' ? payload.draft_data : null
+    if (!draftData) return
+
+    const merged = normalizeDraftForm({
+      ...createForm.value,
+      ...draftData,
+      hard_skills: Array.isArray(draftData.hard_skills) ? draftData.hard_skills : createForm.value.hard_skills,
+      certificates: Array.isArray(draftData.certificates) ? draftData.certificates : createForm.value.certificates,
+      education: Array.isArray(draftData.education) && draftData.education.length ? draftData.education : createForm.value.education,
+      experiences: Array.isArray(draftData.experiences) && draftData.experiences.length ? draftData.experiences : createForm.value.experiences
+    })
+
+    createForm.value = merged
+  } catch {
+    // No draft yet or request fails: ignore silently.
+  }
+}
+
+const loadLatestGeneratedResume = async () => {
+  if (!userId.value) return
+  try {
+    const response = await get(`/ai/resumes/${userId.value}`)
+    const records = getData(response)
+    if (Array.isArray(records) && records.length) {
+      generateResult.value = records[0]
+    }
+  } catch {
+    // Ignore: user may not have a generated resume yet.
+  }
+}
+
 const updateQuotaFromResponse = (response) => {
   const nextQuota = getQuota(response)
   if (nextQuota) quotaState.value = nextQuota
@@ -138,16 +225,20 @@ const handleCvFileUpload = (event) => {
     cvFileNames.value = []
     return
   }
-  const validTypes = ['application/pdf', 'text/plain', 'image/jpeg', 'image/png', 'image/webp']
+  const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp']
   for (const file of files) {
     if (!validTypes.includes(file.type)) {
-      cvFileError.value = 'File harus PDF, TXT, JPG, PNG, atau WEBP'
+      cvFileError.value = 'File harus PDF, JPG, PNG, atau WEBP'
       event.target.value = ''
+      cvFiles.value = []
+      cvFileNames.value = []
       return
     }
     if (file.size > 10 * 1024 * 1024) {
       cvFileError.value = 'Ukuran file maksimal 10MB per file'
       event.target.value = ''
+      cvFiles.value = []
+      cvFileNames.value = []
       return
     }
   }
@@ -155,70 +246,61 @@ const handleCvFileUpload = (event) => {
   cvFileNames.value = files.map((f) => f.name)
 }
 
-// ─── OCR: run backend Vision API on uploaded files ───────────────────────────
+const extractSupportDataWithBackendOCR = async (files = []) => {
+  if (!files.length) return null
 
-const runBackendOCR = async () => {
-  if (!cvFiles.value.length) return null
+  const ocrForm = new FormData()
+  ocrForm.append('prompt', 'Extract complete resume details from all files.')
+  files.forEach((file) => {
+    ocrForm.append('files[]', file)
+  })
+
+  const response = await post('/ai/ocr-extract', ocrForm)
+  return getData(response) || null
+}
+
+const parseTextFromPdf = async (file) => {
   try {
-    const ocrForm = new FormData()
-    ocrForm.append('prompt', 'Extract complete resume details including all experiences, education, skills, certifications, and contact info.')
-    cvFiles.value.forEach((file) => ocrForm.append('files[]', file))
-    const response = await post('/ai/ocr-extract', ocrForm)
-    return getData(response) || null
+    const pdfjs = await import('pdfjs-dist/build/pdf.mjs')
+    const workerModule = await import('pdfjs-dist/build/pdf.worker.min.mjs?url')
+    pdfjs.GlobalWorkerOptions.workerSrc = workerModule.default
+
+    const buffer = await file.arrayBuffer()
+    const document = await pdfjs.getDocument({ data: buffer }).promise
+    const pageTexts = []
+
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber)
+      const textContent = await page.getTextContent()
+      const fragments = textContent.items
+        .map((item) => ('str' in item ? item.str : ''))
+        .filter(Boolean)
+
+      if (fragments.length) {
+        pageTexts.push(fragments.join(' '))
+      }
+    }
+
+    return pageTexts.join('\n').trim()
   } catch {
-    return null
+    return ''
   }
 }
 
-// Merge Gemini-parsed OCR data back into the form fields
-const mergeOcrIntoForm = (ocrData) => {
-  if (!ocrData || typeof ocrData !== 'object') return
-
-  const isGarbage = (val) => {
-    const t = String(val || '').trim().toLowerCase()
-    if (!t) return true
-    return ['<rdf:rdf', 'endobj', 'startxref', 'xpacket', 'http://www.w3.org', 'xmlns:'].some(token => t.includes(token))
-  }
-
-  if (ocrData.full_name && !isGarbage(ocrData.full_name)) createForm.value.full_name = String(ocrData.full_name)
-  if (ocrData.email && !isGarbage(ocrData.email)) createForm.value.email = String(ocrData.email)
-  if (ocrData.phone && !isGarbage(ocrData.phone)) createForm.value.phone = String(ocrData.phone)
-  if (ocrData.website && !isGarbage(ocrData.website)) createForm.value.website = String(ocrData.website)
-  if (ocrData.location && !isGarbage(ocrData.location)) createForm.value.city = String(ocrData.location)
-  if (ocrData.summary && !isGarbage(ocrData.summary)) createForm.value.summary = String(ocrData.summary)
-
-  if (Array.isArray(ocrData.skills) && ocrData.skills.length) {
-    const cleaned = ocrData.skills.map(s => String(s || '').trim()).filter(s => s && !isGarbage(s))
-    if (cleaned.length) createForm.value.hard_skills = Array.from(new Set(cleaned))
-  }
-
-  if (Array.isArray(ocrData.experiences) && ocrData.experiences.length) {
-    const mapped = ocrData.experiences
-      .map(exp => ({
-        company: String(exp.company_name || exp.company || '').trim(),
-        role: String(exp.role || '').trim(),
-        start_date: String(exp.start_date || '').trim(),
-        end_date: String(exp.end_date || '').trim(),
-        tasks: String(exp.description || '').trim(),
-        impact: ''
-      }))
-      .filter(exp => [exp.company, exp.role, exp.tasks].some(v => v && !isGarbage(v)))
-    if (mapped.length) createForm.value.experiences = mapped
-  }
-
-  if (Array.isArray(ocrData.education) && ocrData.education.length) {
-    const mapped = ocrData.education
-      .map(edu => ({
-        school: String(edu.institution || edu.school || '').trim(),
-        degree: [edu.degree, edu.major].map(v => String(v || '').trim()).filter(Boolean).join(' – '),
-        year: [edu.start_year, edu.end_year].map(v => String(v || '').trim()).filter(Boolean).join(' – ')
-      }))
-      .filter(edu => [edu.school, edu.degree, edu.year].some(v => v && !isGarbage(v)))
-    if (mapped.length) createForm.value.education = mapped
-  }
+const removeCvFile = (index) => {
+  cvFiles.value = cvFiles.value.filter((_, i) => i !== index)
+  cvFileNames.value = cvFileNames.value.filter((_, i) => i !== index)
 }
 
 // ─── Main generate flow ───────────────────────────────────────────────────────
+// Logika sederhana:
+// 1. Kumpulkan data form
+// 2. Kalau ada file, langsung append ke FormData dengan key yang dikenali backend
+//    - File pertama → cv_file
+//    - File berikutnya → additional_file_1, additional_file_2, dst.
+//    Backend (processAdditionalFiles) sudah handle semua key ini via Gemini Vision.
+// 3. Kirim ke /ai/generate-resume — backend gabungkan form + file content
+// 4. Tidak ada OCR step terpisah, tidak ada autofill form
 
 const runGenerateFromCreate = async () => {
   if (loadingGenerate.value) return
@@ -231,35 +313,14 @@ const runGenerateFromCreate = async () => {
 
   loadingGenerate.value = true
   try {
-    // ── Step 1: Run Gemini Vision OCR on uploaded files ──────────────────────
-    // This is the ONLY place files are sent to AI — not again in generate.
-    let ocrData = null
-    let ocrRawText = ''
-
-    if (cvFiles.value.length) {
-      ocrData = await runBackendOCR()
-      if (ocrData) {
-        // Merge parsed OCR fields into the form so user can see what was extracted
-        mergeOcrIntoForm(ocrData)
-        // Use the full raw_text from Gemini as our rich cv_text
-        ocrRawText = String(ocrData.raw_text || '').trim()
-      }
-    }
-
-    // ── Step 2: Build cv_text ────────────────────────────────────────────────
-    // Priority: Gemini Vision raw_text > form summary
-    // We intentionally do NOT re-extract PDFs on frontend — Gemini already did it.
-    const cvText = ocrRawText || createForm.value.summary || ''
-
-    // ── Step 3: Build FormData for /ai/generate-resume ───────────────────────
-    // Files are NOT appended here — OCR already processed them.
-    // We pass ocr_extracted_data so backend can use it without re-processing.
     const formData = new FormData()
+
+    // ── Data worker ──────────────────────────────────────────────────────────
     formData.append('worker_id', userId.value)
-    formData.append('cv_text', cvText)
+    formData.append('cv_text', createForm.value.summary || '')
     formData.append('cv_payload', JSON.stringify(createForm.value))
 
-    // Flat fields (backward compat)
+    // Flat fields (backward compat dengan backend)
     formData.append('full_name', createForm.value.full_name)
     formData.append('email', createForm.value.email)
     formData.append('phone', createForm.value.phone)
@@ -274,23 +335,55 @@ const runGenerateFromCreate = async () => {
     formData.append('education', JSON.stringify(createForm.value.education))
     formData.append('experiences', JSON.stringify(createForm.value.experiences))
 
-    // Send OCR result to backend so it doesn't need to re-process files
-    if (ocrData) {
-      formData.append('ocr_extracted_data', JSON.stringify(ocrData))
+    const pdfFiles = cvFiles.value.filter((file) => file.type === 'application/pdf')
+    const imageFiles = cvFiles.value.filter((file) => file.type !== 'application/pdf')
+
+    if (pdfFiles.length > 0) {
+      const pdfTextParts = []
+      for (const file of pdfFiles) {
+        const extracted = await parseTextFromPdf(file)
+        if (extracted) pdfTextParts.push(extracted)
+      }
+      if (pdfTextParts.length) {
+        const pdfMergedText = pdfTextParts.join('\n\n')
+        formData.set('cv_text', formData.get('cv_text') ? `${formData.get('cv_text')}\n\n${pdfMergedText}` : pdfMergedText)
+      }
     }
 
-    // ── Step 4: Generate ─────────────────────────────────────────────────────
+    let imageOcrSuccess = false
+    if (imageFiles.length > 0) {
+      try {
+        const ocrData = await extractSupportDataWithBackendOCR(imageFiles)
+        const ocrText = String(ocrData?.raw_text || '').trim()
+        if (ocrText) {
+          imageOcrSuccess = true
+          formData.set('cv_text', formData.get('cv_text') ? `${formData.get('cv_text')}\n\n${ocrText}` : ocrText)
+        }
+      } catch {
+        imageOcrSuccess = false
+      }
+    }
+
+    // Only send image files back as fallback if OCR extraction failed.
+    if (imageFiles.length > 0 && !imageOcrSuccess) {
+      formData.append('cv_file', imageFiles[0])
+      for (let i = 1; i < imageFiles.length; i++) {
+        formData.append(`additional_file_${i}`, imageFiles[i])
+      }
+    }
+
+    // PDF files are already converted to text locally, so do not upload them again.
+
+    // ── Generate ─────────────────────────────────────────────────────────────
     const response = await post('/ai/generate-resume', formData)
     generateResult.value = getData(response)
     updateQuotaFromResponse(response)
 
-    const debug = response?.debug || {}
-    const source = debug.file_content_source || 'none'
-    const chars = Number(debug.extracted_text_chars || 0)
-    const fallbackUsed = Boolean(debug.fallback_used)
+    await loadLatestGeneratedResume()
 
-    pageSuccess.value = `Resume berhasil dibuat!${ocrData ? ' File dibaca via Gemini Vision.' : ''} Chars: ${chars}. Source: ${source}.${fallbackUsed ? ' (AI fallback aktif)' : ''}`
-    success('Generate CV Berhasil', 'Resume dibuat berhasil.')
+    const hasFiles = cvFiles.value.length > 0
+    pageSuccess.value = `Resume berhasil dibuat!${hasFiles ? ` (${cvFiles.value.length} file diproses via Gemini Vision)` : ''}`
+    success('Generate CV Berhasil', 'Resume kamu sudah siap di-preview dan download.')
   } catch (e) {
     pageError.value = getErrorMessage(e, 'Generate resume gagal.')
     error('Generate CV Gagal', pageError.value)
@@ -299,72 +392,290 @@ const runGenerateFromCreate = async () => {
   }
 }
 
-// ─── PDF Download ─────────────────────────────────────────────────────────────
+// ─── PDF Download — Harvard Style ────────────────────────────────────────────
 
 const downloadCvPdf = () => {
   if (!hasPreview.value) {
     pageError.value = 'Belum ada hasil resume untuk di-download.'
     return
   }
+
   const data = parsedResume.value
   const doc = new jsPDF({ unit: 'pt', format: 'a4' })
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const margin = 44
-  const width = pageWidth - margin * 2
-  let cursorY = margin
 
-  const addLine = (text, bold = false, size = 10) => {
-    const wrapped = doc.splitTextToSize(text || ' ', width)
-    if (cursorY + wrapped.length * 14 > pageHeight - margin) {
+  const pageW = doc.internal.pageSize.getWidth()
+  const pageH = doc.internal.pageSize.getHeight()
+  const mL = 56  // margin left
+  const mR = 56  // margin right
+  const mT = 52  // margin top
+  const mB = 52  // margin bottom
+  const contentW = pageW - mL - mR
+  let y = mT
+
+  // ── helpers ────────────────────────────────────────────────────────────────
+
+  const checkPage = (needed) => {
+    if (y + needed > pageH - mB) {
       doc.addPage()
-      cursorY = margin
+      y = mT
     }
-    doc.setFont('helvetica', bold ? 'bold' : 'normal')
+  }
+
+  const setFont = (style, size) => {
+    doc.setFont('times', style)
     doc.setFontSize(size)
-    doc.text(wrapped, margin, cursorY)
-    cursorY += wrapped.length * 14 + (bold ? 6 : 2)
   }
 
-  addLine(data.name, true, 16)
-  addLine(data.headline, false, 11)
-  addLine([data.contact.email, data.contact.phone, data.contact.location, data.contact.website].filter(Boolean).join('  |  '), false, 9)
-  cursorY += 8
+  const writeText = (txt, x, maxW, lineHeight, style, size, color) => {
+    setFont(style, size)
+    if (color) doc.setTextColor(...color)
+    const lines = doc.splitTextToSize(String(txt || ''), maxW)
+    checkPage(lines.length * lineHeight + 2)
+    doc.text(lines, x, y)
+    y += lines.length * lineHeight
+    if (color) doc.setTextColor(0, 0, 0)
+    return lines.length
+  }
 
+  const drawHRule = (thickness, color, topGap = 3, bottomGap = 9) => {
+    checkPage(topGap + bottomGap + 2)
+    y += topGap
+    const yLine = Math.round(y) + 0.5
+    doc.setDrawColor(...(color || [33, 33, 33]))
+    doc.setLineWidth(thickness)
+    doc.line(mL, yLine, pageW - mR, yLine)
+    y = yLine + bottomGap
+    doc.setDrawColor(0, 0, 0)
+  }
+
+  const sectionHeading = (label) => {
+    y += 11
+    checkPage(20)
+    setFont('bold', 10)
+    doc.setTextColor(0, 0, 0)
+    const lines = doc.splitTextToSize(label.toUpperCase(), contentW)
+    doc.text(lines, mL, y)
+    y += 13
+    drawHRule(0.55, [38, 38, 38], 2, 9)
+  }
+
+  // ── NAME ──────────────────────────────────────────────────────────────────
+  setFont('bold', 17)
+  doc.setTextColor(0, 0, 0)
+  const nameLines = doc.splitTextToSize(data.name || '', contentW)
+  doc.text(nameLines, pageW / 2, y, { align: 'center' })
+  y += nameLines.length * 20
+
+  // ── HEADLINE ──────────────────────────────────────────────────────────────
+  if (data.headline) {
+    setFont('italic', 10.5)
+    doc.setTextColor(80, 80, 80)
+    const hlLines = doc.splitTextToSize(data.headline, contentW)
+    doc.text(hlLines, pageW / 2, y, { align: 'center' })
+    y += hlLines.length * 14
+    doc.setTextColor(0, 0, 0)
+  }
+
+  // ── CONTACT LINE ──────────────────────────────────────────────────────────
+  const contactParts = [
+    data.contact.email,
+    data.contact.phone,
+    data.contact.location,
+    data.contact.website
+  ].filter(Boolean)
+
+  if (contactParts.length) {
+    y += 4
+    setFont('normal', 9)
+    doc.setTextColor(60, 60, 60)
+    const contactStr = contactParts.join('   |   ')
+    const contactLines = doc.splitTextToSize(contactStr, contentW)
+    doc.text(contactLines, pageW / 2, y, { align: 'center' })
+    y += contactLines.length * 13
+    doc.setTextColor(0, 0, 0)
+  }
+
+  y += 6
+  drawHRule(1.0, [15, 23, 42], 2, 10)
+
+  // ── SUMMARY ───────────────────────────────────────────────────────────────
   if (data.summary) {
-    addLine('SUMMARY', true, 11)
-    addLine(data.summary)
-    cursorY += 6
+    sectionHeading('Summary')
+    setFont('normal', 10)
+    doc.setTextColor(30, 30, 30)
+    const sumLines = doc.splitTextToSize(data.summary, contentW)
+    checkPage(sumLines.length * 14)
+    doc.text(sumLines, mL, y)
+    y += sumLines.length * 14
+    doc.setTextColor(0, 0, 0)
   }
 
-  if (data.skills.length) {
-    addLine('SKILLS', true, 11)
-    addLine(data.skills.join('  ·  '))
-    cursorY += 6
-  }
-
+  // ── EXPERIENCE ────────────────────────────────────────────────────────────
   if (data.experiences.length) {
-    addLine('EXPERIENCE', true, 11)
+    sectionHeading('Experience')
     data.experiences.forEach((exp) => {
-      addLine(`${exp.role}  —  ${exp.company}  |  ${exp.period}`, true, 10)
-      exp.bullets.forEach((b) => addLine(`• ${b}`))
-      cursorY += 4
+      checkPage(32)
+
+      // Role (bold) + period (right-aligned, same line)
+      setFont('bold', 10.5)
+      doc.setTextColor(0, 0, 0)
+      const roleLines = doc.splitTextToSize(exp.role || '', contentW * 0.72)
+      doc.text(roleLines, mL, y)
+
+      if (exp.period) {
+        setFont('normal', 9.5)
+        doc.setTextColor(80, 80, 80)
+        doc.text(exp.period, pageW - mR, y, { align: 'right' })
+        doc.setTextColor(0, 0, 0)
+      }
+      y += roleLines.length * 14
+
+      // Company (italic)
+      if (exp.company) {
+        setFont('italic', 10)
+        doc.setTextColor(60, 60, 60)
+        const coLines = doc.splitTextToSize(exp.company, contentW)
+        checkPage(coLines.length * 13)
+        doc.text(coLines, mL, y)
+        y += coLines.length * 13
+        doc.setTextColor(0, 0, 0)
+      }
+
+      // Bullet points
+      if (exp.bullets && exp.bullets.length) {
+        y += 3
+        exp.bullets.forEach((bullet) => {
+          const bulletText = String(bullet || '').trim()
+          if (!bulletText) return
+          const bulletLines = doc.splitTextToSize(bulletText, contentW - 12)
+          checkPage(bulletLines.length * 13 + 2)
+          setFont('normal', 10)
+          doc.setTextColor(30, 30, 30)
+          doc.text('•', mL, y)
+          doc.text(bulletLines, mL + 10, y)
+          y += bulletLines.length * 13 + 2
+        })
+        doc.setTextColor(0, 0, 0)
+      }
+
+      y += 6
     })
-    cursorY += 4
   }
 
+  // ── EDUCATION ─────────────────────────────────────────────────────────────
   if (data.education.length) {
-    addLine('EDUCATION', true, 11)
-    data.education.forEach((edu) => addLine(`${edu.school}  |  ${edu.degree}  |  ${edu.year}`))
-    cursorY += 6
+    sectionHeading('Education')
+    data.education.forEach((edu) => {
+      checkPage(28)
+
+      // School (bold) + year (right)
+      setFont('bold', 10.5)
+      doc.setTextColor(0, 0, 0)
+      const schLines = doc.splitTextToSize(edu.school || '', contentW * 0.72)
+      doc.text(schLines, mL, y)
+
+      if (edu.year) {
+        setFont('normal', 9.5)
+        doc.setTextColor(80, 80, 80)
+        doc.text(edu.year, pageW - mR, y, { align: 'right' })
+        doc.setTextColor(0, 0, 0)
+      }
+      y += schLines.length * 14
+
+      // Degree (italic)
+      if (edu.degree) {
+        setFont('italic', 10)
+        doc.setTextColor(60, 60, 60)
+        const degLines = doc.splitTextToSize(edu.degree, contentW)
+        checkPage(degLines.length * 13)
+        doc.text(degLines, mL, y)
+        y += degLines.length * 13
+        doc.setTextColor(0, 0, 0)
+      }
+      y += 5
+    })
   }
 
+  // ── SKILLS ────────────────────────────────────────────────────────────────
+  const allSkills = [
+    ...data.skills,
+    ...data.core_competencies
+  ].filter(Boolean)
+
+  if (allSkills.length) {
+    sectionHeading('Skills')
+    setFont('normal', 10)
+    doc.setTextColor(30, 30, 30)
+    const skillStr = allSkills.join('   ·   ')
+    const skillLines = doc.splitTextToSize(skillStr, contentW)
+    checkPage(skillLines.length * 14)
+    doc.text(skillLines, mL, y)
+    y += skillLines.length * 14
+    doc.setTextColor(0, 0, 0)
+  }
+
+  // ── CERTIFICATIONS ────────────────────────────────────────────────────────
   if (data.certifications.length) {
-    addLine('CERTIFICATIONS', true, 11)
-    addLine(data.certifications.join('  ·  '))
+    sectionHeading('Certifications')
+    data.certifications.forEach((cert) => {
+      const certText = String(cert || '').trim()
+      if (!certText) return
+      checkPage(16)
+      setFont('normal', 10)
+      doc.setTextColor(30, 30, 30)
+      doc.text('•', mL, y)
+      const certLines = doc.splitTextToSize(certText, contentW - 12)
+      doc.text(certLines, mL + 10, y)
+      y += certLines.length * 14
+    })
+    doc.setTextColor(0, 0, 0)
   }
 
-  doc.save(`CV-${(data.name || 'worker').replace(/\s+/g, '-')}.pdf`)
+  // ── PROJECTS ──────────────────────────────────────────────────────────────
+  if (data.projects && data.projects.length) {
+    sectionHeading('Projects')
+    data.projects.forEach((proj) => {
+      checkPage(28)
+      if (proj.name) {
+        setFont('bold', 10.5)
+        doc.setTextColor(0, 0, 0)
+        const projLines = doc.splitTextToSize(proj.name, contentW)
+        doc.text(projLines, mL, y)
+        y += projLines.length * 14
+      }
+      if (proj.tech_stack && proj.tech_stack.length) {
+        setFont('italic', 9.5)
+        doc.setTextColor(80, 80, 80)
+        const tsLines = doc.splitTextToSize(proj.tech_stack.join(', '), contentW)
+        checkPage(tsLines.length * 13)
+        doc.text(tsLines, mL, y)
+        y += tsLines.length * 13
+        doc.setTextColor(0, 0, 0)
+      }
+      if (proj.description) {
+        setFont('normal', 10)
+        doc.setTextColor(30, 30, 30)
+        const descLines = doc.splitTextToSize(proj.description, contentW)
+        checkPage(descLines.length * 13)
+        doc.text(descLines, mL, y)
+        y += descLines.length * 13
+      }
+      if (proj.impact) {
+        setFont('italic', 10)
+        doc.setTextColor(60, 60, 60)
+        const impLines = doc.splitTextToSize(`Impact: ${proj.impact}`, contentW)
+        checkPage(impLines.length * 13)
+        doc.text(impLines, mL, y)
+        y += impLines.length * 13
+      }
+      y += 6
+      doc.setTextColor(0, 0, 0)
+    })
+  }
+
+  // ── Save ──────────────────────────────────────────────────────────────────
+  const safeName = (data.name || 'resume').replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '')
+  doc.save(`CV-${safeName}.pdf`)
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -372,6 +683,7 @@ const downloadCvPdf = () => {
 const loadInitialData = async () => {
   if (!userId.value) return
   loadingInitial.value = true
+  readyToAutosave.value = false
   clearMessages()
   try {
     const res = await get(`/workers/profile/${userId.value}`)
@@ -388,12 +700,27 @@ const loadInitialData = async () => {
     createForm.value.website = profile.website || ''
     createForm.value.headline = profile.field_of_work || ''
     createForm.value.summary = profile.bio || ''
+    await fetchResumeDraft()
+    await loadLatestGeneratedResume()
   } catch (e) {
     pageError.value = getErrorMessage(e, 'Gagal memuat halaman resume.')
   } finally {
+    readyToAutosave.value = true
     loadingInitial.value = false
   }
 }
+
+watch(
+  () => createForm.value,
+  () => {
+    if (!readyToAutosave.value) return
+    if (draftSaveTimer) clearTimeout(draftSaveTimer)
+    draftSaveTimer = setTimeout(() => {
+      saveResumeDraft()
+    }, 800)
+  },
+  { deep: true }
+)
 
 watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate: true })
 </script>
@@ -516,20 +843,32 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
         </div>
 
         <!-- CV File Upload -->
-        <!-- <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[10px] p-4">
-          <label class="text-[12px] font-medium text-[#64748B] block mb-1">Upload CV Document (Optional)</label>
-          <p class="text-[11px] text-[#94A3B8] mb-3">
-            PDF atau gambar akan dibaca langsung oleh Gemini Vision — hasilnya otomatis mengisi form di atas.
-          </p>
+        <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[10px] p-4 space-y-3">
+          <div>
+            <label class="text-[13px] font-semibold text-[#334155] block mb-1">Upload CV / Dokumen Pendukung</label>
+            <p class="text-[11px] text-[#94A3B8]">
+              Upload PDF atau gambar CV lama kamu. Isinya akan dibaca AI dan digabungkan dengan data form untuk membuat CV yang lebih lengkap.
+            </p>
+          </div>
           <input
-            type="file" multiple
-            accept=".pdf,.txt,.jpg,.jpeg,.png,.webp"
-            class="w-full border border-[#E2E8F0] rounded-[8px] px-3 py-2.5 text-[14px]"
+            type="file"
+            multiple
+            accept=".pdf,.jpg,.jpeg,.png,.webp"
+            class="w-full border border-[#E2E8F0] rounded-[8px] px-3 py-2.5 text-[14px] bg-white"
             @change="handleCvFileUpload"
           />
-          <p v-if="cvFileError" class="text-[12px] text-red-600 mt-2">{{ cvFileError }}</p>
-          <p v-if="cvFileNames.length" class="text-[12px] text-[#1D4ED8] mt-2">✓ {{ cvFileNames.join(', ') }}</p>
-        </div> -->
+          <p v-if="cvFileError" class="text-[12px] text-red-600">{{ cvFileError }}</p>
+          <div v-if="cvFileNames.length" class="flex flex-wrap gap-2">
+            <span
+              v-for="(name, idx) in cvFileNames"
+              :key="idx"
+              class="inline-flex items-center gap-1.5 text-[12px] px-2.5 py-1 rounded-full bg-[#DCFCE7] text-[#166534]"
+            >
+              <span>✓ {{ name }}</span>
+              <button class="text-[#166534] hover:text-red-600 font-bold leading-none" @click="removeCvFile(idx)">×</button>
+            </span>
+          </div>
+        </div>
 
         <!-- Generate Button -->
         <button
@@ -558,45 +897,34 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
 
           <div v-if="hasPreview && parsedResume" class="space-y-5">
             <!-- Header -->
-            <div>
-              <h3 class="text-[23px] font-semibold">{{ parsedResume.name }}</h3>
-              <p class="text-[14px] text-[#334155]">{{ parsedResume.headline }}</p>
-              <p class="text-[13px] text-[#64748B] mt-1">
-                {{ [parsedResume.contact.email, parsedResume.contact.phone, parsedResume.contact.location, parsedResume.contact.website].filter(Boolean).join('  ·  ') }}
+            <div class="text-center border-b border-[#E2E8F0] pb-4">
+              <h3 class="text-[22px] font-semibold tracking-wide uppercase">{{ parsedResume.name }}</h3>
+              <p v-if="parsedResume.headline" class="text-[13px] text-[#64748B] italic mt-1">{{ parsedResume.headline }}</p>
+              <p class="text-[12px] text-[#64748B] mt-1">
+                {{ [parsedResume.contact.email, parsedResume.contact.phone, parsedResume.contact.location, parsedResume.contact.website].filter(Boolean).join('   |   ') }}
               </p>
             </div>
 
             <!-- Summary -->
             <div v-if="parsedResume.summary">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-[#94A3B8] font-semibold mb-2">Summary</p>
-              <p class="text-[14px]">{{ parsedResume.summary }}</p>
-            </div>
-
-            <!-- Skills -->
-            <div v-if="parsedResume.skills.length">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-[#94A3B8] font-semibold mb-2">Skills</p>
-              <div class="flex flex-wrap gap-2">
-                <span v-for="(skill, idx) in parsedResume.skills" :key="idx" class="text-[12px] px-3 py-1 rounded-full bg-[#DBEAFE] text-[#1D4ED8]">{{ skill }}</span>
-              </div>
-            </div>
-
-            <!-- Core Competencies -->
-            <div v-if="parsedResume.core_competencies.length">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-[#94A3B8] font-semibold mb-2">Core Competencies</p>
-              <div class="flex flex-wrap gap-2">
-                <span v-for="(c, idx) in parsedResume.core_competencies" :key="idx" class="text-[12px] px-3 py-1 rounded-full bg-[#F0FDF4] text-[#15803D]">{{ c }}</span>
-              </div>
+              <p class="text-[10px] uppercase tracking-[0.18em] text-[#94A3B8] font-semibold mb-2 border-b border-[#E2E8F0] pb-1">Summary</p>
+              <p class="text-[13px] leading-relaxed">{{ parsedResume.summary }}</p>
             </div>
 
             <!-- Experience -->
             <div v-if="parsedResume.experiences.length">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-[#94A3B8] font-semibold mb-2">Experience</p>
-              <div class="space-y-3">
-                <div v-for="(exp, idx) in parsedResume.experiences" :key="idx" class="border border-[#E2E8F0] rounded-[8px] p-3">
-                  <p class="text-[14px] font-semibold">{{ exp.role }}</p>
-                  <p class="text-[13px] text-[#64748B]">{{ exp.company }}  ·  {{ exp.period }}</p>
-                  <ul v-if="exp.bullets.length" class="list-disc ml-5 mt-2 space-y-1">
-                    <li v-for="(b, bIdx) in exp.bullets" :key="bIdx" class="text-[12px] text-[#334155]">{{ b }}</li>
+              <p class="text-[10px] uppercase tracking-[0.18em] text-[#94A3B8] font-semibold mb-3 border-b border-[#E2E8F0] pb-1">Experience</p>
+              <div class="space-y-4">
+                <div v-for="(exp, idx) in parsedResume.experiences" :key="idx">
+                  <div class="flex items-baseline justify-between">
+                    <p class="text-[14px] font-semibold">{{ exp.role }}</p>
+                    <p class="text-[11px] text-[#94A3B8] shrink-0 ml-3">{{ exp.period }}</p>
+                  </div>
+                  <p class="text-[12px] text-[#64748B] italic">{{ exp.company }}</p>
+                  <ul v-if="exp.bullets.length" class="mt-2 space-y-1">
+                    <li v-for="(b, bIdx) in exp.bullets" :key="bIdx" class="text-[12px] text-[#334155] flex gap-2">
+                      <span class="shrink-0">•</span><span>{{ b }}</span>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -604,19 +932,47 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
 
             <!-- Education -->
             <div v-if="parsedResume.education.length">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-[#94A3B8] font-semibold mb-2">Education</p>
+              <p class="text-[10px] uppercase tracking-[0.18em] text-[#94A3B8] font-semibold mb-3 border-b border-[#E2E8F0] pb-1">Education</p>
               <div class="space-y-2">
-                <div v-for="(edu, idx) in parsedResume.education" :key="idx" class="border border-[#E2E8F0] rounded-[8px] p-3">
-                  <p class="text-[14px] font-semibold">{{ edu.school }}</p>
-                  <p class="text-[13px] text-[#64748B]">{{ edu.degree }}  ·  {{ edu.year }}</p>
+                <div v-for="(edu, idx) in parsedResume.education" :key="idx">
+                  <div class="flex items-baseline justify-between">
+                    <p class="text-[13px] font-semibold">{{ edu.school }}</p>
+                    <p class="text-[11px] text-[#94A3B8] shrink-0 ml-3">{{ edu.year }}</p>
+                  </div>
+                  <p class="text-[12px] text-[#64748B] italic">{{ edu.degree }}</p>
                 </div>
+              </div>
+            </div>
+
+            <!-- Skills -->
+            <div v-if="parsedResume.skills.length || parsedResume.core_competencies.length">
+              <p class="text-[10px] uppercase tracking-[0.18em] text-[#94A3B8] font-semibold mb-2 border-b border-[#E2E8F0] pb-1">Skills</p>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="(skill, idx) in [...parsedResume.skills, ...parsedResume.core_competencies]" :key="idx" class="text-[11px] px-2.5 py-1 rounded-full bg-[#DBEAFE] text-[#1D4ED8]">{{ skill }}</span>
               </div>
             </div>
 
             <!-- Certifications -->
             <div v-if="parsedResume.certifications.length">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-[#94A3B8] font-semibold mb-2">Certifications</p>
-              <p class="text-[14px]">{{ parsedResume.certifications.join('  ·  ') }}</p>
+              <p class="text-[10px] uppercase tracking-[0.18em] text-[#94A3B8] font-semibold mb-2 border-b border-[#E2E8F0] pb-1">Certifications</p>
+              <ul class="space-y-1">
+                <li v-for="(cert, idx) in parsedResume.certifications" :key="idx" class="text-[12px] text-[#334155] flex gap-2">
+                  <span class="shrink-0">•</span><span>{{ cert }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Projects -->
+            <div v-if="parsedResume.projects.length">
+              <p class="text-[10px] uppercase tracking-[0.18em] text-[#94A3B8] font-semibold mb-3 border-b border-[#E2E8F0] pb-1">Projects</p>
+              <div class="space-y-3">
+                <div v-for="(proj, idx) in parsedResume.projects" :key="idx">
+                  <p class="text-[13px] font-semibold">{{ proj.name }}</p>
+                  <p v-if="proj.tech_stack?.length" class="text-[11px] text-[#64748B] italic">{{ proj.tech_stack.join(', ') }}</p>
+                  <p v-if="proj.description" class="text-[12px] text-[#334155] mt-1">{{ proj.description }}</p>
+                  <p v-if="proj.impact" class="text-[12px] text-[#64748B] italic mt-0.5">{{ proj.impact }}</p>
+                </div>
+              </div>
             </div>
           </div>
 
