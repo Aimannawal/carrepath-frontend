@@ -84,7 +84,7 @@ const getJobStatusLabel = (status) => {
 
 const getJobStatusClasses = (status) => {
   if (status === 'open') {
-    return 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-[0_10px_25px_rgba(16,185,129,0.12)]'
+    return 'bg-emerald-50 text-emerald-700 border-emerald-200'
   }
   if (status === 'closed') {
     return 'bg-slate-100 text-slate-700 border-slate-200'
@@ -93,8 +93,7 @@ const getJobStatusClasses = (status) => {
 }
 
 const getJobCardClasses = (job) => [
-  'rounded-[18px] border p-5 md:p-6 flex flex-col gap-5 transition-shadow shadow-[0_10px_24px_rgba(15,23,42,0.04)]',
-  job.status === 'open' ? 'bg-gradient-to-br from-white to-emerald-50/40 border-emerald-100' : 'bg-white border-[#E2E8F0]'
+  'bg-white border border-[#E2E8F0] rounded-[16px] p-5 md:p-6 flex flex-col gap-5 shadow-sm hover:shadow-md transition-all duration-200'
 ]
 
 const getMetaPillClass = (variant) => {
@@ -306,14 +305,14 @@ const toApplicants = (job) => navigateTo(`/company/jobs/${job.id}/applicants`)
 
 <template>
   <section class="p-6 md:p-8">
-    <div class="mb-5 rounded-[24px] border border-[#E2E8F0] bg-gradient-to-r from-white via-[#F8FAFC] to-[#EFF6FF] p-5 md:p-6 shadow-[0_14px_35px_rgba(15,23,42,0.05)]">
+    <div class="mb-5 bg-white border border-[#E2E8F0] rounded-[16px] p-5 md:p-6 shadow-sm">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <p class="text-[13px] uppercase tracking-[0.24em] text-[#64748B]">Company Jobs</p>
           <h1 class="text-[28px] font-semibold mt-2">Manage active openings</h1>
           <p class="text-[14px] text-[#64748B] mt-1">Post a vacancy, track its status, and review applicants in a cleaner layout.</p>
         </div>
-        <button class="bg-[color:var(--color-main)] text-white rounded-full px-5 py-3 text-[14px] font-medium shadow-[0_12px_24px_rgba(29,78,216,0.18)] disabled:opacity-50" :disabled="profileLoading || loading" @click="openCreateModal">+ Post Job</button>
+        <button class="bg-[color:var(--color-main)] hover:bg-blue-700 text-white rounded-[10px] px-5 py-2.5 text-[14px] font-semibold transition-colors disabled:opacity-50" :disabled="profileLoading || loading" @click="openCreateModal">+ Post Job</button>
       </div>
     </div>
 
@@ -351,14 +350,14 @@ const toApplicants = (job) => navigateTo(`/company/jobs/${job.id}/applicants`)
           </div>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button class="rounded-[5px] border border-[#CBD5E1] bg-white px-4 py-2 text-[13px] font-medium text-[#334155] transition duration-150 hover:-translate-y-[1px] hover:border-[color:var(--color-main)] hover:text-[color:var(--color-main)]" @click="openEditModal(job)">
+          <button class="rounded-[5px] border border-[#CBD5E1] bg-white px-4 py-2 text-[13px] font-medium text-[#334155] transition duration-150 hover:border-[color:var(--color-main)] hover:text-[color:var(--color-main)]" @click="openEditModal(job)">
             Edit
           </button>
-          <button class="rounded-[5px] border border-[#CBD5E1] bg-white px-4 py-2 text-[13px] font-medium text-[#334155] shadow-sm transition duration-150 hover:-translate-y-[1px] hover:border-[color:var(--color-main)] hover:text-[color:var(--color-main)]" @click="toggleStatus(job)">
+          <button class="rounded-[5px] border border-[#CBD5E1] bg-white px-4 py-2 text-[13px] font-medium text-[#334155] transition duration-150 hover:border-[color:var(--color-main)] hover:text-[color:var(--color-main)]" @click="toggleStatus(job)">
             {{ job.status === 'open' ? 'Tutup Lowongan' : 'Buka Lowongan' }}
           </button>
-          <button class="rounded-[5px] border border-[color:var(--color-main)] bg-[color:var(--color-main)] px-4 py-2 text-[13px] font-medium text-white shadow-[0_10px_22px_rgba(29,78,216,0.16)] transition duration-150 hover:-translate-y-[1px]" @click="toApplicants(job)">Lihat Pelamar</button>
-          <button class="rounded-[5px] border border-red-200 bg-white px-4 py-2 text-[13px] font-medium text-red-600 transition duration-150 hover:-translate-y-[1px] hover:bg-red-50" @click="removeJob(job)">{{ deleteConfirmId === job.id ? 'Confirm Delete' : 'Delete' }}</button>
+          <button class="rounded-[5px] border border-[color:var(--color-main)] bg-[color:var(--color-main)] px-4 py-2 text-[13px] font-medium text-white transition duration-150 hover:bg-blue-700" @click="toApplicants(job)">Lihat Pelamar</button>
+          <button class="rounded-[5px] border border-red-200 bg-white px-4 py-2 text-[13px] font-medium text-red-600 transition duration-150 hover:bg-red-50" @click="removeJob(job)">{{ deleteConfirmId === job.id ? 'Confirm Delete' : 'Delete' }}</button>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref } from 'vue'
 
 const email = ref('')
@@ -58,13 +58,13 @@ const handleLogin = async (e) => {
           roleCookie.value = role
 
           const dest = role ? `/${role}/dashboard` : '/onboarding'
-          navigateTo(dest)
+          window.location.href = dest
         } else {
-          navigateTo('/onboarding')
+          window.location.href = '/onboarding'
         }
       } catch (err) {
         if (err.status === 404) {
-          navigateTo('/onboarding')
+          window.location.href = '/onboarding'
         } else {
           console.error('Kesalahan memeriksa profile ke server:', err)
           errorMessage.value = 'Gagal mengakses data profil. Coba lagi.'

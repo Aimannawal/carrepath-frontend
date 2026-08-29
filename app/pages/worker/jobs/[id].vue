@@ -5,8 +5,8 @@ useHead({ title: 'CarrePath | Job Detail' })
 definePageMeta({ layout: 'worker' })
 
 const route = useRoute()
-const { get, post } = useApi()
-const { getData, asObject, getErrorMessage } = useApiResponse()
+const { get, post, del } = useApi()
+const { getData, asObject, toArray, getErrorMessage } = useApiResponse()
 const { userId } = useAuth()
 const { uploadPdfCv, uploadError, uploading, clearUploadState } = useFileUpload()
 
@@ -14,6 +14,10 @@ const loading = ref(true)
 const error = ref('')
 const job = ref(null)
 const company = ref(null)
+const companyJobs = ref([])
+const isSaved = ref(false)
+const savedJobId = ref('')
+const saveLoading = ref(false)
 const openApply = ref(false)
 const applyLoading = ref(false)
 const uploadWarning = ref('')
@@ -39,23 +43,50 @@ const resolvedCompanyId = computed(() => {
   )
 })
 
-/**
- * Computed - format salary display safely
- */
+const companyLogo = computed(() => {
+  return company.value?.logo_url || company.value?.photo_url || job.value?.company_profiles?.logo_url || ''
+})
+
+const companyInitial = computed(() => {
+  return (resolvedCompanyName.value || '?')[0].toUpperCase()
+})
+
+const isPremiumCompany = computed(() => {
+  if (!company.value) return false
+  return Boolean(company.value.is_premium || company.value.premium_active || company.value.premium_until)
+})
+
+const companyDescription = computed(() => {
+  return company.value?.description || job.value?.company_profiles?.description || ''
+})
+
+const companyCategory = computed(() => {
+  return company.value?.category || job.value?.company_profiles?.category || ''
+})
+
+const companyAddress = computed(() => {
+  return company.value?.address || job.value?.company_profiles?.address || ''
+})
+
+const companyEmail = computed(() => {
+  return company.value?.company_email || job.value?.company_profiles?.company_email || ''
+})
+
+const otherJobs = computed(() => {
+  if (!job.value?.id) return companyJobs.value
+  return companyJobs.value.filter(j => j.id !== job.value.id).slice(0, 4)
+})
+
 const salaryDisplay = computed(() => {
   if (!job.value) return 'Loading...'
   const min = job.value.salary_min
   const max = job.value.salary_max
-  
   if (!min && !max) return 'Negotiable'
   const minText = min ? `Rp ${Number(min).toLocaleString('id-ID')}` : '-'
   const maxText = max ? `Rp ${Number(max).toLocaleString('id-ID')}` : '-'
   return `${minText} - ${maxText}`
 })
 
-/**
- * Computed - check if job/company data ready for rendering
- */
 const isJobReady = computed(() => {
   return !loading.value && !error.value && job.value && job.value.id
 })
@@ -165,27 +196,42 @@ const submitApply = async () => {
 }
 
 const saveJob = async () => {
-  if (!userId.value || !job.value?.id) {
-    formError.value = 'Worker or job information not ready'
+  if (!userId.value || !job.value?.id || saveLoading.value) {
     return
   }
   
   formError.value = ''
   formSuccess.value = ''
+  saveLoading.value = true
   
   try {
-    const payload = {
-      worker_id: userId.value,
-      job_id: String(job.value.id)
-    }
-
-    const res = await post('/saved/company', payload)
-    const message = String(res?.message || '').toLowerCase()
-    
-    if (message.includes('already saved')) {
-      formSuccess.value = 'Job already saved.'
+    if (isSaved.value && savedJobId.value) {
+      // Unsave
+      await del(`/saved/company/${savedJobId.value}`)
+      isSaved.value = false
+      savedJobId.value = ''
+      formSuccess.value = 'Job removed from saved list.'
     } else {
-      formSuccess.value = 'Job saved successfully.'
+      // Save
+      const payload = {
+        worker_id: userId.value,
+        job_id: String(job.value.id)
+      }
+      const res = await post('/saved/company', payload)
+      
+      const message = String(res?.message || '').toLowerCase()
+      if (message.includes('already saved')) {
+        formSuccess.value = 'Job already saved.'
+        isSaved.value = true
+      } else {
+        formSuccess.value = 'Job saved successfully.'
+        isSaved.value = true
+        // Assuming the response returns the new saved record in data
+        const first = toArray(getData(res))[0]
+        if (first?.id) {
+          savedJobId.value = first.id
+        }
+      }
     }
     
     // Reset after 3 seconds
@@ -193,16 +239,18 @@ const saveJob = async () => {
       formSuccess.value = ''
     }, 3000)
   } catch (e) {
-    const errMsg = getErrorMessage(e, 'Failed to save job')
-    // Handle idempotent case - "already saved" is success
+    const errMsg = getErrorMessage(e, 'Failed to update saved job')
     if (errMsg.toLowerCase().includes('already saved')) {
       formSuccess.value = 'Job already saved.'
+      isSaved.value = true
       setTimeout(() => {
         formSuccess.value = ''
       }, 2000)
     } else {
       formError.value = errMsg
     }
+  } finally {
+    saveLoading.value = false
   }
 }
 
@@ -240,6 +288,30 @@ const fetchJobDetail = async () => {
     
     job.value = payload
     company.value = payload.company_profiles || payload.company || null
+
+    // Fetch other jobs from same company
+    const compId = company.value?.id || payload.company_id
+    if (compId) {
+      try {
+        const compJobsRes = await get(`/companies/${compId}/jobs`)
+        companyJobs.value = toArray(getData(compJobsRes))
+      } catch {
+        companyJobs.value = []
+      }
+    }
+
+    // Check if this job is saved
+    try {
+      const savedRes = await get(`/saved/jobs/${userId.value}`)
+      const savedJobs = toArray(getData(savedRes))
+      const savedMatch = savedJobs.find(s => String(s?.id) === String(job.value.id))
+      if (savedMatch) {
+        isSaved.value = true
+        savedJobId.value = savedMatch.saved_id
+      }
+    } catch {
+      // Ignore error for saved jobs fetch
+    }
   } catch (e) {
     error.value = getErrorMessage(e, 'Failed to load job detail')
     job.value = null
@@ -249,97 +321,192 @@ const fetchJobDetail = async () => {
   }
 }
 
+const goToJob = (jobItem) => {
+  navigateTo(`/worker/jobs/${jobItem.id}`)
+}
+
 onMounted(() => {
   fetchJobDetail()
 })
 </script>
 
 <template>
-  <section class="p-6 md:p-8">
+  <section class="p-4 md:p-6 lg:p-8">
     <!-- Error State -->
-    <div v-if="error" class="bg-red-50 border border-red-200 rounded-[10px] p-4">
-      <p class="text-red-700">{{ error }}</p>
+    <div v-if="error" class="bg-red-50 border border-red-200 rounded-[14px] p-5">
+      <p class="text-red-700 text-[14px]">{{ error }}</p>
     </div>
 
     <!-- Loading Skeleton State -->
     <div v-else-if="loading" class="space-y-6">
-      <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-6 space-y-3">
-        <div class="h-8 bg-[#F1F5F9] rounded-[5px] w-2/3 animate-pulse"></div>
-        <div class="h-5 bg-[#F1F5F9] rounded-[5px] w-1/4 animate-pulse"></div>
-        <div class="flex gap-2 mt-4">
-          <div class="h-6 bg-[#F1F5F9] rounded-full w-20 animate-pulse"></div>
-          <div class="h-6 bg-[#F1F5F9] rounded-full w-20 animate-pulse"></div>
+      <div class="bg-white border border-[#E2E8F0] rounded-[16px] p-6 space-y-4">
+        <div class="flex items-start gap-5">
+          <div class="w-16 h-16 bg-[#F1F5F9] rounded-[12px] animate-pulse"></div>
+          <div class="flex-1 space-y-3">
+            <div class="h-8 bg-[#F1F5F9] rounded-[8px] w-2/3 animate-pulse"></div>
+            <div class="h-5 bg-[#F1F5F9] rounded-[8px] w-1/3 animate-pulse"></div>
+          </div>
         </div>
-        <div class="h-24 bg-[#F1F5F9] rounded-[5px] mt-4 animate-pulse"></div>
+        <div class="flex gap-2 mt-4">
+          <div class="h-7 bg-[#F1F5F9] rounded-full w-24 animate-pulse"></div>
+          <div class="h-7 bg-[#F1F5F9] rounded-full w-24 animate-pulse"></div>
+        </div>
+        <div class="h-32 bg-[#F1F5F9] rounded-[8px] mt-4 animate-pulse"></div>
       </div>
-      <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-6 h-32 animate-pulse"></div>
+      <div class="bg-white border border-[#E2E8F0] rounded-[16px] p-6 h-40 animate-pulse"></div>
     </div>
 
     <!-- Success Messages -->
-    <div v-if="formSuccess" class="mb-4 bg-green-50 border border-green-200 rounded-[10px] p-4">
-      <p class="text-green-700">{{ formSuccess }}</p>
+    <div v-if="formSuccess" class="mb-4 bg-green-50 border border-green-200 rounded-[14px] p-4">
+      <p class="text-green-700 text-[14px]">{{ formSuccess }}</p>
     </div>
 
     <!-- Error Messages (from form submits, not page load) -->
-    <div v-if="formError" class="mb-4 bg-red-50 border border-red-200 rounded-[10px] p-4">
-      <p class="text-red-700">{{ formError }}</p>
+    <div v-if="formError" class="mb-4 bg-red-50 border border-red-200 rounded-[14px] p-4">
+      <p class="text-red-700 text-[14px]">{{ formError }}</p>
     </div>
 
-    <!-- Job Detail Content - Only render when job is ready -->
-    <div v-if="isJobReady" class="space-y-6">
-      <!-- Job Header -->
-      <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-6">
-        <h1 class="text-[30px] font-semibold">{{ job.title }}</h1>
-        <p class="text-[15px] text-[#64748B] mt-2">{{ resolvedCompanyName }}</p>
-        
-        <!-- Job Tags -->
-        <div class="flex flex-wrap gap-2 mt-4">
-          <span v-if="job.location_type" class="text-[12px] px-3 py-1 rounded-full bg-[#EFF6FF] text-[#1D4ED8]">
-            {{ job.location_type }}
-          </span>
-          <span v-if="job.type" class="text-[12px] px-3 py-1 rounded-full bg-[#F1F5F9] text-[#334155]">
-            {{ job.type }}
-          </span>
-          <span v-if="job.category" class="text-[12px] px-3 py-1 rounded-full bg-[#EEF2FF] text-[#4338CA]">
-            {{ job.category }}
-          </span>
-        </div>
+    <!-- Job Detail Content -->
+    <div v-if="isJobReady" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- Salary -->
-        <p class="text-[15px] mt-4 text-[#334155] font-medium">Salary: {{ salaryDisplay }}</p>
+      <!-- ═══ LEFT COLUMN: Job Detail ═══ -->
+      <div class="lg:col-span-2 space-y-6">
 
-        <!-- Description -->
-        <p class="text-[14px] text-[#475569] mt-4 whitespace-pre-line leading-relaxed">
-          {{ job.description || 'No description available.' }}
-        </p>
+        <!-- Job Header Card -->
+        <div class="bg-white border border-[#E2E8F0] rounded-[16px] p-6">
+          <div class="flex items-start gap-5">
+            <!-- Company Logo -->
+            <div class="flex-shrink-0 w-16 h-16 overflow-hidden flex items-center justify-center">
+              <img v-if="companyLogo" :src="companyLogo" :alt="resolvedCompanyName" class="w-full h-full object-cover" />
+              <span v-else class="text-[24px] font-bold text-[color:var(--color-main)] bg-[#F1F5F9] w-full h-full flex items-center justify-center rounded-[4px]">{{ companyInitial }}</span>
+            </div>
+            <!-- Job Title & Company -->
+            <div class="flex-1 min-w-0">
+              <h1 class="text-[26px] font-bold text-[#0F172A] leading-tight">{{ job.title }}</h1>
+              <div class="flex items-center gap-2 mt-2">
+                <p class="text-[15px] text-[#64748B] font-medium">{{ resolvedCompanyName }}</p>
+                <span v-if="isPremiumCompany" class="text-[10px] bg-[#DBEAFE] text-[#1D4ED8] px-2.5 py-0.5 rounded-sm font-bold tracking-wide">Recommended Company</span>
+              </div>
+            </div>
+          </div>
 
-        <!-- Action Buttons -->
-        <div class="flex gap-3 mt-6">
-          <button
-            class="bg-[color:var(--color-main)] text-white rounded-[5px] px-5 py-2.5 font-medium hover:opacity-90 transition-opacity"
-            @click="openApply = true"
-          >
-            Apply Now
-          </button>
-          <button
-            class="border border-[#CBD5E1] rounded-[5px] px-5 py-2.5 font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors"
-            @click="saveJob"
-          >
-            Save Job
-          </button>
+          <!-- Job Tags -->
+          <div class="flex flex-wrap gap-2 mt-5">
+            <span v-if="job.location_type" class="text-[12px] px-3.5 py-1.5 rounded-full bg-[#EFF6FF] text-[#1D4ED8] font-medium">
+              {{ job.location_type }}
+            </span>
+            <span v-if="job.type" class="text-[12px] px-3.5 py-1.5 rounded-full bg-[#F0FDF4] text-[#16A34A] font-medium">
+              {{ job.type }}
+            </span>
+            <span v-if="job.category" class="text-[12px] px-3.5 py-1.5 rounded-full bg-[#EEF2FF] text-[#4338CA] font-medium">
+              {{ job.category }}
+            </span>
+          </div>
+
+          <!-- Salary -->
+          <div class="mt-5 flex items-center gap-2">
+            <Icon name="heroicons:banknotes" class="w-5 h-5 text-[#16A34A]" />
+            <p class="text-[15px] text-[#0F172A] font-semibold">{{ salaryDisplay }}</p>
+          </div>
+
+          <!-- Description -->
+          <div class="mt-6 pt-6 border-t border-[#F1F5F9]">
+            <h3 class="text-[16px] font-semibold text-[#0F172A] mb-3">Job Description</h3>
+            <p class="text-[14px] text-[#475569] whitespace-pre-line leading-[1.8]">
+              {{ job.description || 'No description available.' }}
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3 mt-6 pt-6 border-t border-[#F1F5F9]">
+            <button
+              class="flex-1 sm:flex-none bg-[color:var(--color-main)] text-white rounded-[10px] px-6 py-3 font-semibold text-[14px] hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              @click="openApply = true"
+            >
+              <Icon name="heroicons:paper-airplane" class="w-4 h-4" />
+              Apply Now
+            </button>
+            <button
+              class="flex-1 sm:flex-none border-2 rounded-[10px] px-6 py-3 font-semibold text-[14px] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              :class="isSaved ? 'border-[color:var(--color-main)] bg-[#EEF2FF] text-[color:var(--color-main)]' : 'border-[#E2E8F0] text-[#334155] hover:bg-[#F8FAFC]'"
+              :disabled="saveLoading"
+              @click="saveJob"
+            >
+              <Icon :name="isSaved ? 'heroicons:bookmark-solid' : 'heroicons:bookmark'" class="w-4 h-4" />
+              {{ isSaved ? 'Saved' : 'Save Job' }}
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Company Info -->
-      <div v-if="company" class="bg-white border border-[#E2E8F0] rounded-[10px] p-6">
-        <h2 class="text-[20px] font-semibold">About Company</h2>
-        <p class="text-[14px] text-[#64748B] mt-3">
-          {{ company.description || 'No company description available.' }}
-        </p>
+      <!-- ═══ RIGHT COLUMN: Company Info ═══ -->
+      <div class="space-y-6">
+
+        <!-- Company Card -->
+        <div v-if="company" class="bg-white border border-[#E2E8F0] rounded-[16px] p-6">
+          <!-- Company Header -->
+          <div class="flex items-center gap-4 mb-5">
+            <div class="flex-shrink-0 w-14 h-14 overflow-hidden flex items-center justify-center">
+              <img v-if="companyLogo" :src="companyLogo" :alt="resolvedCompanyName" class="w-full h-full object-cover" />
+              <span v-else class="text-[20px] font-bold text-[color:var(--color-main)] bg-[#F1F5F9] w-full h-full flex items-center justify-center rounded-[4px]">{{ companyInitial }}</span>
+            </div>
+            <div class="min-w-0">
+              <h2 class="text-[16px] font-bold text-[#0F172A] truncate">{{ resolvedCompanyName }}</h2>
+              <p v-if="companyCategory" class="text-[12px] text-[#64748B] mt-0.5">{{ companyCategory }}</p>
+              <span v-if="isPremiumCompany" class="inline-flex mt-1 text-[10px] bg-[#DBEAFE] text-[#1D4ED8] px-2.5 py-0.5 rounded-sm font-bold tracking-wide">Recommended Company</span>
+            </div>
+          </div>
+
+          <!-- About -->
+          <div class="mb-5">
+            <h3 class="text-[13px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">About Company</h3>
+            <p class="text-[13px] text-[#475569] leading-[1.7]">
+              {{ companyDescription || 'No company description available.' }}
+            </p>
+          </div>
+
+          <!-- Company Details -->
+          <div class="space-y-3 pt-4 border-t border-[#F1F5F9]">
+            <div v-if="companyAddress" class="flex items-start gap-3">
+              <Icon name="heroicons:map-pin" class="w-4 h-4 text-[#94A3B8] mt-0.5 flex-shrink-0" />
+              <p class="text-[13px] text-[#475569]">{{ companyAddress }}</p>
+            </div>
+            <div v-if="companyEmail" class="flex items-start gap-3">
+              <Icon name="heroicons:envelope" class="w-4 h-4 text-[#94A3B8] mt-0.5 flex-shrink-0" />
+              <p class="text-[13px] text-[#475569]">{{ companyEmail }}</p>
+            </div>
+            <div v-if="companyCategory" class="flex items-start gap-3">
+              <Icon name="heroicons:building-office-2" class="w-4 h-4 text-[#94A3B8] mt-0.5 flex-shrink-0" />
+              <p class="text-[13px] text-[#475569]">{{ companyCategory }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other Jobs from Same Company -->
+        <div v-if="otherJobs.length > 0" class="bg-white border border-[#E2E8F0] rounded-[16px] p-6">
+          <h3 class="text-[13px] font-bold text-[#94A3B8] uppercase tracking-wider mb-4">Other Jobs at {{ resolvedCompanyName }}</h3>
+          <div class="space-y-3">
+            <div
+              v-for="otherJob in otherJobs"
+              :key="otherJob.id"
+              class="p-3.5 rounded-[12px] border border-[#F1F5F9] hover:border-[color:var(--color-main)] hover:shadow-sm transition-all cursor-pointer group"
+              @click="goToJob(otherJob)"
+            >
+              <h4 class="text-[14px] font-semibold text-[#0F172A] group-hover:text-[color:var(--color-main)] transition-colors truncate">{{ otherJob.title }}</h4>
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                <span v-if="otherJob.type" class="text-[10px] px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#16A34A] font-medium">{{ otherJob.type }}</span>
+                <span v-if="otherJob.location_type" class="text-[10px] px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#1D4ED8] font-medium">{{ otherJob.location_type }}</span>
+              </div>
+              <p class="text-[12px] text-[#94A3B8] mt-2 flex items-center gap-1">
+                <Icon name="heroicons:arrow-right" class="w-3 h-3" /> Lihat Detail
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div v-else-if="!loading && !error" class="bg-white border border-[#E2E8F0] rounded-[10px] p-6 text-[14px] text-[#64748B]">
+    <div v-else-if="!loading && !error" class="bg-white border border-[#E2E8F0] rounded-[16px] p-6 text-[14px] text-[#64748B]">
       Job detail is not available.
     </div>
 
@@ -352,7 +519,7 @@ onMounted(() => {
           <input
             type="file"
             accept="application/pdf"
-            class="mt-2 w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] file:mr-3 file:rounded-[3px] file:border-0 file:text-[13px] file:font-medium file:bg-[#EEF2FF] file:text-[#4338CA]"
+            class="mt-2 w-full border border-[#E2E8F0] rounded-[8px] px-3 py-2.5 text-[14px] file:mr-3 file:rounded-[6px] file:border-0 file:text-[13px] file:font-medium file:bg-[#EEF2FF] file:text-[#4338CA]"
             @change="handleCvChange"
           />
           <p class="mt-2 text-[12px] text-[#64748B]">Only PDF format. Max 5MB.</p>
@@ -371,14 +538,14 @@ onMounted(() => {
             v-model="coverLetter"
             rows="5"
             placeholder="Tell the employer why you're a great fit..."
-            class="mt-2 w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50"
+            class="mt-2 w-full border border-[#E2E8F0] rounded-[8px] px-3 py-2.5 text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50"
           ></textarea>
         </div>
 
         <!-- Submit Button -->
         <button
           :disabled="applyLoading || uploading"
-          class="w-full bg-[color:var(--color-main)] text-white rounded-[5px] px-5 py-2.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+          class="w-full bg-[color:var(--color-main)] text-white rounded-[10px] px-5 py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
           @click="submitApply"
         >
           {{ applyLoading || uploading ? 'Sending...' : 'Submit Application' }}

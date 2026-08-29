@@ -90,13 +90,25 @@ const loadHistory = async () => {
   try {
     const response = await get(`/ai/chat-history/${userId.value}`)
     const history = Array.isArray(getData(response)) ? getData(response) : []
-    messages.value = history.map((item) => ({
-      id: item.id || `${item.created_at}`,
-      role: item.role,
-      text: item.content || '',
-      createdAt: item.created_at,
-      fileNames: Array.isArray(item.file_names) ? item.file_names : []
-    }))
+    messages.value = history.map((item) => {
+      let recJobs = []
+      try {
+        if (typeof item.recommended_jobs === 'string' && item.recommended_jobs) {
+          recJobs = JSON.parse(item.recommended_jobs)
+        } else if (Array.isArray(item.recommended_jobs)) {
+          recJobs = item.recommended_jobs
+        }
+      } catch (e) {}
+
+      return {
+        id: item.id || `${item.created_at}`,
+        role: item.role,
+        text: item.content || '',
+        createdAt: item.created_at,
+        fileNames: Array.isArray(item.file_names) ? item.file_names : [],
+        recommendedJobs: recJobs
+      }
+    })
     await scrollToBottom()
   } catch (e) {
     console.error('Failed to load history:', getErrorMessage(e))
@@ -112,7 +124,8 @@ const handleSend = async () => {
     role: 'user',
     text: userText || 'Tolong analisis file yang saya upload.',
     createdAt: new Date().toISOString(),
-    fileNames: [...uploadFileNames.value]
+    fileNames: [...uploadFileNames.value],
+    recommendedJobs: []
   }
 
   messages.value.push(userMessage)
@@ -135,6 +148,7 @@ const handleSend = async () => {
     const data = getData(response) || {}
 
     const answer = String(data.answer || 'Maaf, aku tidak bisa memproses pertanyaanmu saat ini.')
+    const recommendedJobs = Array.isArray(data.recommended_jobs) ? data.recommended_jobs : []
     const assistantId = `temp-asst-${Date.now()}`
 
     const aiMessage = {
@@ -142,7 +156,8 @@ const handleSend = async () => {
       role: 'assistant',
       text: '',
       createdAt: new Date().toISOString(),
-      fileNames: []
+      fileNames: [],
+      recommendedJobs: recommendedJobs
     }
     messages.value.push(aiMessage)
     await animateAssistantText(aiMessage, answer)
@@ -153,6 +168,19 @@ const handleSend = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const formatMessageText = (text) => {
+  if (!text) return ''
+  
+  // Format bullet points (e.g. " * " or "\n* " or starting with "* ")
+  let html = text.replace(/(?:\s|^)\* /g, '<br/><span class="text-[color:var(--color-main)] mr-1.5 font-bold">•</span> ')
+  // Ensure we don't have leading <br/> if it was at the very start
+  if (html.startsWith('<br/>')) html = html.substring(5)
+
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[#0F172A]">$1</strong>')
+  html = html.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+  return html
 }
 
 onMounted(() => {
@@ -188,8 +216,42 @@ onMounted(() => {
                 : 'bg-[#F1F5F9] text-[#0F172A] rounded-bl-[4px]'
             ]"
           >
-            <p class="whitespace-pre-wrap">{{ item.text }}</p>
-            <p v-if="item.fileNames?.length" class="text-[12px] mt-2 opacity-80">📎 {{ item.fileNames.join(', ') }}</p>
+            <p class="whitespace-pre-wrap leading-[1.6]" v-html="formatMessageText(item.text)"></p>
+            <p v-if="item.fileNames?.length" class="text-[12px] mt-3 opacity-80 font-medium flex items-center gap-1.5"><Icon name="heroicons:paper-clip" class="w-3.5 h-3.5" /> {{ item.fileNames.join(', ') }}</p>
+
+            <!-- Recommended Jobs Cards -->
+            <div v-if="item.recommendedJobs && item.recommendedJobs.length > 0" class="mt-4 space-y-3">
+              <p class="text-[12px] uppercase tracking-[0.15em] font-bold text-[#94A3B8] mb-2 flex items-center gap-1.5">
+                <Icon name="heroicons:briefcase" class="w-5 h-5 text-[color:var(--color-main)]" /> 
+                Lowongan yang Cocok
+              </p>
+              <div v-for="(job, jIdx) in item.recommendedJobs" :key="jIdx" class="bg-white border border-[#E2E8F0] rounded-[14px] p-4 shadow-sm hover:shadow-md hover:border-[color:var(--color-main)] transition-all duration-200 cursor-pointer" @click="navigateTo(`/worker/jobs/${job.job_id}`)">
+                <div class="flex items-start gap-3">
+                  <!-- Company Logo -->
+                  <div class="flex-shrink-0 w-11 h-11 overflow-hidden flex items-center justify-center">
+                    <img v-if="job.logo_url" :src="job.logo_url" :alt="job.company_name" class="w-full h-full object-cover" />
+                    <span v-else class="text-[16px] font-bold text-[color:var(--color-main)] bg-[#F1F5F9] w-full h-full flex items-center justify-center rounded-[4px]">{{ (job.company_name || '?')[0].toUpperCase() }}</span>
+                  </div>
+                  <!-- Job Info -->
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-[14px] font-semibold text-[#0F172A] truncate">{{ job.title }}</h4>
+                    <p class="text-[13px] text-[#64748B] mt-0.5 flex items-center flex-wrap gap-1.5">
+                      {{ job.company_name }}
+                      <span v-if="job.is_premium" class="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-sm font-bold uppercase tracking-wider">PREMIUM</span>
+                    </p>
+                  </div>
+                </div>
+                <p v-if="job.reason" class="text-[12px] text-[#475569] leading-relaxed mt-2.5 pl-14">{{ job.reason }}</p>
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-[#F1F5F9] pl-14">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span v-if="job.category" class="text-[11px] bg-[#EEF2FF] text-[color:var(--color-main)] px-2 py-0.5 rounded-full font-medium">{{ job.category }}</span>
+                    <span v-if="job.type" class="text-[11px] bg-[#F0FDF4] text-[#16A34A] px-2 py-0.5 rounded-full font-medium">{{ job.type }}</span>
+                    <span class="text-[11px] text-[#94A3B8] font-medium flex items-center gap-1"><Icon name="heroicons:users" class="w-3.5 h-3.5" /> {{ job.applicant_count || 0 }}</span>
+                  </div>
+                  <button class="text-[12px] font-semibold text-[color:var(--color-main)] hover:underline flex items-center gap-1" @click.stop="navigateTo(`/worker/jobs/${job.job_id}`)">Lihat <Icon name="heroicons:arrow-right-20-solid" class="w-3.5 h-3.5" /></button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
