@@ -24,6 +24,12 @@ const savingDraft = ref(false)
 const readyToAutosave = ref(false)
 let draftSaveTimer = null
 
+// Added states for Creative CV
+const cvType = ref('ats') // 'ats' | 'creative'
+const creativeTemplate = ref(1) // 1, 2, 3, 4
+const profilePhoto = ref('')
+const isGeneratingPdf = ref(false)
+
 const createForm = ref({
   full_name: '',
   headline: '',
@@ -35,12 +41,14 @@ const createForm = ref({
   website: '',
   summary: '',
   hard_skills: [],
+  soft_skills: [],
   certificates: [],
   education: [{ school: '', degree: '', year: '' }],
   experiences: [{ company: '', role: '', start_date: '', end_date: '', tasks: '', impact: '' }]
 })
 
 const hardSkillInput = ref('')
+const softSkillInput = ref('')
 const certificateInput = ref('')
 
 // ─── Computed ────────────────────────────────────────────────────────────────
@@ -76,8 +84,63 @@ const parsedResume = computed(() => {
         : [createForm.value.city, createForm.value.province, createForm.value.country].filter(Boolean).join(', '),
       website: raw.contact?.website || raw.website || createForm.value.website || ''
     },
-    skills: Array.isArray(raw.skills) ? raw.skills : [],
-    core_competencies: Array.isArray(raw.core_competencies) ? raw.core_competencies : [],
+    hard_skills: (() => {
+      // Known soft skills that AI often misclassifies into hard_skills
+      const SOFT_SKILL_WORDS = ['problem solving', 'teamwork', 'time management', 'communication',
+        'leadership', 'collaboration', 'critical thinking', 'adaptability', 'creativity',
+        'agile', 'scrum', 'mentoring', 'mentorship', 'presentation', 'organization']
+      const FIELD_BLACKLIST = ['development', 'engineering', ' design', 'collaboration', 'control']
+
+      const rawHard = Array.isArray(raw.hard_skills) ? raw.hard_skills : (Array.isArray(raw.skills) ? raw.skills : [])
+
+      // Parse "Category (item1, item2)" format into individual items
+      const expanded = []
+      rawHard.forEach(s => {
+        const match = s && s.match(/^[^(]+\(([^)]+)\)$/)
+        if (match) {
+          // Extract the items inside parentheses
+          match[1].split(',').forEach(item => expanded.push(item.trim()))
+        } else if (s) {
+          expanded.push(s.trim())
+        }
+      })
+
+      // Filter out soft skills & field terms, deduplicate
+      return expanded.filter((s, i, arr) => {
+        if (!s) return false
+        const lower = s.toLowerCase()
+        if (SOFT_SKILL_WORDS.some(w => lower.includes(w))) return false
+        if (FIELD_BLACKLIST.some(w => lower.endsWith(w) && lower.length > w.length + 3)) return false
+        return arr.findIndex(x => x.toLowerCase() === lower) === i
+      })
+    })(),
+    soft_skills: (() => {
+      const SOFT_SKILL_WORDS = ['problem solving', 'teamwork', 'time management', 'communication',
+        'leadership', 'collaboration', 'critical thinking', 'adaptability', 'creativity',
+        'agile', 'scrum', 'mentoring', 'mentorship', 'presentation', 'organization',
+        'management', 'fast learner', 'detail', 'proactive', 'initiative']
+
+      // Terms to REMOVE from soft_skills (commonly misclassified by AI)
+      const SOFT_BLACKLIST = ['development', 'engineering', 'programming', 'coding',
+        'design', 'architecture', 'deployment', 'devops', 'testing', 'qa']
+
+      const rawSoft = Array.isArray(raw.soft_skills) ? raw.soft_skills : (Array.isArray(raw.core_competencies) ? raw.core_competencies : [])
+      const rawHard = Array.isArray(raw.hard_skills) ? raw.hard_skills : []
+
+      // Rescue soft skills that were misplaced in hard_skills
+      const rescued = rawHard.filter(s => {
+        const lower = (s || '').toLowerCase()
+        return SOFT_SKILL_WORDS.some(w => lower.includes(w))
+      })
+
+      return [...rawSoft, ...rescued].filter((s, i, arr) => {
+        if (!s) return false
+        const lower = s.toLowerCase()
+        // Remove any item that contains blacklisted technical terms
+        if (SOFT_BLACKLIST.some(w => lower.includes(w))) return false
+        return arr.findIndex(x => x.toLowerCase() === lower) === i
+      })
+    })(),
     experiences: Array.isArray(raw.experiences) ? raw.experiences.map(exp => ({
       role: exp.role || '',
       company: exp.company_name || exp.company || '',
@@ -89,13 +152,69 @@ const parsedResume = computed(() => {
       degree: [edu.degree, edu.major].filter(Boolean).join(', '),
       year: [edu.start_year, edu.end_year].filter(Boolean).join(' – ')
     })) : [],
-    certifications: Array.isArray(raw.certifications) ? raw.certifications : [],
+    certifications: [
+      ...(Array.isArray(raw.certifications) ? raw.certifications : []),
+      ...(Array.isArray(raw.certificates) ? raw.certificates : []),
+    ].filter((c, i, arr) => c && arr.indexOf(c) === i), // deduplicate
     projects: Array.isArray(raw.projects) ? raw.projects : []
   }
 })
 
+// ─── Creative CV: Smart 1-page curated version ───────────────────────────────
+// Priority order for trimming (what gets cut first if too much content):
+// 1. certifications beyond top 4
+// 2. soft_skills beyond top 4
+// 3. hard_skills beyond top 8
+// 4. summary truncated to 2 sentences
+// 5. projects beyond top 2 (each with short description)
+// 6. experience bullets beyond 2 per entry, and entries beyond 2
+// 7. education beyond top 2
+const parsedResumeCreative = computed(() => {
+  const r = parsedResume.value
+  if (!r) return null
+
+  // Truncate summary to 2 sentences max
+  const truncateSummary = (text, maxSentences = 2) => {
+    if (!text) return ''
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text]
+    return sentences.slice(0, maxSentences).join(' ').trim()
+  }
+
+  // Truncate a string to max N characters
+  const truncateStr = (str, max) => {
+    if (!str || str.length <= max) return str || ''
+    return str.substring(0, max).trimEnd() + '…'
+  }
+
+  return {
+    name: r.name,
+    headline: r.headline,
+    summary: truncateSummary(r.summary, 2),
+    contact: r.contact,
+    // Hard skills: top 8 most relevant (already filtered by blacklist in component)
+    hard_skills: r.hard_skills.slice(0, 8),
+    // Soft skills: top 4 only
+    soft_skills: r.soft_skills.slice(0, 4),
+    // Experiences: max 2 entries, each with max 2 bullets, short company/role
+    experiences: r.experiences.slice(0, 2).map(exp => ({
+      ...exp,
+      bullets: exp.bullets.slice(0, 2).map(b => truncateStr(b, 120))
+    })),
+    // Education: top 2
+    education: r.education.slice(0, 2),
+    // Certifications: top 4 (most recent/important first)
+    certifications: r.certifications.slice(0, 4),
+    // Projects: top 2, with short description
+    projects: r.projects.slice(0, 2).map(p => ({
+      ...p,
+      description: truncateStr(p.description, 100),
+      impact: truncateStr(p.impact, 80)
+    }))
+  }
+})
+
 const hasPreview = computed(() => {
-  return parsedResume.value && (parsedResume.value.name || parsedResume.value.skills.length > 0)
+  return parsedResume.value && (parsedResume.value.name || parsedResume.value.hard_skills.length > 0)
 })
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -118,6 +237,7 @@ const normalizeDraftForm = (value) => {
     website: '',
     summary: '',
     hard_skills: [],
+    soft_skills: [],
     certificates: [],
     education: [{ school: '', degree: '', year: '' }],
     experiences: [{ company: '', role: '', start_date: '', end_date: '', tasks: '', impact: '' }]
@@ -127,6 +247,7 @@ const normalizeDraftForm = (value) => {
     ...base,
     ...raw,
     hard_skills: Array.isArray(raw.hard_skills) ? raw.hard_skills : [],
+    soft_skills: Array.isArray(raw.soft_skills) ? raw.soft_skills : [],
     certificates: Array.isArray(raw.certificates) ? raw.certificates : [],
     education: Array.isArray(raw.education) && raw.education.length ? raw.education : base.education,
     experiences: Array.isArray(raw.experiences) && raw.experiences.length ? raw.experiences : base.experiences
@@ -198,6 +319,14 @@ const addTag = () => {
   hardSkillInput.value = ''
 }
 const removeTag = (index) => createForm.value.hard_skills.splice(index, 1)
+
+const addSoftTag = () => {
+  const clean = softSkillInput.value.trim()
+  if (!clean || createForm.value.soft_skills.includes(clean)) return
+  createForm.value.soft_skills.push(clean)
+  softSkillInput.value = ''
+}
+const removeSoftTag = (index) => createForm.value.soft_skills.splice(index, 1)
 
 const addCertificate = () => {
   const clean = certificateInput.value.trim()
@@ -331,9 +460,11 @@ const runGenerateFromCreate = async () => {
     formData.append('headline', createForm.value.headline)
     formData.append('summary', createForm.value.summary)
     formData.append('hard_skills', JSON.stringify(createForm.value.hard_skills))
+    formData.append('soft_skills', JSON.stringify(createForm.value.soft_skills))
     formData.append('certificates', JSON.stringify(createForm.value.certificates))
     formData.append('education', JSON.stringify(createForm.value.education))
     formData.append('experiences', JSON.stringify(createForm.value.experiences))
+    formData.append('language', 'en')
 
     const pdfFiles = cvFiles.value.filter((file) => file.type === 'application/pdf')
     const imageFiles = cvFiles.value.filter((file) => file.type !== 'application/pdf')
@@ -381,8 +512,6 @@ const runGenerateFromCreate = async () => {
 
     await loadLatestGeneratedResume()
 
-    const hasFiles = cvFiles.value.length > 0
-    pageSuccess.value = `Resume berhasil dibuat!${hasFiles ? ` (${cvFiles.value.length} file diproses via Gemini Vision)` : ''}`
     success('Generate CV Berhasil', 'Resume kamu sudah siap di-preview dan download.')
   } catch (e) {
     pageError.value = getErrorMessage(e, 'Generate resume gagal.')
@@ -391,6 +520,71 @@ const runGenerateFromCreate = async () => {
     loadingGenerate.value = false
   }
 }
+
+// ─── PDF Download — Creative Style ────────────────────────────────────────────
+
+const downloadCreativeCvPdf = async () => {
+  if (!hasPreview.value) {
+    pageError.value = 'Belum ada hasil resume untuk di-download.'
+    return
+  }
+
+  const element = document.getElementById('creative-cv-export')
+  if (!element) {
+    pageError.value = 'Elemen CV tidak ditemukan.'
+    return
+  }
+
+  isGeneratingPdf.value = true
+
+  const safeName = (parsedResume.value?.name || 'resume').replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '')
+
+  const printWindow = window.open('', '_blank', 'width=900,height=1200')
+  if (!printWindow) {
+    pageError.value = 'Popup diblokir oleh browser. Mohon izinkan popup untuk download PDF.'
+    isGeneratingPdf.value = false
+    return
+  }
+
+  printWindow.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CV-Kreatif-${safeName}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: white; font-family: 'Inter', sans-serif; }
+    @page { size: A4 portrait; margin: 0; }
+    @media print {
+      html, body { width: 210mm; }
+      body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .no-print { display: none !important; }
+    }
+    #cv-print-root { width: 794px; }
+  </style>
+</head>
+<body>
+  <div id="cv-print-root">${element.outerHTML}</div>
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        document.title = 'CV-Kreatif-${safeName}';
+        window.print();
+        window.close();
+      }, 1200);
+    };
+  <\/script>
+</body>
+</html>`)
+
+  printWindow.document.close()
+  isGeneratingPdf.value = false
+}
+
 
 // ─── PDF Download — Harvard Style ────────────────────────────────────────────
 
@@ -598,8 +792,8 @@ const downloadCvPdf = () => {
 
   // ── SKILLS ────────────────────────────────────────────────────────────────
   const allSkills = [
-    ...data.skills,
-    ...data.core_competencies
+    ...data.hard_skills,
+    ...data.soft_skills
   ].filter(Boolean)
 
   if (allSkills.length) {
@@ -700,6 +894,7 @@ const loadInitialData = async () => {
     createForm.value.website = profile.website || ''
     createForm.value.headline = profile.field_of_work || ''
     createForm.value.summary = profile.bio || ''
+    profilePhoto.value = profile.photo_url || profile.profile_url || user.photo_url || ''
     await fetchResumeDraft()
     await loadLatestGeneratedResume()
   } catch (e) {
@@ -788,13 +983,25 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
 
         <!-- Hard Skills -->
         <div>
-          <label class="text-[12px] font-medium text-[#64748B] block mb-2">Hard Skills</label>
+          <label class="text-[12px] font-medium text-[#64748B] block mb-2">Hard Skills (Tools, Bahasa Pemrograman)</label>
           <div class="flex gap-2">
-            <input v-model="hardSkillInput" class="flex-1 border border-[#E2E8F0] rounded-[8px] px-3 py-2.5 text-[14px]" placeholder="Vue.js" @keyup.enter="addTag" />
+            <input v-model="hardSkillInput" class="flex-1 border border-[#E2E8F0] rounded-[8px] px-3 py-2.5 text-[14px]" placeholder="e.g. Vue.js, Python, Figma" @keyup.enter="addTag" />
             <button class="px-4 py-2 rounded-[8px] bg-[#EEF2FF] text-[#1D4ED8] text-[13px] font-medium" @click="addTag">Add</button>
           </div>
           <div class="mt-2 flex flex-wrap gap-2">
             <button v-for="(skill, idx) in createForm.hard_skills" :key="idx" class="text-[12px] px-2 py-1 rounded-full bg-[#EEF2FF] text-[#1D4ED8]" @click="removeTag(idx)">{{ skill }} ×</button>
+          </div>
+        </div>
+
+        <!-- Soft Skills -->
+        <div>
+          <label class="text-[12px] font-medium text-[#64748B] block mb-2">Soft Skills (Kemampuan Interpersonal)</label>
+          <div class="flex gap-2">
+            <input v-model="softSkillInput" class="flex-1 border border-[#E2E8F0] rounded-[8px] px-3 py-2.5 text-[14px]" placeholder="e.g. Teamwork, Problem Solving" @keyup.enter="addSoftTag" />
+            <button class="px-4 py-2 rounded-[8px] bg-[#EEF2FF] text-[#1D4ED8] text-[13px] font-medium" @click="addSoftTag">Add</button>
+          </div>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <button v-for="(skill, idx) in createForm.soft_skills" :key="idx" class="text-[12px] px-2 py-1 rounded-full bg-[#FAF5FF] text-[#9333EA]" @click="removeSoftTag(idx)">{{ skill }} ×</button>
           </div>
         </div>
 
@@ -870,6 +1077,46 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
           </div>
         </div>
 
+        <!-- CV Format & Template Options -->
+        <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[10px] p-4 space-y-4">
+          <div>
+            <label class="text-[13px] font-semibold text-[#334155] block mb-2">Pilih Format CV</label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" v-model="cvType" value="ats" class="text-[color:var(--color-main)] focus:ring-[color:var(--color-main)]" />
+                <span class="text-[14px]">ATS (Harvard Style)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" v-model="cvType" value="creative" class="text-[color:var(--color-main)] focus:ring-[color:var(--color-main)]" />
+                <span class="text-[14px]">Kreatif (Non-ATS)</span>
+              </label>
+            </div>
+          </div>
+          
+          <div v-if="cvType === 'creative'" class="pt-2 border-t border-[#E2E8F0]">
+            <label class="text-[13px] font-semibold text-[#334155] block mb-2">Pilih Desain Kreatif</label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div @click="creativeTemplate = 1" :class="['cursor-pointer border-2 rounded-[8px] p-2 text-center transition-all', creativeTemplate === 1 ? 'border-[#3B82F6] bg-[#EFF6FF]' : 'border-[#E2E8F0] hover:border-[#93C5FD]']">
+                <div class="h-12 w-full rounded-[4px] bg-gradient-to-br from-[#1E3A8A] to-[#3B82F6] mb-2"></div>
+                <span class="text-[12px] font-medium text-[#1E3A8A]">Modern Blue</span>
+              </div>
+              <div @click="creativeTemplate = 2" :class="['cursor-pointer border-2 rounded-[8px] p-2 text-center transition-all', creativeTemplate === 2 ? 'border-[#1F2937] bg-[#F3F4F6]' : 'border-[#E2E8F0] hover:border-[#9CA3AF]']">
+                <div class="h-12 w-full rounded-[4px] bg-gradient-to-br from-[#111827] to-[#374151] mb-2"></div>
+                <span class="text-[12px] font-medium text-[#111827]">Elegant Dark</span>
+              </div>
+              <div @click="creativeTemplate = 3" :class="['cursor-pointer border-2 rounded-[8px] p-2 text-center transition-all', creativeTemplate === 3 ? 'border-[#DC2626] bg-[#FEF2F2]' : 'border-[#E2E8F0] hover:border-[#FCA5A5]']">
+                <div class="h-12 w-full rounded-[4px] bg-gradient-to-br from-[#7F1D1D] to-[#DC2626] mb-2"></div>
+                <span class="text-[12px] font-medium text-[#7F1D1D]">Vibrant Red</span>
+              </div>
+              <div @click="creativeTemplate = 4" :class="['cursor-pointer border-2 rounded-[8px] p-2 text-center transition-all', creativeTemplate === 4 ? 'border-[#10B981] bg-[#ECFDF5]' : 'border-[#E2E8F0] hover:border-[#6EE7B7]']">
+                <div class="h-12 w-full rounded-[4px] bg-gradient-to-br from-[#047857] to-[#10B981] mb-2"></div>
+                <span class="text-[12px] font-medium text-[#047857]">Minimal Green</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
         <!-- Generate Button -->
         <button
           class="w-full bg-[color:var(--color-main)] text-white rounded-[8px] px-5 py-3 text-[15px] font-medium disabled:opacity-50"
@@ -890,12 +1137,14 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
         <div class="bg-[#FAFBFF] border border-[#E2E8F0] rounded-[12px] p-6">
           <div class="flex items-center justify-between gap-3 mb-4">
             <h2 class="text-[19px] font-semibold">CV Preview</h2>
-            <button v-if="hasPreview" class="bg-[color:var(--color-main)] text-white rounded-[8px] px-4 py-2 text-[14px]" @click="downloadCvPdf">
-              Download PDF
+            <button v-if="hasPreview" class="bg-[color:var(--color-main)] text-white rounded-[8px] px-4 py-2 text-[14px] disabled:opacity-50" @click="cvType === 'ats' ? downloadCvPdf() : downloadCreativeCvPdf()" :disabled="isGeneratingPdf">
+              <span v-if="isGeneratingPdf" class="flex items-center gap-2"><Icon name="heroicons:arrow-path" class="w-4 h-4 animate-spin"/> Exporting...</span>
+              <span v-else>Download PDF</span>
             </button>
           </div>
 
-          <div v-if="hasPreview && parsedResume" class="space-y-5">
+          <template v-if="hasPreview && parsedResume">
+            <div v-if="cvType === 'ats'" class="space-y-5">
             <!-- Header -->
             <div class="text-center border-b border-[#E2E8F0] pb-4">
               <h3 class="text-[22px] font-semibold tracking-wide uppercase">{{ parsedResume.name }}</h3>
@@ -945,10 +1194,21 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
             </div>
 
             <!-- Skills -->
-            <div v-if="parsedResume.skills.length || parsedResume.core_competencies.length">
+            <div v-if="parsedResume.hard_skills.length || parsedResume.soft_skills.length">
               <p class="text-[10px] uppercase tracking-[0.18em] text-[#94A3B8] font-semibold mb-2 border-b border-[#E2E8F0] pb-1">Skills</p>
-              <div class="flex flex-wrap gap-2">
-                <span v-for="(skill, idx) in [...parsedResume.skills, ...parsedResume.core_competencies]" :key="idx" class="text-[11px] px-2.5 py-1 rounded-full bg-[#DBEAFE] text-[#1D4ED8]">{{ skill }}</span>
+              
+              <div v-if="parsedResume.hard_skills.length" class="mb-3">
+                <p class="text-[12px] font-medium text-[#475569] mb-1.5">Hard Skills</p>
+                <div class="flex flex-wrap gap-2">
+                  <span v-for="(skill, idx) in parsedResume.hard_skills" :key="'hard'+idx" class="text-[11px] px-2.5 py-1 rounded-full bg-[#DBEAFE] text-[#1D4ED8]">{{ skill }}</span>
+                </div>
+              </div>
+
+              <div v-if="parsedResume.soft_skills.length">
+                <p class="text-[12px] font-medium text-[#475569] mb-1.5">Soft Skills</p>
+                <div class="flex flex-wrap gap-2">
+                  <span v-for="(skill, idx) in parsedResume.soft_skills" :key="'soft'+idx" class="text-[11px] px-2.5 py-1 rounded-full bg-[#F3E8FF] text-[#7E22CE]">{{ skill }}</span>
+                </div>
               </div>
             </div>
 
@@ -974,7 +1234,12 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
                 </div>
               </div>
             </div>
-          </div>
+            </div>
+            
+            <div v-else-if="cvType === 'creative'">
+              <CreativeCvPreview :data="parsedResumeCreative" :photo-url="profilePhoto" :template-id="creativeTemplate" />
+            </div>
+          </template>
 
           <p v-else class="text-[14px] text-[#64748B]">Isi form dan klik "Generate CV" untuk melihat preview</p>
         </div>

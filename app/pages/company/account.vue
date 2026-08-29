@@ -263,10 +263,6 @@ const changePassword = async () => {
             <div v-if="uploadWarning" class="text-[13px] bg-yellow-50 border border-yellow-200 rounded-[5px] p-2 text-yellow-800">
               ⚠️ {{ uploadWarning }}
             </div>
-
-            <p v-if="form.logo_url" class="text-[12px] text-[#64748B]">
-              Current: <span class="font-medium truncate">{{ form.logo_url }}</span>
-            </p>
           </div>
         </div>
       </div>
