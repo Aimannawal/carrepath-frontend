@@ -54,8 +54,8 @@ const certificateInput = ref('')
 // ─── Computed ────────────────────────────────────────────────────────────────
 
 const quotaDisplayText = computed(() => {
-  if (!quotaState.value) return 'Quota akan tampil setelah generate berhasil.'
-  return `${quotaState.value.remaining}x tersisa dari ${quotaState.value.quota}x kuota bulanan`
+  if (!quotaState.value) return 'Memuat status kuota...'
+  return `${quotaState.value.remaining}x tersisa dari ${quotaState.value.quota}x kuota bulan ini`
 })
 
 const getLatestResumeSource = (value) => {
@@ -895,6 +895,16 @@ const loadInitialData = async () => {
     createForm.value.headline = profile.field_of_work || ''
     createForm.value.summary = profile.bio || ''
     profilePhoto.value = profile.photo_url || profile.profile_url || user.photo_url || ''
+    
+    // Fetch initial quota
+    try {
+      const quotaRes = await get(`/ai/quota/${userId.value}`)
+      const quotaData = getData(quotaRes)
+      if (quotaData) quotaState.value = quotaData
+    } catch {
+      // Ignore quota fetch error
+    }
+
     await fetchResumeDraft()
     await loadLatestGeneratedResume()
   } catch (e) {

@@ -148,8 +148,8 @@ const recommendedJobs = computed(() => {
 })
 
 const quotaDisplayText = computed(() => {
-  if (!quotaState.value) return 'Quota akan tampil setelah generate berhasil.'
-  return `${quotaState.value.remaining}x tersisa dari ${quotaState.value.quota}x kuota bulanan`
+  if (!quotaState.value) return 'Memuat status kuota...'
+  return `${quotaState.value.remaining}x tersisa dari ${quotaState.value.quota}x kuota bulan ini`
 })
 
 const fetchHistory = async () => {
@@ -389,6 +389,15 @@ onMounted(() => {
   loadDraft()
   fetchHistory()
   fetchJobs()
+
+  if (userId.value) {
+    get(`/ai/quota/${userId.value}`)
+      .then((res) => {
+        const quotaData = getData(res)
+        if (quotaData) quotaState.value = quotaData
+      })
+      .catch(() => {})
+  }
 })
 </script>
 
