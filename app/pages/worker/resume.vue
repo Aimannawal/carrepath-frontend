@@ -1307,13 +1307,8 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
                       {{ resume.updated_at ? new Date(resume.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A' }}
                     </p>
                   </div>
-                </div>
-                <div class="mt-2 ml-10">
-                  <span class="text-[10px] px-2 py-0.5 rounded-full font-medium" :class="resume.generated_by === 'optimize' ? 'bg-[#FEF3C7] text-[#92400E]' : 'bg-[#DCFCE7] text-[#166534]'">
-                    {{ resume.generated_by === 'optimize' ? 'Optimized' : 'Generated' }}
-                  </span>
-                </div>
               </div>
+            </div>
               <div class="flex gap-2 justify-end mt-1" @click.stop>
                 <button 
                   class="text-[12px] px-3 py-1.5 rounded-[8px] border border-[#E2E8F0] text-[#475569] bg-white hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all inline-flex items-center gap-1.5"
