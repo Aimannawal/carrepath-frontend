@@ -403,6 +403,22 @@ const filteredResumes = computed(() => {
   })
 })
 
+const currentPage = ref(1)
+const itemsPerPage = 6
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredResumes.value.length / itemsPerPage)
+})
+
+const paginatedResumes = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredResumes.value.slice(start, start + itemsPerPage)
+})
+
+watch(() => resumeSearchQuery.value, () => {
+  currentPage.value = 1
+})
+
 const updateQuotaFromResponse = (response) => {
   const nextQuota = getQuota(response)
   if (nextQuota) quotaState.value = nextQuota
@@ -1270,7 +1286,7 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div 
-              v-for="resume in filteredResumes" 
+              v-for="resume in paginatedResumes" 
               :key="resume.id" 
               :class="[
                 'group border rounded-[12px] p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between gap-3',
@@ -1314,6 +1330,46 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
                   Delete
                 </button>
               </div>
+            </div>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-[#E2E8F0] mt-6 pt-4">
+            <div class="text-[13px] text-[#64748B]">
+              Menampilkan <span class="font-medium text-[#0F172A]">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> - 
+              <span class="font-medium text-[#0F172A]">{{ Math.min(currentPage * itemsPerPage, filteredResumes.length) }}</span> dari 
+              <span class="font-medium text-[#0F172A]">{{ filteredResumes.length }}</span> resume
+            </div>
+            <div class="flex items-center gap-2">
+              <button 
+                :disabled="currentPage === 1" 
+                class="p-2 border border-[#E2E8F0] rounded-[8px] bg-white hover:bg-[#F8FAFC] disabled:opacity-40 disabled:hover:bg-white text-[#475569] transition-all"
+                @click="currentPage--"
+              >
+                <Icon name="heroicons:chevron-left" class="w-4 h-4" />
+              </button>
+              <div class="flex items-center gap-1">
+                <button 
+                  v-for="page in totalPages" 
+                  :key="page"
+                  :class="[
+                    'px-3.5 py-1.5 rounded-[8px] text-[13px] font-medium transition-all',
+                    currentPage === page 
+                      ? 'bg-[color:var(--color-main)] text-white' 
+                      : 'border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F8FAFC]'
+                  ]"
+                  @click="currentPage = page"
+                >
+                  {{ page }}
+                </button>
+              </div>
+              <button 
+                :disabled="currentPage === totalPages" 
+                class="p-2 border border-[#E2E8F0] rounded-[8px] bg-white hover:bg-[#F8FAFC] disabled:opacity-40 disabled:hover:bg-white text-[#475569] transition-all"
+                @click="currentPage++"
+              >
+                <Icon name="heroicons:chevron-right" class="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
