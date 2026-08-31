@@ -5,10 +5,10 @@ import { jsPDF } from 'jspdf'
 useHead({ title: 'CarrePath | My Resume' })
 definePageMeta({ layout: 'worker' })
 
-const { get, post } = useApi()
+const { get, post, put, del } = useApi()
 const { getData, getErrorMessage, getQuota } = useApiResponse()
 const { userId } = useAuth()
-const { success, error } = useModal()
+const { success, error, confirm: confirmModal } = useModal()
 
 const loadingInitial = ref(true)
 const loadingGenerate = ref(false)
@@ -20,8 +20,17 @@ const cvFiles = ref([])
 const cvFileNames = ref([])
 const cvFileError = ref('')
 const generateResult = ref(null)
+const savedResumes = ref([])
+const selectedResumeId = ref(null)
+const resumeSearchQuery = ref('')
 const savingDraft = ref(false)
 const readyToAutosave = ref(false)
+
+// Rename modal state
+const showRenameModal = ref(false)
+const renameTarget = ref({ id: '', name: '' })
+const renameInput = ref('')
+const renameSaving = ref(false)
 let draftSaveTimer = null
 
 // Added states for Creative CV
@@ -297,13 +306,102 @@ const loadLatestGeneratedResume = async () => {
   try {
     const response = await get(`/ai/resumes/${userId.value}`)
     const records = getData(response)
-    if (Array.isArray(records) && records.length) {
-      generateResult.value = records[0]
+    if (Array.isArray(records)) {
+      savedResumes.value = records
+      if (records.length && !selectedResumeId.value) {
+        selectedResumeId.value = records[0].id
+        generateResult.value = records[0]
+      } else if (selectedResumeId.value) {
+        const found = records.find(r => r.id === selectedResumeId.value)
+        if (found) {
+          generateResult.value = found
+        }
+      }
     }
   } catch {
     // Ignore: user may not have a generated resume yet.
   }
 }
+
+const selectSavedResume = (id) => {
+  selectedResumeId.value = id
+  const found = savedResumes.value.find(r => r.id === id)
+  if (found) {
+    generateResult.value = found
+  }
+}
+
+const openRenameModal = (id, currentName) => {
+  renameTarget.value = { id, name: currentName || '' }
+  renameInput.value = currentName || ''
+  showRenameModal.value = true
+}
+
+const closeRenameModal = () => {
+  showRenameModal.value = false
+  renameTarget.value = { id: '', name: '' }
+  renameInput.value = ''
+  renameSaving.value = false
+}
+
+const submitRename = async () => {
+  const newName = renameInput.value.trim()
+  if (!newName || newName === renameTarget.value.name) {
+    closeRenameModal()
+    return
+  }
+  renameSaving.value = true
+  try {
+    await put(`/ai/resumes/${renameTarget.value.id}`, { name: newName })
+    success('Berhasil', 'Nama resume berhasil diubah')
+    await loadLatestGeneratedResume()
+    closeRenameModal()
+  } catch (e) {
+    error('Gagal', getErrorMessage(e, 'Gagal mengganti nama resume'))
+    renameSaving.value = false
+  }
+}
+
+const deleteResume = (id) => {
+  confirmModal(
+    'Hapus Resume',
+    'Apakah kamu yakin ingin menghapus resume ini? Tindakan ini tidak bisa dibatalkan.',
+    async () => {
+      try {
+        await del(`/ai/resumes/${id}`)
+        success('Berhasil', 'Resume berhasil dihapus')
+        if (selectedResumeId.value === id) {
+          selectedResumeId.value = null
+          generateResult.value = null
+        }
+        await loadLatestGeneratedResume()
+      } catch (e) {
+        error('Gagal', getErrorMessage(e, 'Gagal menghapus resume'))
+      }
+    },
+    undefined,
+    'Hapus'
+  )
+}
+
+const filteredResumes = computed(() => {
+  const q = resumeSearchQuery.value.trim().toLowerCase()
+  let list = [...savedResumes.value]
+  // Sort descending by created_at (newest first), with updated_at as tiebreaker
+  list.sort((a, b) => {
+    const dateA = new Date(a.created_at || a.updated_at || 0).getTime()
+    const dateB = new Date(b.created_at || b.updated_at || 0).getTime()
+    if (dateB !== dateA) return dateB - dateA
+    return new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime()
+  })
+  if (!q) return list
+  return list.filter(r => {
+    const name = (r.name || 'Untitled Resume').toLowerCase()
+    const date = r.updated_at ? new Date(r.updated_at).toLocaleDateString('id-ID') : ''
+    const gen = (r.generated_by || '').toLowerCase()
+    return name.includes(q) || date.includes(q) || gen.includes(q)
+  })
+})
 
 const updateQuotaFromResponse = (response) => {
   const nextQuota = getQuota(response)
@@ -505,9 +603,12 @@ const runGenerateFromCreate = async () => {
 
     // PDF files are already converted to text locally, so do not upload them again.
 
-    // ── Generate ─────────────────────────────────────────────────────────────
     const response = await post('/ai/generate-resume', formData)
     generateResult.value = getData(response)
+    if (Array.isArray(generateResult.value) && generateResult.value.length) {
+      generateResult.value = generateResult.value[0]
+    }
+    selectedResumeId.value = generateResult.value?.id || null
     updateQuotaFromResponse(response)
 
     await loadLatestGeneratedResume()
@@ -1143,6 +1244,139 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
           </span>
         </button>
 
+        <!-- Saved Resumes -->
+        <div v-if="savedResumes.length > 0" class="bg-[#FAFBFF] border border-[#E2E8F0] rounded-[12px] p-6">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
+            <div>
+              <h2 class="text-[19px] font-semibold">My Saved Resumes</h2>
+              <p class="text-[12px] text-[#94A3B8] mt-0.5">{{ savedResumes.length }} resume tersimpan</p>
+            </div>
+            <!-- Live Search -->
+            <div class="relative w-full md:w-[280px]">
+              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
+              <input
+                v-model="resumeSearchQuery"
+                type="text"
+                placeholder="Cari resume..."
+                class="w-full pl-9 pr-3 py-2.5 border border-[#E2E8F0] rounded-[10px] text-[13px] bg-white focus:outline-none focus:border-[color:var(--color-main)] focus:ring-1 focus:ring-[color:var(--color-main)] transition-all"
+              />
+            </div>
+          </div>
+
+          <!-- No search results -->
+          <p v-if="filteredResumes.length === 0 && resumeSearchQuery.trim()" class="text-[14px] text-[#94A3B8] text-center py-6">
+            Tidak ada resume yang cocok dengan pencarian "{{ resumeSearchQuery }}"
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div 
+              v-for="resume in filteredResumes" 
+              :key="resume.id" 
+              :class="[
+                'group border rounded-[12px] p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between gap-3',
+                selectedResumeId === resume.id 
+                  ? 'border-[color:var(--color-main)] bg-gradient-to-br from-[#EEF2FF] to-[#F8FAFF] shadow-[0_2px_12px_rgba(43,77,182,0.10)]' 
+                  : 'border-[#E2E8F0] hover:border-[#CBD5E1] hover:shadow-sm bg-white'
+              ]"
+              @click="selectSavedResume(resume.id)"
+            >
+              <div>
+                <div class="flex items-start gap-2">
+                  <div class="flex-shrink-0 w-8 h-8 rounded-[8px] flex items-center justify-center mt-0.5" :class="selectedResumeId === resume.id ? 'bg-[color:var(--color-main)] text-white' : 'bg-[#F1F5F9] text-[#64748B] group-hover:bg-[#E2E8F0]'">
+                    <Icon name="heroicons:document-text" class="w-4 h-4" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="font-semibold text-[14px] truncate text-[#0F172A]">{{ resume.name || 'Untitled Resume' }}</p>
+                    <p class="text-[11px] text-[#94A3B8] mt-0.5">
+                      {{ resume.updated_at ? new Date(resume.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-2 ml-10">
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-medium" :class="resume.generated_by === 'optimize' ? 'bg-[#FEF3C7] text-[#92400E]' : 'bg-[#DCFCE7] text-[#166534]'">
+                    {{ resume.generated_by === 'optimize' ? 'Optimized' : 'Generated' }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex gap-2 justify-end mt-1" @click.stop>
+                <button 
+                  class="text-[12px] px-3 py-1.5 rounded-[8px] border border-[#E2E8F0] text-[#475569] bg-white hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all inline-flex items-center gap-1.5"
+                  @click="openRenameModal(resume.id, resume.name)"
+                >
+                  <Icon name="heroicons:pencil-square" class="w-3.5 h-3.5" />
+                  Rename
+                </button>
+                <button 
+                  class="text-[12px] px-3 py-1.5 rounded-[8px] border border-red-100 text-red-500 bg-red-50/50 hover:bg-red-100 hover:text-red-600 transition-all inline-flex items-center gap-1.5"
+                  @click="deleteResume(resume.id)"
+                >
+                  <Icon name="heroicons:trash" class="w-3.5 h-3.5" />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rename Modal -->
+        <Teleport to="body">
+          <Transition name="modal">
+            <div v-if="showRenameModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              <!-- Backdrop -->
+              <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeRenameModal" />
+              <!-- Modal Card -->
+              <div class="relative bg-white rounded-[16px] shadow-2xl w-full max-w-[420px] overflow-hidden animate-[modalSlideIn_0.25s_ease-out]">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-[#2B4DB6] to-[#3B63D6] px-6 py-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 bg-white/20 rounded-[10px] flex items-center justify-center">
+                        <Icon name="heroicons:pencil-square" class="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 class="text-[16px] font-semibold text-white">Rename Resume</h3>
+                        <p class="text-[11px] text-white/70">Berikan nama yang mudah diingat</p>
+                      </div>
+                    </div>
+                    <button @click="closeRenameModal" class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors">
+                      <Icon name="heroicons:x-mark" class="w-5 h-5 text-white" />
+                    </button>
+                  </div>
+                </div>
+                <!-- Body -->
+                <div class="px-6 py-5">
+                  <label class="text-[12px] font-medium text-[#64748B] block mb-2">Nama Resume</label>
+                  <input
+                    v-model="renameInput"
+                    type="text"
+                    placeholder="Contoh: CV Backend Engineer"
+                    class="w-full border border-[#E2E8F0] rounded-[10px] px-4 py-3 text-[14px] focus:outline-none focus:border-[color:var(--color-main)] focus:ring-2 focus:ring-[#2B4DB6]/10 transition-all"
+                    @keyup.enter="submitRename"
+                    autofocus
+                  />
+                </div>
+                <!-- Footer -->
+                <div class="px-6 pb-5 flex items-center gap-3 justify-end">
+                  <button 
+                    @click="closeRenameModal" 
+                    class="px-5 py-2.5 text-[13px] font-medium rounded-[10px] border border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC] transition-all"
+                  >
+                    Batal
+                  </button>
+                  <button 
+                    @click="submitRename" 
+                    :disabled="renameSaving || !renameInput.trim()"
+                    class="px-5 py-2.5 text-[13px] font-medium rounded-[10px] bg-[color:var(--color-main)] text-white hover:bg-[#243F99] disabled:opacity-50 transition-all inline-flex items-center gap-2"
+                  >
+                    <Icon v-if="renameSaving" name="heroicons:arrow-path" class="w-4 h-4 animate-spin" />
+                    <span>{{ renameSaving ? 'Menyimpan...' : 'Simpan' }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </Teleport>
+
         <!-- Preview -->
         <div class="bg-[#FAFBFF] border border-[#E2E8F0] rounded-[12px] p-6">
           <div class="flex items-center justify-between gap-3 mb-4">
@@ -1258,3 +1492,27 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
     </div>
   </section>
 </template>
+
+<style scoped>
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-enter-active {
+  transition: opacity 0.2s ease-out;
+}
+.modal-leave-active {
+  transition: opacity 0.15s ease-in;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+</style>
