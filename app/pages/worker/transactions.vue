@@ -47,9 +47,13 @@ onMounted(async () => {
           <p class="text-[15px] font-medium">{{ item.payment_packages?.name || item.payment_packages?.package_name || 'Package' }}</p>
           <p class="text-[13px] text-[#64748B]">Amount: Rp {{ Number(item.amount || item.payment_packages?.price || 0).toLocaleString('id-ID') }}</p>
         </div>
-        <div class="text-left md:text-right">
+        <div class="text-left md:text-right flex flex-col items-start md:items-end">
           <p class="text-[13px] font-medium capitalize">{{ item.status || 'pending' }}</p>
-          <p class="text-[12px] text-[#64748B]">{{ new Date(item.created_at || Date.now()).toLocaleString('id-ID') }}</p>
+          <p class="text-[12px] text-[#64748B] mb-2">{{ new Date(item.created_at || Date.now()).toLocaleString('id-ID') }}</p>
+          <NuxtLink :to="`/invoice/${item.id}`" class="text-[12px] text-blue-600 font-medium hover:underline flex items-center gap-1">
+            <Icon name="mdi:receipt-text-outline" class="w-4 h-4" />
+            View Invoice
+          </NuxtLink>
         </div>
       </div>
     </div>

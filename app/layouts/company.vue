@@ -14,7 +14,7 @@ const menuItems = [
   { name: 'Dashboard', path: '/company/dashboard', icon: 'heroicons:home' },
   { name: 'Manage Job', path: '/company/jobs', icon: 'heroicons:briefcase' },
   { name: 'My Account', path: '/company/account', icon: 'heroicons:user' },
-  { name: 'Settings', path: '/company/settings', icon: 'heroicons:cog-6-tooth' },
+  { name: 'Upgrade', path: '/company/upgrade', icon: 'heroicons:arrow-trending-up' },
   { name: 'Transactions', path: '/company/transactions', icon: 'heroicons:banknotes' }
 ]
 

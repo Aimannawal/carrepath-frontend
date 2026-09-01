@@ -19,8 +19,8 @@ const menuItems = [
   { name: 'Applications', path: '/worker/applications', icon: 'heroicons:paper-airplane' },
   { name: 'Saved Jobs', path: '/worker/saved-companies', icon: 'heroicons:bookmark' },
   { name: 'My Account', path: '/worker/account', icon: 'heroicons:user' },
-  { name: 'Transactions', path: '/worker/transactions', icon: 'heroicons:banknotes' },
-  { name: 'Upgrade', path: '/worker/upgrade', icon: 'heroicons:arrow-trending-up' }
+  { name: 'Upgrade', path: '/worker/upgrade', icon: 'heroicons:arrow-trending-up' },
+  { name: 'Transactions', path: '/worker/transactions', icon: 'heroicons:banknotes' }
 ]
 
 const toggleDrawer = () => {
