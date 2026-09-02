@@ -151,9 +151,12 @@ const handleLogout = () => {
       <!-- Mobile Header with Hamburger -->
       <header class="lg:hidden bg-white/95 backdrop-blur-xl border-b border-[#E2E8F0] sticky top-0 z-40">
         <div class="px-4 py-3 flex items-center justify-between">
+          <NuxtLink to="/company/dashboard" class="font-semibold text-[20px] tracking-tight whitespace-nowrap">
+            Carre<span class="text-[color:var(--color-main)]">path.</span>
+          </NuxtLink>
           <button
             @click="toggleDrawer"
-            class="p-2 -ml-1 rounded-[10px] text-[color:var(--color-dark)] hover:bg-[#F1F5F9] hover:text-[color:var(--color-main)] transition-colors"
+            class="p-2 -mr-1 rounded-[10px] text-[color:var(--color-dark)] hover:bg-[#F1F5F9] hover:text-[color:var(--color-main)] transition-colors"
             aria-label="Open menu"
           >
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -162,9 +165,6 @@ const handleLogout = () => {
               <line x1="4" y1="18" x2="20" y2="18"></line>
             </svg>
           </button>
-          <NuxtLink to="/company/dashboard" class="font-semibold text-[20px] tracking-tight whitespace-nowrap">
-            Carre<span class="text-[color:var(--color-main)]">path.</span>
-          </NuxtLink>
         </div>
       </header>
 
