@@ -9,7 +9,7 @@
 
   **Submission for ITECHNO CUP 2026 — Web Development**
 
-  **By WHN YH Institut**
+  **By whn yah institut**
 
 </div>
 
@@ -1021,6 +1021,17 @@ Semua endpoint menggunakan format response yang konsisten:
 
 ## 🧪 Testing
 
+### Akun Tester
+
+Gunakan akun berikut untuk mencoba semua fitur platform:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Super Admin** | admin@gmail.com | admin@gmail.com |
+| **Company** | microsoft@gmail.com | microsoft@gmail.com |
+| **Provider Bootcamp** | akubootcamp@gmail.com | akubootcamp@gmail.com |
+| **Worker** | worker@gmail.com | worker@gmail.com |
+
 ### Manual Testing
 
 Gunakan tools berikut untuk test API secara manual:
@@ -1068,6 +1079,6 @@ Proyek ini dilisensikan di bawah [MIT License](LICENSE) — lihat file LICENSE u
 
 <div align="center">
 
-  **Made with ❤️ by WHN YH Institut for ITECHNO CUP 2026**
+  **Made with ❤️ by whn yah institut for ITECHNO CUP 2026**
 
 </div>
