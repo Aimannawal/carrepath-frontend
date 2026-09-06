@@ -36,7 +36,7 @@
 | Nama | Peran | GitHub |
 |------|-------|--------|
 | **Aiman Wafi'i An Nawal** | Project Lead & Fullstack Developer | [Aimannawal](https://github.com/Aimannawal) |
-| **Muhammad Rizal Ramzi** | UI/UX Designer | [Rizalramzini](https://github.com/Rizalramzini) |
+| **Muhammad Rizal Ramzi** | UI/UX Designer | [Rizalramzi](https://github.com/Rizalramzi) |
 
 ---
 
@@ -363,6 +363,15 @@ npm run generate
 1. **Registrasi & Set Role** — Pilih role "provider"
 2. **Kelola Bootcamp** — Tambah, edit, dan hapus program bootcamp
 3. **Upgrade Premium** — Boost visibilitas bootcamp di platform
+
+#### Untuk Super Admin
+
+1. **Akses Admin Dashboard** — Login dengan akun super admin, lalu navigasi ke `/admin`
+2. **Monitor Revenue** — Lihat total pendapatan platform dari seluruh transaksi premium
+3. **Revenue Trend** — Pantau grafik tren pendapatan dari waktu ke waktu
+4. **Kelola Transaksi** — Review semua transaksi yang masuk (pending, success, failed)
+5. **Premium Users** — Lihat daftar worker, company, dan provider yang aktif berlangganan premium
+6. **Platform Stats** — Pantau statistik keseluruhan platform (total user, job, bootcamp, dll)
 
 ---
 
