@@ -48,7 +48,7 @@ const statusLabel = (status) => {
       </div>
     </div>
 
-    <p class="text-[12px] text-[#94A3B8]">Applied {{ new Date(item.applied_at || item.created_at || Date.now()).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) }}</p>
+    <p class="text-[12px] text-[#94A3B8]">Applied {{ formatDate(item.applied_at || item.created_at || Date.now()) }}</p>
 
     <!-- Show feedback/message if available -->
     <div v-if="item.feedback || item.message || item.rejection_reason" class="mt-3 p-2 rounded-[8px] bg-[#F8FAFC] border border-[#E2E8F0]">

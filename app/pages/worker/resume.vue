@@ -397,7 +397,7 @@ const filteredResumes = computed(() => {
   if (!q) return list
   return list.filter(r => {
     const name = (r.name || 'Untitled Resume').toLowerCase()
-    const date = r.updated_at ? new Date(r.updated_at).toLocaleDateString('id-ID') : ''
+    const date = r.updated_at ? formatDate(r.updated_at) : ''
     const gen = (r.generated_by || '').toLowerCase()
     return name.includes(q) || date.includes(q) || gen.includes(q)
   })
@@ -1260,115 +1260,6 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
           </span>
         </button>
 
-        <!-- Saved Resumes -->
-        <div v-if="savedResumes.length > 0" class="bg-[#FAFBFF] border border-[#E2E8F0] rounded-[12px] p-6">
-          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
-            <div>
-              <h2 class="text-[19px] font-semibold">My Saved Resumes</h2>
-              <p class="text-[12px] text-[#94A3B8] mt-0.5">{{ savedResumes.length }} resume tersimpan</p>
-            </div>
-            <!-- Live Search -->
-            <div class="relative w-full md:w-[280px]">
-              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
-              <input
-                v-model="resumeSearchQuery"
-                type="text"
-                placeholder="Cari resume..."
-                class="w-full pl-9 pr-3 py-2.5 border border-[#E2E8F0] rounded-[10px] text-[13px] bg-white focus:outline-none focus:border-[color:var(--color-main)] focus:ring-1 focus:ring-[color:var(--color-main)] transition-all"
-              />
-            </div>
-          </div>
-
-          <!-- No search results -->
-          <p v-if="filteredResumes.length === 0 && resumeSearchQuery.trim()" class="text-[14px] text-[#94A3B8] text-center py-6">
-            Tidak ada resume yang cocok dengan pencarian "{{ resumeSearchQuery }}"
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div 
-              v-for="resume in paginatedResumes" 
-              :key="resume.id" 
-              :class="[
-                'group border rounded-[12px] p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between gap-3',
-                selectedResumeId === resume.id 
-                  ? 'border-[color:var(--color-main)] bg-gradient-to-br from-[#EEF2FF] to-[#F8FAFF] shadow-[0_2px_12px_rgba(43,77,182,0.10)]' 
-                  : 'border-[#E2E8F0] hover:border-[#CBD5E1] hover:shadow-sm bg-white'
-              ]"
-              @click="selectSavedResume(resume.id)"
-            >
-              <div>
-                <div class="flex items-start gap-2">
-                  <div class="flex-shrink-0 w-8 h-8 rounded-[8px] flex items-center justify-center mt-0.5" :class="selectedResumeId === resume.id ? 'bg-[color:var(--color-main)] text-white' : 'bg-[#F1F5F9] text-[#64748B] group-hover:bg-[#E2E8F0]'">
-                    <Icon name="heroicons:document-text" class="w-4 h-4" />
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-[14px] truncate text-[#0F172A]">{{ resume.name || 'Untitled Resume' }}</p>
-                    <p class="text-[11px] text-[#94A3B8] mt-0.5">
-                      {{ resume.updated_at ? new Date(resume.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A' }}
-                    </p>
-                  </div>
-              </div>
-            </div>
-              <div class="flex gap-2 justify-end mt-1" @click.stop>
-                <button 
-                  class="text-[12px] px-3 py-1.5 rounded-[8px] border border-[#E2E8F0] text-[#475569] bg-white hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all inline-flex items-center gap-1.5"
-                  @click="openRenameModal(resume.id, resume.name)"
-                >
-                  <Icon name="heroicons:pencil-square" class="w-3.5 h-3.5" />
-                  Rename
-                </button>
-                <button 
-                  class="text-[12px] px-3 py-1.5 rounded-[8px] border border-red-100 text-red-500 bg-red-50/50 hover:bg-red-100 hover:text-red-600 transition-all inline-flex items-center gap-1.5"
-                  @click="deleteResume(resume.id)"
-                >
-                  <Icon name="heroicons:trash" class="w-3.5 h-3.5" />
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pagination Controls -->
-          <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-[#E2E8F0] mt-6 pt-4">
-            <div class="text-[13px] text-[#64748B]">
-              Menampilkan <span class="font-medium text-[#0F172A]">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> - 
-              <span class="font-medium text-[#0F172A]">{{ Math.min(currentPage * itemsPerPage, filteredResumes.length) }}</span> dari 
-              <span class="font-medium text-[#0F172A]">{{ filteredResumes.length }}</span> resume
-            </div>
-            <div class="flex items-center gap-2">
-              <button 
-                :disabled="currentPage === 1" 
-                class="p-2 border border-[#E2E8F0] rounded-[8px] bg-white hover:bg-[#F8FAFC] disabled:opacity-40 disabled:hover:bg-white text-[#475569] transition-all"
-                @click="currentPage--"
-              >
-                <Icon name="heroicons:chevron-left" class="w-4 h-4" />
-              </button>
-              <div class="flex items-center gap-1">
-                <button 
-                  v-for="page in totalPages" 
-                  :key="page"
-                  :class="[
-                    'px-3.5 py-1.5 rounded-[8px] text-[13px] font-medium transition-all',
-                    currentPage === page 
-                      ? 'bg-[color:var(--color-main)] text-white' 
-                      : 'border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F8FAFC]'
-                  ]"
-                  @click="currentPage = page"
-                >
-                  {{ page }}
-                </button>
-              </div>
-              <button 
-                :disabled="currentPage === totalPages" 
-                class="p-2 border border-[#E2E8F0] rounded-[8px] bg-white hover:bg-[#F8FAFC] disabled:opacity-40 disabled:hover:bg-white text-[#475569] transition-all"
-                @click="currentPage++"
-              >
-                <Icon name="heroicons:chevron-right" class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Rename Modal -->
         <Teleport to="body">
           <Transition name="modal">
@@ -1538,6 +1429,116 @@ watch(() => userId.value, (next) => { if (next) loadInitialData() }, { immediate
 
           <p v-else class="text-[14px] text-[#64748B]">Isi form dan klik "Generate CV" untuk melihat preview</p>
         </div>
+
+        <!-- Saved Resumes -->
+        <div v-if="savedResumes.length > 0" class="bg-[#FAFBFF] border border-[#E2E8F0] rounded-[12px] p-6">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
+            <div>
+              <h2 class="text-[19px] font-semibold">My Saved Resumes</h2>
+              <p class="text-[12px] text-[#94A3B8] mt-0.5">{{ savedResumes.length }} resume tersimpan</p>
+            </div>
+            <!-- Live Search -->
+            <div class="relative w-full md:w-[280px]">
+              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
+              <input
+                v-model="resumeSearchQuery"
+                type="text"
+                placeholder="Cari resume..."
+                class="w-full pl-9 pr-3 py-2.5 border border-[#E2E8F0] rounded-[10px] text-[13px] bg-white focus:outline-none focus:border-[color:var(--color-main)] focus:ring-1 focus:ring-[color:var(--color-main)] transition-all"
+              />
+            </div>
+          </div>
+
+          <!-- No search results -->
+          <p v-if="filteredResumes.length === 0 && resumeSearchQuery.trim()" class="text-[14px] text-[#94A3B8] text-center py-6">
+            Tidak ada resume yang cocok dengan pencarian "{{ resumeSearchQuery }}"
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div 
+              v-for="resume in paginatedResumes" 
+              :key="resume.id" 
+              :class="[
+                'group border rounded-[12px] p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between gap-3',
+                selectedResumeId === resume.id 
+                  ? 'border-[color:var(--color-main)] bg-gradient-to-br from-[#EEF2FF] to-[#F8FAFF] shadow-[0_2px_12px_rgba(43,77,182,0.10)]' 
+                  : 'border-[#E2E8F0] hover:border-[#CBD5E1] hover:shadow-sm bg-white'
+              ]"
+              @click="selectSavedResume(resume.id)"
+            >
+              <div>
+                <div class="flex items-start gap-2">
+                  <div class="flex-shrink-0 w-8 h-8 rounded-[8px] flex items-center justify-center mt-0.5" :class="selectedResumeId === resume.id ? 'bg-[color:var(--color-main)] text-white' : 'bg-[#F1F5F9] text-[#64748B] group-hover:bg-[#E2E8F0]'">
+                    <Icon name="heroicons:document-text" class="w-4 h-4" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="font-semibold text-[14px] truncate text-[#0F172A]">{{ resume.name || 'Untitled Resume' }}</p>
+                    <p class="text-[11px] text-[#94A3B8] mt-0.5">
+                      {{ formatDate(resume.updated_at, true) }}
+                    </p>
+                  </div>
+              </div>
+            </div>
+              <div class="flex gap-2 justify-end mt-1" @click.stop>
+                <button 
+                  class="text-[12px] px-3 py-1.5 rounded-[8px] border border-[#E2E8F0] text-[#475569] bg-white hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all inline-flex items-center gap-1.5"
+                  @click="openRenameModal(resume.id, resume.name)"
+                >
+                  <Icon name="heroicons:pencil-square" class="w-3.5 h-3.5" />
+                  Rename
+                </button>
+                <button 
+                  class="text-[12px] px-3 py-1.5 rounded-[8px] border border-red-100 text-red-500 bg-red-50/50 hover:bg-red-100 hover:text-red-600 transition-all inline-flex items-center gap-1.5"
+                  @click="deleteResume(resume.id)"
+                >
+                  <Icon name="heroicons:trash" class="w-3.5 h-3.5" />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-[#E2E8F0] mt-6 pt-4">
+            <div class="text-[13px] text-[#64748B]">
+              Menampilkan <span class="font-medium text-[#0F172A]">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> - 
+              <span class="font-medium text-[#0F172A]">{{ Math.min(currentPage * itemsPerPage, filteredResumes.length) }}</span> dari 
+              <span class="font-medium text-[#0F172A]">{{ filteredResumes.length }}</span> resume
+            </div>
+            <div class="flex items-center gap-2">
+              <button 
+                :disabled="currentPage === 1" 
+                class="p-2 border border-[#E2E8F0] rounded-[8px] bg-white hover:bg-[#F8FAFC] disabled:opacity-40 disabled:hover:bg-white text-[#475569] transition-all"
+                @click="currentPage--"
+              >
+                <Icon name="heroicons:chevron-left" class="w-4 h-4" />
+              </button>
+              <div class="flex items-center gap-1">
+                <button 
+                  v-for="page in totalPages" 
+                  :key="page"
+                  :class="[
+                    'px-3.5 py-1.5 rounded-[8px] text-[13px] font-medium transition-all',
+                    currentPage === page 
+                      ? 'bg-[color:var(--color-main)] text-white' 
+                      : 'border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F8FAFC]'
+                  ]"
+                  @click="currentPage = page"
+                >
+                  {{ page }}
+                </button>
+              </div>
+              <button 
+                :disabled="currentPage === totalPages" 
+                class="p-2 border border-[#E2E8F0] rounded-[8px] bg-white hover:bg-[#F8FAFC] disabled:opacity-40 disabled:hover:bg-white text-[#475569] transition-all"
+                @click="currentPage++"
+              >
+                <Icon name="heroicons:chevron-right" class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
 
       </div>
     </div>

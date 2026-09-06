@@ -45,8 +45,10 @@ const handleSetRole = async () => {
 
     if (selectedRole.value === 'worker') {
       navigateTo('/worker-name')
-    } else {
+    } else if (selectedRole.value === 'company') {
       navigateTo('/company-name')
+    } else {
+      navigateTo('/provider-name')
     }
   } catch (error) {
     alert(error?.data?.error || 'Terjadi kesalahan saat menyimpan role.')
@@ -121,6 +123,28 @@ const handleSetRole = async () => {
           <h3 class="text-[20px] font-medium text-[color:var(--color-dark)] mt-[27px]">Find a Worker</h3>
           <p class="text-[14px] font-normal text-[color:var(--color-dark)] opacity-60 mt-[20px] leading-[150%]">
             Recruit the best talent instantly. post vacancies and accelerate the growth of your business now.
+          </p>
+        </div>
+
+        <div @click="selectedRole = 'provider'" :class="[
+          'w-full max-w-[320px] p-[40px] rounded-[10px] bg-white cursor-pointer transition-all duration-200 ease-in-out text-left border relative hover:shadow-sm',
+          selectedRole === 'provider' ? 'ring-2 ring-[#2B4DB6] border-[#2B4DB6]' : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
+        ]">
+          <div class="flex items-start justify-between">
+            <div class="w-[40px] h-[40px] bg-[#F4F6FB] rounded-[5px] flex items-center justify-center text-[color:var(--color-main)]">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+              </svg>
+            </div>
+
+            <div :class="['w-[20px] h-[20px] rounded-full border-[1.5px] flex items-center justify-center transition-all', selectedRole === 'provider' ? 'border-[color:var(--color-main)]' : 'border-[color:var(--color-dark)] border-opacity-20']">
+              <div v-if="selectedRole === 'provider'" class="w-[10px] h-[10px] rounded-full bg-[color:var(--color-main)]"></div>
+            </div>
+          </div>
+
+          <h3 class="text-[20px] font-medium text-[color:var(--color-dark)] mt-[27px]">Penyedia Bootcamp</h3>
+          <p class="text-[14px] font-normal text-[color:var(--color-dark)] opacity-60 mt-[20px] leading-[150%]">
+            Bagikan program bootcamp terbaikmu dan bantu talenta IT mencapai potensi maksimal mereka bersama kami.
           </p>
         </div>
       </div>

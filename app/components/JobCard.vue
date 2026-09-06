@@ -59,11 +59,13 @@ const jobLevel = computed(() => {
       <span class="text-[11px] px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#334155] font-medium">{{ job.type || 'Full-time' }}</span>
     </div>
 
+
+
     <!-- Quick info -->
     <div class="space-y-2 mb-4 text-[12px] text-[#475569]">
       <p class="font-medium">{{ salaryText }}</p>
       <p v-if="job.location_city" class="text-[#64748B]">📍 {{ job.location_city }}</p>
-      <p v-if="job.posted_at" class="text-[#94A3B8] text-[11px]">Posted {{ new Date(job.posted_at).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }) }}</p>
+      <p v-if="job.posted_at" class="text-[#94A3B8] text-[11px]">Posted {{ formatDate(job.posted_at) }}</p>
     </div>
 
     <!-- Actions -->

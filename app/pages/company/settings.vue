@@ -103,7 +103,7 @@ const confirmPayment = async () => {
         {{ companyProfile.premium_active || companyProfile.is_premium ? 'Active' : 'Inactive' }}
       </p>
       <p v-if="companyProfile.premium_until || companyProfile.premium_expires_at" class="text-[13px] text-[#64748B] mt-1">
-        Premium active until {{ new Date(companyProfile.premium_until || companyProfile.premium_expires_at).toLocaleDateString('id-ID') }}
+        Premium active until {{ formatDate(companyProfile.premium_until || companyProfile.premium_expires_at) }}
       </p>
     </div>
     <p v-if="error" class="text-[14px] text-red-600 mb-4">{{ error }}</p>

@@ -98,7 +98,7 @@ const goBack = () => {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Invoice Date</p>
-              <p class="font-semibold text-slate-800">{{ new Date(tx.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) }}</p>
+              <p class="font-semibold text-slate-800">{{ formatDate(tx.created_at) }}</p>
             </div>
             <div>
               <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Payment Method</p>
@@ -118,7 +118,7 @@ const goBack = () => {
             </div>
             <div v-if="tx.status === 'success' && tx.paid_at">
               <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Paid At</p>
-              <p class="font-semibold text-slate-800">{{ new Date(tx.paid_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) }}</p>
+              <p class="font-semibold text-slate-800">{{ formatDate(tx.paid_at) }}</p>
             </div>
           </div>
         </div>

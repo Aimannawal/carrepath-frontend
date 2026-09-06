@@ -1,0 +1,309 @@
+<script setup>
+import { ref, onBeforeUnmount, onMounted } from "vue"
+
+useHead({ title: "CarrePath | Provider Account" })
+definePageMeta({ layout: "provider" })
+
+const { get, put } = useApi()
+const { getData, asObject, getErrorMessage } = useApiResponse()
+const { userId } = useAuth()
+const { uploadProfileImage, uploadError, uploading, clearUploadState } = useFileUpload()
+const { success, error, info } = useModal()
+
+const loading = ref(false)
+const pageError = ref("")
+const pageSuccess = ref("")
+const uploadWarning = ref("")
+const localPreviewUrl = ref("")
+
+const form = ref({
+  provider_name: "",
+  website: "",
+  description: "",
+  logo_url: ""
+})
+
+const password = ref("")
+const confirmPassword = ref("")
+const logoFileInput = ref(null)
+
+const safeValue = (value) => {
+  if (value === null || value === undefined) return ""
+  return String(value)
+}
+
+const fetchProfile = async () => {
+  if (!userId.value) {
+    console.warn("No userId available")
+    return
+  }
+  loading.value = true
+  pageError.value = ""
+  
+  try {
+    const res = await get(`/providers/profile/${userId.value}`)
+    const payload = asObject(getData(res))
+    const profile = asObject(payload.profile || payload)
+
+    const extractedData = {
+      provider_name: safeValue(profile.provider_name),
+      website: safeValue(profile.website),
+      description: safeValue(profile.description),
+      logo_url: safeValue(profile.logo_url)
+    }
+    
+    form.value = { ...form.value, ...extractedData }
+    
+  } catch (e) {
+    if (e?.status !== 404) {
+      const msg = getErrorMessage(e, "Failed to load profile")
+      pageError.value = msg
+      console.error("Provider profile fetch error:", msg)
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => { fetchProfile() })
+onBeforeUnmount(() => {
+  if (localPreviewUrl.value) URL.revokeObjectURL(localPreviewUrl.value)
+})
+
+const handleLogoFileChange = (event) => {
+  const file = event.target.files?.[0]
+  pageError.value = ""
+  pageSuccess.value = ""
+  uploadWarning.value = ""
+  clearUploadState()
+
+  if (!file) return
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"]
+  if (!allowedTypes.includes(file.type)) {
+    error("Invalid File Type", "Logo must be JPG, PNG, or WebP")
+    logoFileInput.value.value = ""
+    return
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    error("File Too Large", "Logo max size is 2MB")
+    logoFileInput.value.value = ""
+    return
+  }
+
+  if (localPreviewUrl.value) URL.revokeObjectURL(localPreviewUrl.value)
+  localPreviewUrl.value = URL.createObjectURL(file)
+}
+
+const handleUploadLogo = async () => {
+  const file = logoFileInput.value?.files?.[0]
+  if (!file) {
+    info("Select Logo", "Please select a logo first")
+    return
+  }
+
+  pageError.value = ""
+  pageSuccess.value = ""
+  uploadWarning.value = ""
+
+  const result = await uploadProfileImage(file, userId.value)
+  
+  if (!result) {
+    error("Upload Failed", uploadError.value || "Failed to upload logo")
+    return
+  }
+
+  form.value.logo_url = result.publicUrl
+  if (result.warning) uploadWarning.value = result.warning
+
+  success("Upload Complete", "Provider logo uploaded successfully")
+  logoFileInput.value.value = ""
+  if (localPreviewUrl.value) {
+    URL.revokeObjectURL(localPreviewUrl.value)
+    localPreviewUrl.value = ""
+  }
+}
+
+const saveProfile = async () => {
+  if (loading.value || uploading.value) return
+  if (!userId.value) {
+    error("Error", "User ID not available")
+    return
+  }
+
+  const required = [
+    { key: "provider_name", label: "Provider name" }
+  ]
+
+  const missing = required.find((item) => !String(form.value[item.key] || "").trim())
+  if (missing) {
+    error("Validation Error", `${missing.label} is required`)
+    return
+  }
+
+  loading.value = true
+  pageError.value = ""
+  pageSuccess.value = ""
+
+  try {
+    const payload = {
+      provider_name: form.value.provider_name,
+      website: form.value.website || "",
+      description: form.value.description || ""
+    }
+
+    if (form.value.logo_url) payload.logo_url = form.value.logo_url
+
+    await put(`/providers/profile/${userId.value}`, payload)
+    await fetchProfile()
+    success("Success", "Provider profile updated successfully")
+  } catch (e) {
+    const msg = getErrorMessage(e, "Failed to save profile")
+    error("Error", msg)
+  } finally {
+    loading.value = false
+  }
+}
+
+const changePassword = async () => {
+  if (!password.value || !confirmPassword.value) {
+    error("Validation Error", "Both password fields are required")
+    return
+  }
+
+  if (password.value.length < 8) {
+    error("Validation Error", "Password must be at least 8 characters")
+    return
+  }
+
+  if (password.value !== confirmPassword.value) {
+    error("Validation Error", "Passwords do not match")
+    return
+  }
+
+  success("Coming Soon", "Password change functionality coming soon")
+  password.value = ""
+  confirmPassword.value = ""
+}
+</script>
+
+<template>
+  <section class="p-6 md:p-8">
+    <h1 class="text-[30px] font-semibold mb-2">Account Center</h1>
+    <p class="text-[14px] text-[#64748B] mb-6">Manage your provider profile and account settings</p>
+
+    <div class="bg-[#EEF2FF] border-l-4 border-[color:var(--color-main)] rounded-[5px] text-[14px] p-4 mb-6">
+      <p class="text-[#4338CA]">Provider name is required to use Carrepath dashboard.</p>
+    </div>
+
+    <div v-if="pageError" class="mb-4 bg-red-50 border border-red-200 rounded-[10px] p-4">
+      <p class="text-red-700 text-[14px]">{{ pageError }}</p>
+    </div>
+
+    <div v-if="pageSuccess" class="mb-4 bg-green-50 border border-green-200 rounded-[10px] p-4">
+      <p class="text-green-700 text-[14px]">{{ pageSuccess }}</p>
+    </div>
+
+    <div class="bg-white border border-[#E2E8F0] rounded-[10px] p-6">
+      <div class="mb-6 pb-6 border-b border-[#E2E8F0]">
+        <h2 class="text-[18px] font-semibold mb-4">Provider Logo</h2>
+        
+        <div class="flex flex-col md:flex-row gap-6 md:items-start">
+          <div class="flex-shrink-0">
+            <div class="h-24 w-24 overflow-hidden bg-white flex items-center justify-center shadow-[0_12px_26px_rgba(15,23,42,0.08)]">
+              <img 
+                v-if="localPreviewUrl || form.logo_url"
+                :src="localPreviewUrl || form.logo_url"
+                alt="Logo preview"
+                class="h-full w-full object-cover"
+              />
+              <span v-else class="text-[12px] text-[#64748B] text-center px-2">No logo</span>
+            </div>
+          </div>
+
+          <div class="flex-1 space-y-3">
+            <div>
+              <label class="text-[14px] font-medium text-[#1E293B] block mb-2">Choose Logo</label>
+              <input
+                ref="logoFileInput"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                class="w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] file:mr-3 file:rounded-[3px] file:border-0 file:text-[13px] file:font-medium file:bg-[#EEF2FF] file:text-[#4338CA]"
+                @change="handleLogoFileChange"
+              />
+              <p class="text-[12px] text-[#64748B] mt-2">JPG, PNG, or WebP • Max 2MB</p>
+            </div>
+
+            <button
+              :disabled="uploading || !localPreviewUrl"
+              class="bg-[color:var(--color-main)] text-white rounded-[5px] px-4 py-2.5 text-[14px] font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+              @click="handleUploadLogo"
+            >
+              {{ uploading ? "Uploading..." : "Upload Logo" }}
+            </button>
+
+            <p v-if="uploadError" class="text-[13px] text-red-600">{{ uploadError }}</p>
+
+            <div v-if="uploadWarning" class="text-[13px] bg-yellow-50 border border-yellow-200 rounded-[5px] p-2 text-yellow-800">
+              ⚠️ {{ uploadWarning }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-[18px] font-semibold mb-4">Provider Information</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="text-[12px] font-medium text-[#64748B] block mb-2">Provider Name *</label>
+            <input v-model="form.provider_name" class="w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50" placeholder="E.g. Dicoding, Adinusa" />
+          </div>
+
+          <div>
+            <label class="text-[12px] font-medium text-[#64748B] block mb-2">Website</label>
+            <input v-model="form.website" type="url" class="w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50" placeholder="https://your-website.com" />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[12px] font-medium text-[#64748B] block mb-2">Description</label>
+          <textarea v-model="form.description" rows="4" class="w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50" placeholder="Tell workers about your bootcamp programs, specialization, and what makes you stand out..."></textarea>
+          <p class="text-[12px] text-[#64748B] mt-1">350 characters recommended</p>
+        </div>
+
+        <button
+          :disabled="loading || uploading"
+          class="mt-6 bg-[color:var(--color-main)] text-white rounded-[5px] px-6 py-2.5 text-[14px] font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+          @click="saveProfile"
+        >
+          {{ loading ? "Saving..." : "Save Profile" }}
+        </button>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-[#E2E8F0]">
+        <h2 class="text-[18px] font-semibold mb-4">Change Password</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="text-[12px] font-medium text-[#64748B] block mb-2">New Password</label>
+            <input v-model="password" type="password" class="w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50" placeholder="At least 8 characters" />
+          </div>
+
+          <div>
+            <label class="text-[12px] font-medium text-[#64748B] block mb-2">Confirm Password</label>
+            <input v-model="confirmPassword" type="password" class="w-full border border-[#E2E8F0] rounded-[5px] px-3 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-main)] focus:ring-opacity-50" placeholder="Re-enter password" />
+          </div>
+        </div>
+
+        <button
+          class="bg-[color:var(--color-main)] text-white rounded-[5px] px-6 py-2.5 text-[14px] font-medium hover:opacity-90 transition-opacity"
+          @click="changePassword"
+        >
+          Update Password
+        </button>
+      </div>
+    </div>
+  </section>
+</template>

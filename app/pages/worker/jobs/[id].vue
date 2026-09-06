@@ -17,6 +17,7 @@ const company = ref(null)
 const companyJobs = ref([])
 const isSaved = ref(false)
 const savedJobId = ref('')
+const recommendedBootcamps = ref([])
 const saveLoading = ref(false)
 const openApply = ref(false)
 const applyLoading = ref(false)
@@ -298,6 +299,14 @@ const fetchJobDetail = async () => {
       } catch {
         companyJobs.value = []
       }
+      
+      // Fetch recommended bootcamps
+      try {
+        const recommendedRes = await get(`/companies/${compId}/recommended-bootcamps`)
+        recommendedBootcamps.value = toArray(getData(recommendedRes))
+      } catch {
+        recommendedBootcamps.value = []
+      }
     }
 
     // Check if this job is saved
@@ -367,10 +376,10 @@ onMounted(() => {
     </div>
 
     <!-- Job Detail Content -->
-    <div v-if="isJobReady" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div v-if="isJobReady" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
       <!-- ═══ LEFT COLUMN: Job Detail ═══ -->
-      <div class="lg:col-span-2 space-y-6">
+      <div class="lg:col-span-2 space-y-6 lg:sticky lg:top-8 lg:self-start">
 
         <!-- Job Header Card -->
         <div class="bg-white border border-[#E2E8F0] rounded-[16px] p-6">
@@ -501,6 +510,36 @@ onMounted(() => {
                 <Icon name="heroicons:arrow-right" class="w-3 h-3" /> Lihat Detail
               </p>
             </div>
+          </div>
+        </div>
+
+        <!-- Recommended Bootcamps -->
+        <div class="bg-white border border-[#E2E8F0] rounded-[16px] p-6">
+          <h3 class="text-[13px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Company Recommendation</h3>
+          <p class="text-[12px] text-[#475569] mb-4">Miliki sertifikasi bootcamp ini untuk peluang lebih besar di perusahaan ini.</p>
+          <div v-if="recommendedBootcamps.length > 0" class="space-y-3">
+              <NuxtLink
+                v-for="item in recommendedBootcamps"
+                :key="item.id"
+                :to="`/worker/bootcamps/${item.bootcamp_id}`"
+                class="block p-3 rounded-[12px] bg-white border border-[#E2E8F0] hover:border-[#3B82F6] hover:shadow-md transition-all group"
+              >
+                <div class="flex gap-3 items-center">
+                  <div class="w-12 h-12 bg-white flex items-center justify-center flex-shrink-0 border border-[#E2E8F0] p-1">
+                    <img v-if="item.bootcamps?.provider_profiles?.logo_url" :src="item.bootcamps.provider_profiles.logo_url" class="w-full h-full object-contain" />
+                    <Icon v-else name="mdi:domain" class="w-6 h-6 text-[#94A3B8]" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h4 class="text-[13px] font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors truncate">{{ item.bootcamps?.title || 'Bootcamp Partner' }}</h4>
+                    <p class="text-[11px] text-[#64748B] truncate mt-0.5">{{ item.bootcamps?.provider_profiles?.provider_name || 'Verified Provider' }}</p>
+                  </div>
+                  <Icon name="heroicons:chevron-right" class="w-4 h-4 text-[#94A3B8] group-hover:text-[#3B82F6]" />
+                </div>
+              </NuxtLink>
+            </div>
+          <div v-else class="text-center py-6 bg-[#F8FAFC] rounded-[12px] border border-[#E2E8F0] border-dashed">
+            <Icon name="heroicons:academic-cap" class="w-8 h-8 text-[#CBD5E1] mx-auto mb-2" />
+            <p class="text-[12px] text-[#64748B]">Belum ada rekomendasi bootcamp dari perusahaan ini.</p>
           </div>
         </div>
       </div>

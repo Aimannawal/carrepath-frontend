@@ -46,7 +46,7 @@ onMounted(async () => {
           <div class="flex items-center gap-3">
             <div class="text-right">
               <span class="text-[11px] px-2.5 py-1 rounded-full inline-block mb-1" :class="tx.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">{{ tx.status || '-' }}</span>
-              <p class="text-[12px] text-[#64748B]">{{ new Date(tx.created_at || Date.now()).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) }}</p>
+              <p class="text-[12px] text-[#64748B]">{{ formatDate(tx.created_at || Date.now(), true) }}</p>
             </div>
             <NuxtLink :to="`/invoice/${tx.id}`" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#E2E8F0] text-[#64748B] hover:text-[#1E293B] transition" title="View Invoice">
               <Icon name="mdi:receipt-text-outline" class="w-4 h-4" />

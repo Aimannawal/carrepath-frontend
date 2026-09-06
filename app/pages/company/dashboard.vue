@@ -111,7 +111,7 @@ onMounted(async () => {
           <div>
             <p class="text-[15px] font-semibold text-[#0F172A]">{{ app.worker_user?.full_name || app.worker_profile?.full_name || app.worker_name || 'Worker' }}</p>
             <p class="text-[13px] text-[#64748B] mt-1">{{ resolveJobTitle(app) }}</p>
-            <p class="text-[12px] text-[#94A3B8] mt-1">Applied {{ new Date(app.applied_at || app.created_at || Date.now()).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) }}</p>
+            <p class="text-[12px] text-[#94A3B8] mt-1">Applied {{ formatDate(app.applied_at || app.created_at || Date.now(), true) }}</p>
           </div>
           <div class="flex items-center gap-2 self-start md:self-auto">
             <span :class="['text-[12px] rounded-full px-3 py-1 border capitalize', app.status === 'accepted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : app.status === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200']">{{ app.status || 'pending' }}</span>

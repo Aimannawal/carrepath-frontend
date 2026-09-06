@@ -82,7 +82,7 @@ const updateStatus = async (item, status) => {
               <span :class="['text-[12px] rounded-full px-3 py-1 border capitalize', getStatusBadgeClass(getApplicantStatus(item))]">{{ getApplicantStatus(item) }}</span>
             </div>
             <p class="text-[13px] text-[#64748B]">{{ getApplicantField(item) }}</p>
-            <p class="text-[12px] text-[#94A3B8]">Applied: {{ new Date(getAppliedAt(item) || Date.now()).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) }}</p>
+            <p class="text-[12px] text-[#94A3B8]">Applied: {{ formatDate(getAppliedAt(item) || Date.now(), true) }}</p>
           </div>
           <div class="flex flex-wrap gap-2">
             <a v-if="getApplicantCvUrl(item)" :href="getApplicantCvUrl(item)" target="_blank" class="rounded-full border border-[color:var(--color-main)] bg-[color:var(--color-main)] px-4 py-2 text-[13px] font-medium text-white shadow-[0_10px_22px_rgba(29,78,216,0.16)] inline-block">View CV</a>

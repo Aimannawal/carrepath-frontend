@@ -103,6 +103,21 @@ const parsedPlan = computed(() => {
         reason: row.reason || ''
       }
     }),
+    recommendedBootcamps: normalizeList(raw.recommended_bootcamps).map((item) => {
+      const row = toRecord(item)
+      const provider = toRecord(row.provider_profiles)
+      return {
+        id: row.id || row.bootcamp_id || '',
+        title: row.title || '-',
+        provider_name: provider.provider_name || row.provider_name || '-',
+        logo_url: provider.logo_url || row.logo_url || '',
+        category: row.category || '-',
+        level: row.level || 'All Level',
+        price: row.price || 0,
+        is_premium: provider.is_premium ?? row.is_premium ?? false,
+        reason: row.reason || ''
+      }
+    }),
     careers: careerList.map((item) => {
       const row = toRecord(item)
       return {
@@ -385,6 +400,16 @@ const openJobDetail = (job) => {
   navigateTo(`/worker/jobs/${jobId}`)
 }
 
+const recommendedBootcamps = computed(() => {
+  return parsedPlan.value.recommendedBootcamps || []
+})
+
+const openBootcampDetail = (bc) => {
+  const bcId = bc?.id || bc?.bootcamp_id
+  if (!bcId) return
+  navigateTo(`/worker/bootcamps/${bcId}`)
+}
+
 onMounted(() => {
   loadDraft()
   fetchHistory()
@@ -514,6 +539,27 @@ onMounted(() => {
           <p v-else class="text-[13px] text-[#64748B] mt-3">Belum ada lowongan yang cocok ditemukan.</p>
         </div>
       </div>
+      
+      <div v-if="!loading" class="bg-[#FAFBFF] border border-[#E2E8F0] rounded-[12px] p-4 mt-6">
+          <h2 class="text-[19px] font-semibold">Recommended Bootcamps</h2>
+          <div v-if="recommendedBootcamps.length" class="mt-3 space-y-3">
+            <div v-for="bc in recommendedBootcamps" :key="bc.id" class="rounded-[10px] border border-[#E2E8F0] bg-white p-3">
+              <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 bg-white flex items-center justify-center flex-shrink-0 border border-[#E2E8F0] p-1">
+                  <img v-if="bc.logo_url" :src="bc.logo_url" alt="Provider logo" class="w-full h-full object-contain" />
+                  <Icon v-else name="mdi:domain" class="w-5 h-5 text-[#94A3B8]" />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-[14px] font-semibold text-[#0F172A] line-clamp-1">{{ bc.title || '-' }}</p>
+                  <p class="text-[12px] text-[#64748B] line-clamp-1">{{ bc.provider_name || '-' }}</p>
+                  <p class="text-[12px] text-[#94A3B8] mt-1">{{ bc.category || '-' }} • {{ bc.level || '-' }}</p>
+                </div>
+                <button class="px-3 py-1.5 rounded-[8px] border border-[color:var(--color-main)] text-[color:var(--color-main)] text-[12px] font-medium hover:bg-[#EEF2FF] transition" @click="openBootcampDetail(bc)">View</button>
+              </div>
+            </div>
+          </div>
+          <p v-else class="text-[13px] text-[#64748B] mt-3">Belum ada rekomendasi bootcamp.</p>
+        </div>
 
       <div v-if="!loading" class="bg-[#FAFBFF] border border-[#E2E8F0] rounded-[12px] p-4">
         <h2 class="text-[19px] font-semibold">Study Plan ({{ parsedPlan.weeks.length }} Weeks)</h2>

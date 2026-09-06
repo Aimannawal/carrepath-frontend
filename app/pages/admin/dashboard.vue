@@ -11,6 +11,7 @@ const revenue = ref(0)
 const stats = ref({ total_users: 0, total_companies: 0, total_jobs: 0, total_transactions: 0 })
 const transactions = ref([])
 const premiumCompanies = ref([])
+const premiumProviders = ref([])
 const premiumUsers = ref([])
 const revenueTrend = ref({})
 const chartData = ref({
@@ -118,11 +119,12 @@ const updateChartData = () => {
 
 onMounted(async () => {
   try {
-    const [revRes, statsRes, txRes, premCompRes, premUsersRes, trendRes] = await Promise.all([
+    const [revRes, statsRes, txRes, premCompRes, premProvRes, premUsersRes, trendRes] = await Promise.all([
       get('/admin/revenue'),
       get('/admin/stats'),
       get('/admin/transactions'),
       get('/admin/premium-companies'),
+      get('/admin/premium-providers'),
       get('/admin/premium-users'),
       get('/admin/revenue-trend')
     ])
@@ -130,6 +132,7 @@ onMounted(async () => {
     stats.value = statsRes.data || stats.value
     transactions.value = txRes.data || []
     premiumCompanies.value = premCompRes.data || []
+    premiumProviders.value = premProvRes.data || []
     premiumUsers.value = premUsersRes.data || []
     revenueTrend.value = trendRes.data || {}
     updateChartData()
@@ -194,6 +197,10 @@ onMounted(async () => {
             <span class="font-semibold">{{ premiumCompanies.length }}</span>
           </div>
           <div class="flex justify-between items-center text-[13px]">
+            <span class="text-blue-100">Premium Providers:</span>
+            <span class="font-semibold">{{ premiumProviders.length }}</span>
+          </div>
+          <div class="flex justify-between items-center text-[13px]">
             <span class="text-blue-100">Top Up Users:</span>
             <span class="font-semibold">{{ premiumUsers.length }}</span>
           </div>
@@ -226,7 +233,7 @@ onMounted(async () => {
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-[13px] font-medium text-[#1E293B] truncate">{{ company.company_name }}</p>
-              <p class="text-[11px] text-[#64748B]">Until: {{ new Date(company.premium_until).toLocaleDateString('id-ID') }}</p>
+              <p class="text-[11px] text-[#64748B]">Until: {{ formatDate(company.premium_until) }}</p>
             </div>
             <span class="text-[11px] px-2 py-1 rounded-full bg-[#FFFBEA] text-[#F59E0B] font-medium flex-shrink-0">Premium</span>
           </div>
@@ -248,13 +255,35 @@ onMounted(async () => {
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-[13px] font-medium text-[#1E293B] truncate">{{ user.full_name }}</p>
-              <p class="text-[11px] text-[#64748B]">Last top up: {{ user.last_topup_at ? new Date(user.last_topup_at).toLocaleDateString('id-ID') : '-' }}</p>
+              <p class="text-[11px] text-[#64748B]">Last top up: {{ user.last_topup_at ? formatDate(user.last_topup_at) : '-' }}</p>
             </div>
             <span class="text-[11px] px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium flex-shrink-0">{{ Number(user.total_amount || 0).toLocaleString('id-ID') }}</span>
           </div>
         </div>
         <div v-else class="text-center py-8 text-[14px] text-[#94A3B8]">No top up users</div>
       </div>
+    </div>
+
+    <!-- Premium Providers -->
+    <div class="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm mb-8">
+      <h2 class="text-[18px] font-semibold mb-4 text-[#1E293B]">Premium Providers</h2>
+      <div v-if="loading" class="space-y-3">
+        <div v-for="i in 3" :key="i" class="h-[60px] bg-[#F1F5F9] rounded-[8px] animate-pulse"></div>
+      </div>
+      <div v-else-if="premiumProviders.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div v-for="provider in premiumProviders" :key="provider.id" class="flex items-center gap-3 p-3 rounded-[8px] bg-[#F8FAFC] hover:bg-[#FFF7ED] transition border border-[#E2E8F0]">
+          <div class="w-10 h-10 rounded-full overflow-hidden bg-white border border-[#E2E8F0] flex-shrink-0 flex items-center justify-center">
+            <img v-if="provider.logo_url" :src="provider.logo_url" alt="Logo" class="w-full h-full object-cover" />
+            <Icon v-else name="heroicons:academic-cap" class="w-5 h-5 text-[#94A3B8]" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[13px] font-medium text-[#1E293B] truncate">{{ provider.provider_name }}</p>
+            <p class="text-[11px] text-[#64748B]">Until: {{ formatDate(provider.premium_until) }}</p>
+          </div>
+          <span class="text-[11px] px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium flex-shrink-0">Premium</span>
+        </div>
+      </div>
+      <div v-else class="text-center py-8 text-[14px] text-[#94A3B8]">No premium providers yet</div>
     </div>
 
     <!-- Latest Transactions -->
@@ -277,7 +306,7 @@ onMounted(async () => {
           </div>
           <div class="flex items-center gap-2">
             <span class="text-[11px] px-2.5 py-1 rounded-full" :class="tx.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">{{ tx.status }}</span>
-            <p class="text-[12px] text-[#64748B] text-right">{{ new Date(tx.created_at || Date.now()).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) }}</p>
+            <p class="text-[12px] text-[#64748B] text-right">{{ formatDate(tx.created_at || Date.now(), true) }}</p>
           </div>
         </div>
       </div>

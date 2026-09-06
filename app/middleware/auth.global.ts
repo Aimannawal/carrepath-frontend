@@ -7,7 +7,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
   }
 
   const getDashboardPath = (role: string) => {
-    if (role === 'worker' || role === 'company' || role === 'admin') {
+    if (role === 'worker' || role === 'company' || role === 'admin' || role === 'provider') {
       return `/${role}/dashboard`
     }
     return '/onboarding'
@@ -29,7 +29,8 @@ export default defineNuxtRouteMiddleware((to, from) => {
       to.path === '/onboarding' ||
       to.path.startsWith('/worker') ||
       to.path.startsWith('/company') ||
-      to.path.startsWith('/admin')
+      to.path.startsWith('/admin') ||
+      to.path.startsWith('/provider')
 
     // 1. Cek Login
     if (isProtectedRoute && !token) {
@@ -48,7 +49,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
     }
 
     // 3. Pengecekan Khusus Role workspace (worker/company/admin)
-    if (to.path.startsWith('/worker') || to.path.startsWith('/company') || to.path.startsWith('/admin')) {
+    if (to.path.startsWith('/worker') || to.path.startsWith('/company') || to.path.startsWith('/admin') || to.path.startsWith('/provider')) {
       // Jika nyasar padahal belum milih role
       if (!role) {
         return navigateTo('/onboarding')
@@ -64,6 +65,9 @@ export default defineNuxtRouteMiddleware((to, from) => {
         return navigateTo(correctPath)
       }
       if (to.path.startsWith('/company') && role !== 'company') {
+        return navigateTo(correctPath)
+      }
+      if (to.path.startsWith('/provider') && role !== 'provider') {
         return navigateTo(correctPath)
       }
     }

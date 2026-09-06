@@ -49,7 +49,7 @@ onMounted(async () => {
         </div>
         <div class="text-left md:text-right flex flex-col items-start md:items-end">
           <p class="text-[13px] font-medium capitalize">{{ item.status || 'pending' }}</p>
-          <p class="text-[12px] text-[#64748B] mb-2">{{ new Date(item.created_at || Date.now()).toLocaleString('id-ID') }}</p>
+          <p class="text-[12px] text-[#64748B] mb-2">{{ formatDate(item.created_at || Date.now()) }}</p>
           <NuxtLink :to="`/invoice/${item.id}`" class="text-[12px] text-blue-600 font-medium hover:underline flex items-center gap-1">
             <Icon name="mdi:receipt-text-outline" class="w-4 h-4" />
             View Invoice

@@ -11,18 +11,11 @@ const drawerRef = ref(null)
 const overlayRef = ref(null)
 
 const menuItems = [
-  { name: 'Dashboard', path: '/worker/dashboard', icon: 'heroicons:home' },
-  { name: 'Find Job', path: '/worker/jobs', icon: 'heroicons:briefcase' },
-  { name: 'Find Bootcamp', path: '/worker/bootcamps', icon: 'heroicons:academic-cap' },
-  { name: 'My Resume', path: '/worker/resume', icon: 'heroicons:document-text' },
-  { name: 'Study Plan', path: '/worker/study-plan', icon: 'heroicons:book-open' },
-  { name: 'CarrepathAI', path: '/worker/ai', icon: 'heroicons:sparkles' },
-  { name: 'Applications', path: '/worker/applications', icon: 'heroicons:paper-airplane' },
-  { name: 'Saved Jobs', path: '/worker/saved-companies', icon: 'heroicons:bookmark' },
-  { name: 'Saved Bootcamps', path: '/worker/saved-bootcamps', icon: 'heroicons:bookmark-square' },
-  { name: 'My Account', path: '/worker/account', icon: 'heroicons:user' },
-  { name: 'Upgrade', path: '/worker/upgrade', icon: 'heroicons:arrow-trending-up' },
-  { name: 'Transactions', path: '/worker/transactions', icon: 'heroicons:banknotes' }
+  { name: 'Dashboard', path: '/provider/dashboard', icon: 'heroicons:home' },
+  { name: 'Manage Bootcamp', path: '/provider/bootcamps', icon: 'heroicons:academic-cap' },
+  { name: 'My Account', path: '/provider/account', icon: 'heroicons:user' },
+  { name: 'Upgrade', path: '/provider/upgrade', icon: 'heroicons:arrow-trending-up' },
+  { name: 'Transactions', path: '/provider/transactions', icon: 'heroicons:banknotes' }
 ]
 
 const toggleDrawer = () => {
@@ -54,13 +47,13 @@ const handleLogout = () => {
 
 <template>
   <div class="min-h-screen bg-[#F8F9FA] font-['Outfit'] text-[color:var(--color-dark)] lg:flex">
-    <!-- Desktop Sidebar (unchanged) -->
+    <!-- Desktop Sidebar -->
     <aside ref="navRef" class="hidden lg:flex lg:w-[280px] lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 bg-white border-r border-[#E2E8F0] z-40">
       <div class="px-6 pt-6 pb-4 border-b border-[#E2E8F0]">
-        <NuxtLink to="/worker/dashboard" class="font-semibold text-[24px] tracking-tight whitespace-nowrap">
+        <NuxtLink to="/provider/dashboard" class="font-semibold text-[24px] tracking-tight whitespace-nowrap">
           Carre<span class="text-[color:var(--color-main)]">path.</span>
         </NuxtLink>
-        <p class="text-[13px] text-[#64748B] mt-2">Worker menu navigation</p>
+        <p class="text-[13px] text-[#64748B] mt-2">Provider menu navigation</p>
       </div>
 
       <nav class="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
@@ -108,7 +101,7 @@ const handleLogout = () => {
         >
           <!-- Drawer Header -->
           <div class="px-6 pt-6 pb-4 border-b border-[#E2E8F0] flex items-center justify-between">
-            <NuxtLink to="/worker/dashboard" class="font-semibold text-[22px] tracking-tight whitespace-nowrap" @click="closeDrawer">
+            <NuxtLink to="/provider/dashboard" class="font-semibold text-[22px] tracking-tight whitespace-nowrap" @click="closeDrawer">
               Carre<span class="text-[color:var(--color-main)]">path.</span>
             </NuxtLink>
             <button
@@ -158,7 +151,7 @@ const handleLogout = () => {
       <!-- Mobile Header with Hamburger -->
       <header class="lg:hidden bg-white/95 backdrop-blur-xl border-b border-[#E2E8F0] sticky top-0 z-40">
         <div class="px-4 py-3 flex items-center justify-between">
-          <NuxtLink to="/worker/dashboard" class="font-semibold text-[20px] tracking-tight whitespace-nowrap">
+          <NuxtLink to="/provider/dashboard" class="font-semibold text-[20px] tracking-tight whitespace-nowrap">
             Carre<span class="text-[color:var(--color-main)]">path.</span>
           </NuxtLink>
           <button

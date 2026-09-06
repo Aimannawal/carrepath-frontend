@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-useHead({ title: 'CarrePath | Company Transactions' })
-definePageMeta({ layout: 'company' })
+useHead({ title: 'CarrePath | Provider Transactions' })
+definePageMeta({ layout: 'provider' })
 
 const { get } = useApi()
 const { getData, toArray, getErrorMessage } = useApiResponse()
@@ -12,13 +12,9 @@ const loading = ref(true)
 const error = ref('')
 const items = ref([])
 
-const parseToken = () => {
-  if (!userId.value) throw new Error('User not authenticated')
-}
-
 onMounted(async () => {
   try {
-    parseToken()
+    if (!userId.value) throw new Error('User not authenticated')
     const res = await get(`/payment/transactions/${userId.value}`)
     items.value = toArray(getData(res))
   } catch (e) {
@@ -33,7 +29,7 @@ onMounted(async () => {
   <section class="p-6 md:p-8">
     <div class="flex items-center justify-between gap-3 mb-5">
       <h1 class="text-[28px] font-semibold">Transaction History</h1>
-      <NuxtLink to="/company/settings" class="text-[14px] text-[color:var(--color-main)]">Manage package</NuxtLink>
+      <NuxtLink to="/provider/upgrade" class="text-[14px] text-[color:var(--color-main)]">Upgrade package</NuxtLink>
     </div>
 
     <p v-if="error" class="text-[14px] text-red-600 mb-4">{{ error }}</p>

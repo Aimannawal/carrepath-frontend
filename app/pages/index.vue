@@ -506,7 +506,7 @@ onMounted(() => {
           <div
             class="mt-[40px] md:mt-[80px] grid grid-cols-2 gap-x-[10px] sm:gap-x-[20px] gap-y-[15px] w-full max-w-[550px] place-items-center lg:place-items-start">
             <!-- Box 1 -->
-            <div
+            <NuxtLink to="/auth/login"
               class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
                 class="bg-[color:var(--color-main)] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
@@ -515,9 +515,9 @@ onMounted(() => {
               </div>
               <span
                 class="text-[12px] sm:text-[14px] font-medium text-[color:var(--color-dark)] leading-tight">Business<br />Development</span>
-            </div>
+            </NuxtLink>
             <!-- Box 2 -->
-            <div
+            <NuxtLink to="/auth/login"
               class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
                 class="bg-[color:var(--color-main)] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
@@ -525,9 +525,9 @@ onMounted(() => {
               </div>
               <span
                 class="text-[12px] sm:text-[14px] font-medium text-[color:var(--color-dark)] leading-tight">Web<br />Developer</span>
-            </div>
+            </NuxtLink>
             <!-- Box 3 -->
-            <div
+            <NuxtLink to="/auth/login"
               class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
                 class="bg-[color:var(--color-main)] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
@@ -535,16 +535,16 @@ onMounted(() => {
               </div>
               <span
                 class="text-[12px] sm:text-[14px] font-medium text-[color:var(--color-dark)] leading-tight">Human<br />Resource</span>
-            </div>
+            </NuxtLink>
             <!-- Box 4 -->
-            <div
+            <NuxtLink to="/auth/login"
               class="s3-box opacity-0 bg-white rounded-[10px] p-[8px] sm:p-[10px] sm:pr-4 flex items-center gap-[10px] sm:gap-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:-translate-y-1 transition duration-300 w-full sm:w-[200px] h-[75px]">
               <div
                 class="bg-[color:var(--color-main)] p-[8px] sm:p-[10px] rounded-[5px] text-white shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
                 <img src="/files/hero/data.svg" alt="Data Analyst" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
               <span class="text-[12px] sm:text-[14px] font-medium text-[color:var(--color-dark)] leading-tight">Data Analyst</span>
-            </div>
+            </NuxtLink>
           </div>
         </div>
 
@@ -554,14 +554,14 @@ onMounted(() => {
             class="bg-white rounded-[10px] w-full min-h-[355px] p-6 lg:p-[30px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] text-left">
             <div class="flex items-center justify-between mb-[30px]">
               <h3 class="text-[20px] font-medium text-[color:var(--color-dark)]">Popular Categories</h3>
-              <button
+              <NuxtLink to="/auth/login"
                 class="flex items-center gap-2 text-[color:var(--color-dark)] opacity-50 text-[14px] font-medium hover:opacity-100 transition cursor-pointer">
                 See all categories
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2.625 11.375L11.375 2.625M11.375 2.625H4.8125M11.375 2.625V9.1875" stroke="var(--color-dark)"
                     stroke-opacity="1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-              </button>
+              </NuxtLink>
             </div>
 
             <div class="flex flex-col">
@@ -631,14 +631,14 @@ onMounted(() => {
           <!-- Top row -->
           <div class="flex items-center justify-between w-full">
             <img :src="job.logo" alt="Company Logo" class="w-[30px] h-[30px] object-contain" />
-            <button
+            <NuxtLink to="/auth/login"
               class="w-[94px] h-[35px] border border-[color:var(--color-main)] bg-white hover:bg-[#EEF1FA] text-[color:var(--color-main)] text-[14px] font-normal rounded-[5px] flex items-center justify-center gap-[6px] transition-colors duration-300 cursor-pointer">
               Apply
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M2.625 11.375L11.375 2.625M11.375 2.625H4.8125M11.375 2.625V9.1875" stroke="currentColor"
                   stroke-width="0.875" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-            </button>
+            </NuxtLink>
           </div>
 
           <!-- Job Title -->

@@ -1,83 +1,104 @@
-# 🚀 Carrepath - Platform Karir Terdepan
+# 🚀 Carrepath Frontend
 
-Carrepath adalah platform karir terpadu yang menghubungkan **job seekers** dan **perusahaan** dalam satu ekosistem yang terintegrasi. Kami membantu profesional muda menemukan pekerjaan impian mereka dengan dukungan AI terdepan, sementara memberikan perusahaan akses ke talenta terbaik.
+![Carrepath Banner](https://via.placeholder.com/1200x400/2B4DB6/FFFFFF?text=Carrepath+Career+Platform)
 
-## 💼 Untuk Job Seekers
+> Carrepath adalah platform karir terpadu yang menghubungkan **Job Seekers**, **Perusahaan**, dan **Penyedia Bootcamp** dalam satu ekosistem digital yang modern. Didukung dengan teknologi AI untuk membantu talenta muda meraih karir impian mereka secara optimal.
 
-Temukan peluang karir yang sesuai dengan skill dan aspirasi Anda:
+---
 
-- **Browse & Apply** - Jelajahi ribuan lowongan kerja dari perusahaan ternama, dan apply langsung dengan satu klik
-- **Resume AI Powered** - Tingkatkan CV Anda dengan bantuan AI yang mengoptimalkan tulisan Anda untuk setiap posisi
-- **Study Plan** - Dapatkan rekomendasi pembelajaran personal untuk mengembangkan skill sesuai target karir Anda
-- **Simpan Perusahaan Favorit** - Ikuti perusahaan yang Anda minati dan jangan lewatkan update lowongan terbaru
-- **Track Applications** - Pantau status aplikasi Anda secara real-time, dari submitted hingga interview
-- **Upgrade Premium** - Akses fitur eksklusif untuk meningkatkan peluang mendapatkan pekerjaan impian
+## ✨ Fitur Utama
 
-## 🏢 Untuk Perusahaan
+Carrepath dirancang dengan 3 role utama yang saling terhubung:
 
-Rekrut talenta terbaik dengan mudah dan efisien:
+### 👨‍💻 Untuk Pekerja (Job Seekers)
+- **AI Resume Builder & Optimizer**: Buat CV ATS-friendly dalam hitungan detik. AI akan menganalisis dan mengoptimalkan deskripsi pengalamanmu.
+- **CarrepathAI**: Asisten virtual pintar yang siap menjawab pertanyaan seputar karir, simulasi interview, dan memberikan rekomendasi lowongan secara personal.
+- **Smart Study Plan**: Hasilkan roadmap belajar otomatis berbasis AI untuk menutupi *skill gap* demi mencapai posisi pekerjaan target.
+- **Job & Bootcamp Explorer**: Cari lowongan kerja dan program pelatihan yang terkurasi.
+- **Dashboard Lamaran**: Pantau status lamaran kerja dan bootcamp secara *real-time*.
 
-- **Post & Manage Jobs** - Buat dan kelola lowongan kerja dengan sistem yang mudah digunakan
-- **Investor Dashboard** - Lihat semua aplikasi masuk, track progress perekrutan, dan kelola kandidat favorit
-- **Screening Otomatis** - Saring kandidat berdasarkan skill dan kualifikasi dengan lebih cepat
-- **Premium Packages** - Tingkatkan visibilitas lowongan Anda dan akses fitur premium untuk rekrutmen yang lebih efektif
-- **Analytics** - Dapatkan insights tentang recruitment funnel dan performa lowongan Anda
+### 🏢 Untuk Perusahaan (Company)
+- **Job Management**: Posting lowongan pekerjaan baru dan kelola kriteria talenta yang dibutuhkan dengan mudah.
+- **Applicant Tracking System**: Review, filter, dan kelola ribuan kandidat pelamar kerja dalam satu dasbor rapi.
+- **Company Branding**: Buat profil perusahaan yang menarik dengan rekomendasi bootcamp khusus untuk calon pelamar.
+- **Premium Analytics**: Insights performa rekrutmen perusahaan secara mendalam.
 
-## 🎯 Fitur Unggulan
+### 🎓 Untuk Penyedia Bootcamp (Provider)
+- **Program Management**: Publikasikan program bootcamp (online/offline) lengkap dengan silabus dan harga.
+- **Participant Tracking**: Kelola calon peserta yang mendaftar program bootcamp.
+- **Provider Dashboard**: Kelola profil edukasi untuk meningkatkan kepercayaan publik.
 
-### AI Resume Optimizer
-- **CV Scanner** - AI akan menganalisis CV Anda dan memberikan saran perbaikan untuk meningkatkan ATS score
-- **Resume Preview** - Lihat preview final CV dalam format ATS sebelum disubmit
-- **Download PDF** - Ekspor CV yang sudah dioptimalkan dalam format PDF siap kirim
+---
 
-### Payment & Subscription
-- **Flexible Plans** - Pilih paket yang sesuai dengan kebutuhan Anda (untuk worker maupun company)
-- **Secure Payment** - Proses pembayaran yang aman dan terpercaya
-- **Instant Activation** - Nikmati premium features segera setelah pembayaran berhasil
+## 🛠️ Teknologi & Stack
 
-### User Experience Optimization
-- **Responsive Design** - Platform yang bekerja sempurna di desktop, tablet, dan mobile
-- **Fast Performance** - Interface yang cepat dan responsif untuk pengalaman pengguna terbaik
-- **Intuitive Navigation** - Mudah digunakan bahkan untuk pemula
+Proyek *frontend* ini dibangun dengan stack modern yang berfokus pada kecepatan, keamanan, dan *Developer Experience* (DX).
 
-## 🚀 Mulai Sekarang
+- **Framework**: [Nuxt 3](https://nuxt.com/) (Vue 3, Composition API)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Nuxt Icon](https://nuxt.com/modules/icon)
+- **Package Manager**: [Bun](https://bun.sh/)
+- **HTTP Client**: Nuxt `$fetch` (via composable `useApi`)
 
-### Untuk Developer
+---
 
+## 🚀 Panduan Memulai (Development)
+
+Pastikan kamu sudah menginstal [Bun](https://bun.sh/) dan [Node.js](https://nodejs.org/) di komputermu.
+
+### 1. Kloning & Install Dependensi
 ```bash
-# Install dependencies
+# Masuk ke direktori frontend
+cd fe
+
+# Install semua dependensi menggunakan Bun
 bun install
-
-# Run development server
-bun run dev
-
-# Build for production
-bun run build
 ```
 
-Buka browser ke `http://localhost:3000`
-
-### Environment Setup
-
-Buat file `.env` di root directory:
-
+### 2. Konfigurasi Environment
+Buat file `.env` di *root directory* folder `fe` dan sesuaikan URL API dengan backend lokalmu:
 ```env
 NUXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-## 📱 Platform
+### 3. Jalankan Server Development
+```bash
+bun run dev
+```
+Buka *browser* pada alamat `http://localhost:3000`. Server *development* sudah dilengkapi dengan *Hot Module Replacement* (HMR).
 
-Carrepath dibangun dengan teknologi modern yang menjamin:
+### 4. Build untuk Production
+```bash
+# Build aplikasi untuk production
+bun run build
 
-- ⚡ **Performance** - Load time cepat dengan optimasi bundle
-- 🔒 **Security** - Enkripsi dan validasi data untuk keamanan maksimal
-- 📱 **Mobile First** - Dioptimalkan untuk pengalaman mobile yang sempurna
-- ♿ **Accessibility** - Dapat diakses oleh semua kalangan pengguna
-
-## 🎓 Tentang Kami
-
-Carrepath lahir dari visi untuk mempermudah transisi karir generasi muda Indonesia. Dengan menggabungkan teknologi AI terkini dan UX yang user-friendly, kami membantu puluhan ribu profesional menemukan karir impian mereka.
+# Menjalankan hasil build
+bun run preview
+```
 
 ---
 
-**Siap memulai karir Anda? Bergabunglah dengan ribuan pengguna yang sudah merasakan manfaatnya! 🌟**
+## 📂 Struktur Folder Utama
+
+```text
+fe/
+├── app/
+│   ├── components/  # Komponen Vue yang reusable (JobCard, Modal, dll)
+│   ├── composables/ # Logic functions global (useApi, useAuth, dll)
+│   ├── layouts/     # Layout template halaman (default, worker, company, provider)
+│   ├── pages/       # Rute halaman aplikasi berbasis file (file-based routing)
+│   └── plugins/     # Konfigurasi plugin Nuxt (Pinia, dll)
+├── public/          # Aset statis publik (images, favicon)
+├── nuxt.config.ts   # Konfigurasi utama Nuxt & Tailwind
+└── package.json     # Daftar dependensi & script project
+```
+
+---
+
+## 🤝 Kontribusi
+
+Kami sangat terbuka untuk kontribusi! Silakan ikuti standar kode yang sudah ada, buat *branch* terpisah untuk setiap fitur atau perbaikan *bug*, dan kirimkan *Pull Request*. Pastikan untuk selalu menjalankan `bun run lint` (jika ada) sebelum commit.
+
+<p align="center">
+  <b>Siap memulai karir Anda? Bergabunglah dengan ribuan pengguna Carrepath! 🌟</b>
+</p>

@@ -100,13 +100,23 @@ const loadHistory = async () => {
         }
       } catch (e) {}
 
+      let recBootcamps = []
+      try {
+        if (typeof item.recommended_bootcamps === 'string' && item.recommended_bootcamps) {
+          recBootcamps = JSON.parse(item.recommended_bootcamps)
+        } else if (Array.isArray(item.recommended_bootcamps)) {
+          recBootcamps = item.recommended_bootcamps
+        }
+      } catch (e) {}
+
       return {
         id: item.id || `${item.created_at}`,
         role: item.role,
         text: item.content || '',
         createdAt: item.created_at,
         fileNames: Array.isArray(item.file_names) ? item.file_names : [],
-        recommendedJobs: recJobs
+        recommendedJobs: recJobs,
+        recommendedBootcamps: recBootcamps
       }
     })
     await scrollToBottom()
@@ -125,7 +135,8 @@ const handleSend = async () => {
     text: userText || 'Tolong analisis file yang saya upload.',
     createdAt: new Date().toISOString(),
     fileNames: [...uploadFileNames.value],
-    recommendedJobs: []
+    recommendedJobs: [],
+    recommendedBootcamps: []
   }
 
   messages.value.push(userMessage)
@@ -149,6 +160,7 @@ const handleSend = async () => {
 
     const answer = String(data.answer || 'Maaf, aku tidak bisa memproses pertanyaanmu saat ini.')
     const recommendedJobs = Array.isArray(data.recommended_jobs) ? data.recommended_jobs : []
+    const recommendedBootcamps = Array.isArray(data.recommended_bootcamps) ? data.recommended_bootcamps : []
     const assistantId = `temp-asst-${Date.now()}`
 
     const aiMessage = {
@@ -157,7 +169,8 @@ const handleSend = async () => {
       text: '',
       createdAt: new Date().toISOString(),
       fileNames: [],
-      recommendedJobs: recommendedJobs
+      recommendedJobs: recommendedJobs,
+      recommendedBootcamps: recommendedBootcamps
     }
     messages.value.push(aiMessage)
     await animateAssistantText(aiMessage, answer)
@@ -229,7 +242,7 @@ onMounted(() => {
                 <div class="flex items-start gap-3">
                   <!-- Company Logo -->
                   <div class="flex-shrink-0 w-11 h-11 overflow-hidden flex items-center justify-center">
-                    <img v-if="job.logo_url" :src="job.logo_url" :alt="job.company_name" class="w-full h-full object-cover" />
+                    <img v-if="job.logo_url || job.company_profiles?.logo_url" :src="job.logo_url || job.company_profiles?.logo_url" :alt="job.company_name" class="w-full h-full object-cover" />
                     <span v-else class="text-[16px] font-bold text-[color:var(--color-main)] bg-[#F1F5F9] w-full h-full flex items-center justify-center rounded-[4px]">{{ (job.company_name || '?')[0].toUpperCase() }}</span>
                   </div>
                   <!-- Job Info -->
@@ -249,6 +262,36 @@ onMounted(() => {
                     <span class="text-[11px] text-[#94A3B8] font-medium flex items-center gap-1"><Icon name="heroicons:users" class="w-3.5 h-3.5" /> {{ job.applicant_count || 0 }}</span>
                   </div>
                   <button class="text-[12px] font-semibold text-[color:var(--color-main)] hover:underline flex items-center gap-1" @click.stop="navigateTo(`/worker/jobs/${job.job_id}`)">Lihat <Icon name="heroicons:arrow-right-20-solid" class="w-3.5 h-3.5" /></button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Recommended Bootcamps Cards -->
+            <div v-if="item.recommendedBootcamps && item.recommendedBootcamps.length > 0" class="mt-4 space-y-3">
+              <p class="text-[12px] uppercase tracking-[0.15em] font-bold text-[#94A3B8] mb-2 flex items-center gap-1.5">
+                <Icon name="heroicons:academic-cap" class="w-5 h-5 text-[color:var(--color-main)]" /> 
+                Rekomendasi Bootcamp
+              </p>
+              <div v-for="(bc, bIdx) in item.recommendedBootcamps" :key="bIdx" class="bg-white border border-[#E2E8F0] rounded-[14px] p-4 shadow-sm hover:shadow-md hover:border-[color:var(--color-main)] transition-all duration-200 cursor-pointer" @click="navigateTo(`/worker/bootcamps/${bc.bootcamp_id}`)">
+                <div class="flex items-start gap-3">
+                  <div class="flex-shrink-0 w-11 h-11 bg-white border border-[#E2E8F0] p-1 flex items-center justify-center">
+                    <img v-if="bc.logo_url" :src="bc.logo_url" :alt="bc.provider_name" class="w-full h-full object-contain" />
+                    <Icon v-else name="mdi:domain" class="w-6 h-6 text-[#94A3B8]" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-[14px] font-semibold text-[#0F172A] truncate">{{ bc.title }}</h4>
+                    <p class="text-[13px] text-[#64748B] mt-0.5 flex items-center flex-wrap gap-1.5">
+                      {{ bc.provider_name }}
+                    </p>
+                  </div>
+                </div>
+                <p v-if="bc.reason" class="text-[12px] text-[#475569] leading-relaxed mt-2.5 pl-14">{{ bc.reason }}</p>
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-[#F1F5F9] pl-14">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span v-if="bc.category" class="text-[11px] bg-[#EEF2FF] text-[color:var(--color-main)] px-2 py-0.5 rounded-full font-medium">{{ bc.category }}</span>
+                    <span v-if="bc.level" class="text-[11px] bg-[#F0FDF4] text-[#16A34A] px-2 py-0.5 rounded-full font-medium">{{ bc.level }}</span>
+                  </div>
+                  <button class="text-[12px] font-semibold text-[color:var(--color-main)] hover:underline flex items-center gap-1" @click.stop="navigateTo(`/worker/bootcamps/${bc.bootcamp_id}`)">Lihat <Icon name="heroicons:arrow-right-20-solid" class="w-3.5 h-3.5" /></button>
                 </div>
               </div>
             </div>
